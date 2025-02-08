@@ -9,20 +9,21 @@
   <link rel="canonical" href="https://theoldtowncottage.com/">
   <link rel="icon" href="logo.png" type="image/png">
 
-  <!-- Google Fonts: Playfair Display for headings & Lato for body -->
-  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Poppins for headings & Roboto for body -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     /* New Color Palette & Variables */
     :root {
-      --primary-color: #2C3E50;       /* Dark blue-gray */
-      --accent-color:  #2980B9;       /* Blue accent */
-      --background-color: #ECF0F1;    /* Light gray-blue */
-      --text-color: #2C3E50;          /* Dark blue-gray text */
-      --header-bg: rgba(44, 62, 80, 0.95);  /* Nearly opaque dark header */
-      --nav-hover: #3498DB;           /* Lighter blue for hover */
+      --primary-color: #333333;       /* Dark text for headings */
+      --accent-color:  #ff6f61;         /* Warm coral accent */
+      --background-color: #f5f5f5;      /* Light, airy background */
+      --nav-bg: rgba(255, 255, 255, 0.75);  /* Glass-effect nav background */
+      --nav-text: #333333;             /* Dark text for nav links */
+      --nav-hover: #ff6f61;            /* Coral hover effect */
       --white: #ffffff;
       --transition-speed: 0.3s;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     /* Base & Reset Styles */
@@ -36,20 +37,20 @@
       font-size: 16px;
     }
     body {
-      font-family: 'Lato', sans-serif;
-      color: var(--text-color);
+      font-family: 'Roboto', sans-serif;
+      color: var(--primary-color);
       background-color: var(--background-color);
       line-height: 1.6;
     }
     h1, h2, h3, h4, h5, h6 {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Poppins', sans-serif;
       margin-bottom: 1rem;
     }
     p {
       margin-bottom: 1rem;
     }
     a {
-      color: var(--primary-color);
+      color: var(--accent-color);
       text-decoration: none;
       transition: color var(--transition-speed) ease;
     }
@@ -70,18 +71,19 @@
       transition: width 0.2s;
     }
 
-    /* Header & Navigation */
+    /* Header & Navigation with Glass Effect */
     header {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      background: var(--header-bg);
+      background: var(--nav-bg);
+      backdrop-filter: blur(10px);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 15px 30px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--box-shadow);
       z-index: 1000;
     }
     /* Header Left: Logo & Dynamic Section Title */
@@ -98,7 +100,7 @@
       transform: scale(1.05);
     }
     #nav-current-section {
-      color: var(--white);
+      color: var(--nav-text);
       font-size: 1.1rem;
       margin-left: 15px;
       font-weight: bold;
@@ -117,7 +119,7 @@
       margin-left: 20px;
     }
     nav ul li a {
-      color: var(--white);
+      color: var(--nav-text);
       text-decoration: none;
       font-weight: bold;
       text-transform: uppercase;
@@ -138,7 +140,7 @@
       display: block;
       width: 25px;
       height: 3px;
-      background: var(--white);
+      background: var(--nav-text);
       margin: 5px 0;
       transition: background var(--transition-speed);
     }
@@ -159,7 +161,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, rgba(44, 62, 80, 0.4), rgba(44, 62, 80, 0.7));
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4));
     }
     .hero-content {
       position: relative;
@@ -191,9 +193,9 @@
       background: var(--nav-hover);
     }
 
-    /* Main Content */
+    /* Main Content & Section Containers */
     main {
-      margin-top: 80px; /* space for fixed header */
+      margin-top: 80px; /* room for fixed header */
       padding: 20px;
     }
     .section-container {
@@ -201,8 +203,8 @@
       padding: 30px;
       margin: 40px auto;
       max-width: 1000px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
+      box-shadow: var(--box-shadow);
       animation: fadeInUp 0.8s ease-out;
     }
     .section-container h2 {
@@ -229,7 +231,7 @@
       margin-bottom: 20px;
     }
     .inline-images img {
-      max-width: 350px; /* Larger "card" images */
+      max-width: 350px;
       border-radius: 5px;
       cursor: pointer;
       transition: transform 0.3s;
@@ -330,7 +332,7 @@
       padding: 10px 15px;
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--box-shadow);
       opacity: 0;
       visibility: hidden;
       transition: opacity var(--transition-speed), visibility var(--transition-speed);
@@ -351,7 +353,8 @@
     @media (max-width: 768px) {
       nav ul {
         flex-direction: column;
-        background: var(--header-bg);
+        background: var(--nav-bg);
+        backdrop-filter: blur(10px);
         position: absolute;
         top: 60px;
         right: 0;
@@ -384,7 +387,7 @@
   <!-- Scroll Progress Bar -->
   <div id="scroll-progress"></div>
 
-  <!-- Header -->
+  <!-- Header with Glass Effect -->
   <header id="main-header">
     <div class="header-left">
       <div class="logo">
