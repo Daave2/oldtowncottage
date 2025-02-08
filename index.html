@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Old Town Cottage - Distinguished Seaside Retreat in Scarborough</title>
-  <meta name="description" content="Discover The Old Town Cottage in Scarborough – a refined seaside retreat blending heritage with modern luxury, ideal for professionals and discerning travelers.">
+  <meta name="description" content="Discover The Old Town Cottage in Scarborough – a refined seaside retreat blending heritage with modern luxury, ideally positioned near local attractions and designed for discerning travelers.">
   <link rel="canonical" href="https://theoldtowncottage.com/">
   <link rel="icon" href="logo.png" type="image/png">
 
@@ -84,7 +84,7 @@
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       z-index: 1000;
     }
-    /* Left side: Logo & Section Title */
+    /* Left side: Logo & Dynamic Section Title */
     .header-left {
       display: flex;
       align-items: center;
@@ -97,7 +97,7 @@
     .logo img:hover {
       transform: scale(1.05);
     }
-    /* Dynamic Section Title positioned next to the logo */
+    /* Dynamic Section Title positioned to the right of the logo */
     #nav-current-section {
       color: var(--white);
       font-size: 1.1rem;
@@ -253,6 +253,21 @@
       transform: scale(1.05);
     }
 
+    /* Guest Reviews Section */
+    #reviews .review {
+      border-left: 3px solid var(--accent-color);
+      padding-left: 15px;
+      margin-bottom: 20px;
+    }
+    #reviews .review h3 {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    #reviews .review p {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
     /* Footer */
     footer {
       background: var(--primary-color);
@@ -404,19 +419,21 @@
       </div>
     </section>
 
-    <!-- About Section -->
+    <!-- About / Property Overview Section -->
     <section id="about">
       <div class="section-container">
-        <h2>Welcome to The Old Town Cottage</h2>
+        <h2>Property Overview</h2>
         <p>
-          Experience a refined escape where timeless charm meets contemporary elegance. Our retreat is designed for discerning travelers seeking quality and comfort.
+          Located at <strong>35 Longwestgate, Scarborough, United Kingdom</strong>, The Old Town Cottage is a charming historic mid-terrace property spanning three floors. Ideally situated near local restaurants, shops, and the beachfront—and just on the edge of the North York Moors National Park—it offers an exceptional base for exploring the area.
         </p>
+        <ul>
+          <li><strong>Layout:</strong> Two main bedrooms (a first-floor double and a second-floor twin arrangement) and a fully equipped bathroom (bath, shower, WC, and basin).</li>
+          <li><strong>Living & Kitchen:</strong> A tidy kitchen/diner with modern appliances (electric oven, induction hob, microwave, pod coffee machine, fridge/freezer, washing machine, and dishwasher) alongside a comfortable sitting room featuring an electric fire, Smart TV with Freeview, WiFi, and a selection of books and games.</li>
+          <li><strong>Outdoor Space:</strong> Enjoy a spacious decking area and garden ideal for outdoor meals and relaxation.</li>
+        </ul>
         <p>
-          Highlights include a meticulously restored heritage property, modern amenities with a classic touch, and service tailored to your needs.
+          Additional amenities include family-friendly extras (highchair and travel cot on request), a pet-friendly policy (one well-behaved dog allowed), and a convenient roadside parking permit. Check-in is from 4:00 pm with check-out by 10:00 am.
         </p>
-        <div class="inline-images">
-          <img src="entrance.jpg" alt="Elegant entrance view of The Old Town Cottage" class="clickable-image" loading="lazy">
-        </div>
       </div>
     </section>
 
@@ -432,7 +449,7 @@
           <li><strong>Twin Bedroom:</strong> Enjoy panoramic views through charming roof windows.</li>
         </ul>
         <p>
-          The well-appointed bathroom features a luxurious bath, separate shower, and contemporary fixtures.
+          The well-appointed bathroom features a luxurious bath, a separate shower, and contemporary fixtures.
         </p>
         <div class="inline-images">
           <img src="room1.jpg" alt="Spacious double bedroom at The Old Town Cottage" class="clickable-image" loading="lazy">
@@ -441,12 +458,12 @@
       </div>
     </section>
 
-    <!-- Living Spaces & Modern Amenities Section -->
+    <!-- Refined Living Spaces & Amenities Section -->
     <section id="amenities">
       <div class="section-container">
         <h2>Refined Living Spaces & Amenities</h2>
         <p>
-          Our kitchen/diner is equipped with state-of-the-art appliances that combine functionality with style:
+          Our kitchen/diner is equipped with state-of-the-art appliances that blend functionality with style:
         </p>
         <ul>
           <li>Electric oven and induction hob</li>
@@ -464,7 +481,7 @@
       </div>
     </section>
 
-    <!-- Outdoor & Additional Amenities Section -->
+    <!-- Outdoor Elegance Section -->
     <section id="outdoor">
       <div class="section-container">
         <h2>Outdoor Elegance & Additional Features</h2>
@@ -472,8 +489,8 @@
           Step outside to discover a serene decking area ideal for alfresco dining or a tranquil moment by the sea.
         </p>
         <ul>
-          <li>Pet-friendly environment (one well-behaved dog welcome)</li>
-          <li>Family amenities including highchair and travel cot available on request</li>
+          <li>Pet-friendly environment (one well-behaved dog allowed)</li>
+          <li>Family amenities including highchair and travel cot on request</li>
           <li>Complimentary roadside parking permit</li>
         </ul>
         <div class="inline-images">
@@ -482,37 +499,13 @@
       </div>
     </section>
 
-    <!-- Combined Local Info Section -->
+    <!-- Local Area & Attractions Section -->
     <section id="local-info">
       <div class="section-container">
-        <div class="combined-container">
-          <h2>Local Attractions</h2>
-          <p>
-            Explore the rich heritage and vibrant culture of Scarborough:
-          </p>
-          <ul>
-            <li><strong>Scarborough Castle:</strong> A historic landmark with panoramic vistas. (<a href="https://www.english-heritage.org.uk/visit/places/scarborough-castle/" target="_blank" rel="noopener">English Heritage</a>)</li>
-            <li><strong>Scarborough Harbour:</strong> Experience seaside cafés and a lively maritime atmosphere.</li>
-            <li><strong>North Bay Beach:</strong> A pristine stretch ideal for family outings.</li>
-            <li><strong>Peasholm Park:</strong> Scenic gardens and a boating lake. (<a href="https://www.scarborough.gov.uk/home/sport-and-leisure/parks-play-areas-and-gardens/peasholm-park-and-glen" target="_blank" rel="noopener">Council</a>)</li>
-            <li><strong>Maritime Heritage Centre:</strong> Delve into the town’s seafaring legacy. (<a href="http://www.scarboroughsmaritimeheritage.org.uk/" target="_blank" rel="noopener">Heritage Centre</a>)</li>
-            <li><strong>Local Art Gallery:</strong> Admire regional art and culture. (<a href="https://www.scarboroughmuseumstrust.com/scarborough-art-gallery/" target="_blank" rel="noopener">Gallery</a>)</li>
-            <li><strong>Visit England:</strong> Discover more attractions. (<a href="https://www.visitengland.com/things-to-do/scarborough" target="_blank" rel="noopener">VisitEngland</a>)</li>
-          </ul>
-        </div>
-        <div class="combined-container">
-          <h2>Useful Resources</h2>
-          <ul>
-            <li><a href="https://www.visitscarborough.com/" target="_blank" rel="noopener">Visit Scarborough</a></li>
-            <li><a href="https://www.english-heritage.org.uk/visit/places/scarborough-castle/" target="_blank" rel="noopener">Scarborough Castle</a></li>
-            <li><a href="https://www.scarborough.gov.uk/home/sport-and-leisure/parks-play-areas-and-gardens/peasholm-park-and-glen" target="_blank" rel="noopener">Peasholm Park</a></li>
-            <li><a href="http://www.scarboroughsmaritimeheritage.org.uk/" target="_blank" rel="noopener">Maritime Centre</a></li>
-            <li><a href="https://www.scarboroughmuseumstrust.com/scarborough-art-gallery/" target="_blank" rel="noopener">Local Art Gallery</a></li>
-            <li><a href="https://www.visitengland.com/things-to-do/scarborough" target="_blank" rel="noopener">VisitEngland</a></li>
-            <li><a href="https://www.google.com/maps/search/Captains+Cottage+Scarborough" target="_blank" rel="noopener">Google Maps</a></li>
-            <li><a href="https://www.tripadvisor.co.uk/Search?q=Captains+Cottage+Scarborough" target="_blank" rel="noopener">TripAdvisor</a></li>
-          </ul>
-        </div>
+        <h2>Local Attractions</h2>
+        <p>
+          Enjoy easy access to Scarborough’s top sights including Scarborough Castle, the bustling Harbour, North Bay Beach, and cultural highlights such as the Rotunda Museum and Stephen Joseph Theatre. For nature enthusiasts, scenic coastal walks and spots like Peasholm Park await.
+        </p>
       </div>
     </section>
 
@@ -536,7 +529,33 @@
       </div>
     </section>
 
-    <!-- Combined Events & Weather Section -->
+    <!-- Guest Reviews & Feedback Section -->
+    <section id="reviews">
+      <div class="section-container">
+        <h2>Guest Reviews & Feedback</h2>
+        <p>
+          Our guests consistently praise The Old Town Cottage for its historic charm, prime location, and the well-appointed living spaces that make every stay comfortable. While a few minor quirks inherent to a heritage property have been noted, we are continually improving to ensure an exceptional experience.
+        </p>
+        <div class="review">
+          <h3>Review by Lisa (4.7★, September 2024)</h3>
+          <p>"We've had a fantastic week at the cottage and truly enjoyed the thoughtful extra touches provided. The spacious rooms and well-equipped amenities made our stay very comfortable. Minor snagging details did not detract from our overall experience, and we would definitely book again."</p>
+        </div>
+        <div class="review">
+          <h3>Review by Terence (2.8★, September 2024)</h3>
+          <p>"There was an issue with an unpleasant odor in the bedrooms, attributed to a CPAP machine. Despite this, the property’s overall charm and excellent location shone through."</p>
+        </div>
+        <div class="review">
+          <h3>Review by Cheryl (3.4★, July 2024)</h3>
+          <p>"The cottage offers a lovely blend of historic character and modern convenience. Although there were a few challenges—such as sticking doors and a hard mattress—the owners have acknowledged these minor issues and are actively addressing them. With these improvements, the experience will be even more appealing."</p>
+          <p><em>Owner’s Response:</em> "Thank you for your feedback. We appreciate your understanding regarding the natural quirks of a 170-year-old property and are working diligently to resolve the maintenance issues."</p>
+        </div>
+        <p>
+          Aggregated reviews typically rate the property between 3.2 to 3.6 stars—a testament to its enduring charm and the continuous improvements we are making.
+        </p>
+      </div>
+    </section>
+
+    <!-- Events & Weather Section -->
     <section id="events-weather">
       <div class="section-container">
         <div class="combined-container">
@@ -597,7 +616,7 @@
       </div>
     </section>
 
-    <!-- Interactive Gallery Section -->
+    <!-- Gallery Section -->
     <section id="gallery">
       <div class="section-container">
         <h2>Gallery</h2>
