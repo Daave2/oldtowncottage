@@ -13,14 +13,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-    /* Color Palette & Variables */
+    /* New Color Palette & Variables */
     :root {
-      --primary-color: #8B4513;      /* SaddleBrown – a deep earthy brown */
-      --accent-color: #CD853F;       /* Peru – a warm, inviting accent */
-      --background-color: #FAF3E0;   /* A soft, light cream */
-      --text-color: #333333;         /* Dark grey for readable text */
-      --header-bg: rgba(139, 69, 19, 0.95); /* Nearly opaque header background */
-      --nav-hover: #FFCC80;          /* A light, golden tone on hover */
+      --primary-color: #2C3E50;       /* Dark blue-gray */
+      --accent-color:  #2980B9;       /* Blue accent */
+      --background-color: #ECF0F1;    /* Light gray-blue */
+      --text-color: #2C3E50;          /* Dark blue-gray text */
+      --header-bg: rgba(44, 62, 80, 0.95);  /* Nearly opaque dark header */
+      --nav-hover: #3498DB;           /* Lighter blue for hover */
       --white: #ffffff;
       --transition-speed: 0.3s;
     }
@@ -78,11 +78,16 @@
       width: 100%;
       background: var(--header-bg);
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       padding: 15px 30px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       z-index: 1000;
+    }
+    /* Left side: Logo & Section Title */
+    .header-left {
+      display: flex;
+      align-items: center;
     }
     .logo img {
       height: 50px;
@@ -91,6 +96,13 @@
     }
     .logo img:hover {
       transform: scale(1.05);
+    }
+    /* Dynamic Section Title positioned next to the logo */
+    #nav-current-section {
+      color: var(--white);
+      font-size: 1.1rem;
+      margin-left: 15px;
+      font-weight: bold;
     }
     nav {
       display: flex;
@@ -148,7 +160,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, rgba(139, 69, 19, 0.4), rgba(139, 69, 19, 0.7));
+      background: linear-gradient(to bottom, rgba(44, 62, 80, 0.4), rgba(44, 62, 80, 0.7));
     }
     .hero-content {
       position: relative;
@@ -218,7 +230,7 @@
       margin-bottom: 20px;
     }
     .inline-images img {
-      max-width: 350px; /* Increased size for a more prominent display */
+      max-width: 350px; /* Larger "card" images */
       border-radius: 5px;
       cursor: pointer;
       transition: transform 0.3s;
@@ -341,6 +353,15 @@
       .mobile-menu-toggle {
         display: block;
       }
+      /* Adjust header-left on small screens */
+      .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      #nav-current-section {
+        margin-left: 0;
+        margin-top: 5px;
+      }
     }
   </style>
 </head>
@@ -350,12 +371,13 @@
 
   <!-- Header -->
   <header id="main-header">
-    <div class="logo">
-      <img src="logo.png" alt="The Old Town Cottage Logo" id="logo">
+    <div class="header-left">
+      <div class="logo">
+        <img src="logo.png" alt="The Old Town Cottage Logo" id="logo">
+      </div>
+      <span id="nav-current-section">Home</span>
     </div>
     <nav id="nav-menu" role="navigation" aria-label="Main Navigation">
-      <!-- Dynamic Section Title (if needed) -->
-      <span id="nav-current-section"></span>
       <ul>
         <li><a href="#home" data-section="Home">Home</a></li>
         <li><a href="#about" data-section="About">About</a></li>
@@ -377,8 +399,8 @@
     <section class="hero" id="home">
       <div class="hero-content">
         <h1>The Old Town Cottage</h1>
-        <p>A Distinguished Seaside Retreat in Scarborough ✦ Where Heritage Meets Modern Luxury</p>
-        <a href="#booking" class="cta-button">Book Now &#x2708;</a>
+        <p>A Distinguished Seaside Retreat in Scarborough – where heritage meets modern luxury.</p>
+        <a href="#booking" class="cta-button">Book Now</a>
       </div>
     </section>
 
@@ -390,9 +412,7 @@
           Experience a refined escape where timeless charm meets contemporary elegance. Our retreat is designed for discerning travelers seeking quality and comfort.
         </p>
         <p>
-          &#x2714; Meticulously restored heritage<br>
-          &#x2714; Modern amenities with a classic touch<br>
-          &#x2714; Professional service tailored to your needs
+          Highlights include a meticulously restored heritage property, modern amenities with a classic touch, and service tailored to your needs.
         </p>
         <div class="inline-images">
           <img src="entrance.jpg" alt="Elegant entrance view of The Old Town Cottage" class="clickable-image" loading="lazy">
@@ -408,11 +428,11 @@
           Our cottage comfortably accommodates up to four guests in thoughtfully designed rooms:
         </p>
         <ul>
-          <li>&#x2714; <strong>Double Bedroom:</strong> Spacious and elegantly furnished on the first floor.</li>
-          <li>&#x2714; <strong>Twin Bedroom:</strong> Enjoy panoramic views through charming roof windows.</li>
+          <li><strong>Double Bedroom:</strong> Spacious and elegantly furnished on the first floor.</li>
+          <li><strong>Twin Bedroom:</strong> Enjoy panoramic views through charming roof windows.</li>
         </ul>
         <p>
-          The well-appointed bathroom features a luxurious bath, a separate shower, and contemporary fixtures.
+          The well-appointed bathroom features a luxurious bath, separate shower, and contemporary fixtures.
         </p>
         <div class="inline-images">
           <img src="room1.jpg" alt="Spacious double bedroom at The Old Town Cottage" class="clickable-image" loading="lazy">
@@ -426,16 +446,16 @@
       <div class="section-container">
         <h2>Refined Living Spaces & Amenities</h2>
         <p>
-          Our kitchen/diner is equipped with state-of-the-art appliances to ensure a seamless blend of functionality and style:
+          Our kitchen/diner is equipped with state-of-the-art appliances that combine functionality with style:
         </p>
         <ul>
-          <li>&#x2714; Electric oven and induction hob</li>
-          <li>&#x2714; Microwave and premium coffee machine</li>
-          <li>&#x2714; Spacious fridge/freezer combo</li>
-          <li>&#x2714; Washing machine and dishwasher</li>
+          <li>Electric oven and induction hob</li>
+          <li>Microwave and premium coffee machine</li>
+          <li>Spacious fridge/freezer combo</li>
+          <li>Washing machine and dishwasher</li>
         </ul>
         <p>
-          Relax in our cozy sitting room complete with an electric fireplace, Smart TV with Freeview, high-speed WiFi, and a curated selection of literature and games.
+          Relax in our cozy sitting room featuring an electric fireplace, Smart TV with Freeview, high-speed WiFi, and a curated selection of literature and games.
         </p>
         <div class="inline-images">
           <img src="kitchen.jpg" alt="Modern kitchen and dining area" class="clickable-image" loading="lazy">
@@ -449,12 +469,12 @@
       <div class="section-container">
         <h2>Outdoor Elegance & Additional Features</h2>
         <p>
-          Step outside to discover a serene decking area ideal for al fresco dining or a tranquil moment by the sea.
+          Step outside to discover a serene decking area ideal for alfresco dining or a tranquil moment by the sea.
         </p>
         <ul>
-          <li>&#x2714; Pet-friendly environment (one well-behaved dog welcome)</li>
-          <li>&#x2714; Family-oriented amenities including highchair and travel cot on request</li>
-          <li>&#x2714; Complimentary roadside parking permit</li>
+          <li>Pet-friendly environment (one well-behaved dog welcome)</li>
+          <li>Family amenities including highchair and travel cot available on request</li>
+          <li>Complimentary roadside parking permit</li>
         </ul>
         <div class="inline-images">
           <img src="dinningroom.jpg" alt="Outdoor decking area set for dining" class="clickable-image" loading="lazy">
@@ -471,26 +491,26 @@
             Explore the rich heritage and vibrant culture of Scarborough:
           </p>
           <ul>
-            <li>&#x2605; <strong>Scarborough Castle:</strong> A historic landmark with panoramic vistas. (<a href="https://www.english-heritage.org.uk/visit/places/scarborough-castle/" target="_blank" rel="noopener">English Heritage</a>)</li>
-            <li>&#x2605; <strong>Scarborough Harbour:</strong> Experience seaside cafés and a lively maritime atmosphere.</li>
-            <li>&#x2605; <strong>North Bay Beach:</strong> A pristine stretch ideal for family outings.</li>
-            <li>&#x2605; <strong>Peasholm Park:</strong> Scenic gardens and a boating lake. (<a href="https://www.scarborough.gov.uk/home/sport-and-leisure/parks-play-areas-and-gardens/peasholm-park-and-glen" target="_blank" rel="noopener">Council</a>)</li>
-            <li>&#x2605; <strong>Maritime Heritage Centre:</strong> Delve into the town’s seafaring legacy. (<a href="http://www.scarboroughsmaritimeheritage.org.uk/" target="_blank" rel="noopener">Heritage Centre</a>)</li>
-            <li>&#x2605; <strong>Local Art Gallery:</strong> Admire regional art and culture. (<a href="https://www.scarboroughmuseumstrust.com/scarborough-art-gallery/" target="_blank" rel="noopener">Gallery</a>)</li>
-            <li>&#x2605; <strong>Visit England:</strong> Discover more attractions. (<a href="https://www.visitengland.com/things-to-do/scarborough" target="_blank" rel="noopener">VisitEngland</a>)</li>
+            <li><strong>Scarborough Castle:</strong> A historic landmark with panoramic vistas. (<a href="https://www.english-heritage.org.uk/visit/places/scarborough-castle/" target="_blank" rel="noopener">English Heritage</a>)</li>
+            <li><strong>Scarborough Harbour:</strong> Experience seaside cafés and a lively maritime atmosphere.</li>
+            <li><strong>North Bay Beach:</strong> A pristine stretch ideal for family outings.</li>
+            <li><strong>Peasholm Park:</strong> Scenic gardens and a boating lake. (<a href="https://www.scarborough.gov.uk/home/sport-and-leisure/parks-play-areas-and-gardens/peasholm-park-and-glen" target="_blank" rel="noopener">Council</a>)</li>
+            <li><strong>Maritime Heritage Centre:</strong> Delve into the town’s seafaring legacy. (<a href="http://www.scarboroughsmaritimeheritage.org.uk/" target="_blank" rel="noopener">Heritage Centre</a>)</li>
+            <li><strong>Local Art Gallery:</strong> Admire regional art and culture. (<a href="https://www.scarboroughmuseumstrust.com/scarborough-art-gallery/" target="_blank" rel="noopener">Gallery</a>)</li>
+            <li><strong>Visit England:</strong> Discover more attractions. (<a href="https://www.visitengland.com/things-to-do/scarborough" target="_blank" rel="noopener">VisitEngland</a>)</li>
           </ul>
         </div>
         <div class="combined-container">
           <h2>Useful Resources</h2>
           <ul>
-            <li><a href="https://www.visitscarborough.com/" target="_blank" rel="noopener">&#x1F4DA; Visit Scarborough</a></li>
-            <li><a href="https://www.english-heritage.org.uk/visit/places/scarborough-castle/" target="_blank" rel="noopener">&#x1F3DB; Scarborough Castle</a></li>
-            <li><a href="https://www.scarborough.gov.uk/home/sport-and-leisure/parks-play-areas-and-gardens/peasholm-park-and-glen" target="_blank" rel="noopener">&#x1F3DE; Peasholm Park</a></li>
-            <li><a href="http://www.scarboroughsmaritimeheritage.org.uk/" target="_blank" rel="noopener">&#x2693; Maritime Centre</a></li>
-            <li><a href="https://www.scarboroughmuseumstrust.com/scarborough-art-gallery/" target="_blank" rel="noopener">&#x1F3A8; Art Gallery</a></li>
-            <li><a href="https://www.visitengland.com/things-to-do/scarborough" target="_blank" rel="noopener">&#x1F30E; VisitEngland</a></li>
-            <li><a href="https://www.google.com/maps/search/Captains+Cottage+Scarborough" target="_blank" rel="noopener">&#x1F4CD; Google Maps</a></li>
-            <li><a href="https://www.tripadvisor.co.uk/Search?q=Captains+Cottage+Scarborough" target="_blank" rel="noopener">&#x1F4AC; TripAdvisor</a></li>
+            <li><a href="https://www.visitscarborough.com/" target="_blank" rel="noopener">Visit Scarborough</a></li>
+            <li><a href="https://www.english-heritage.org.uk/visit/places/scarborough-castle/" target="_blank" rel="noopener">Scarborough Castle</a></li>
+            <li><a href="https://www.scarborough.gov.uk/home/sport-and-leisure/parks-play-areas-and-gardens/peasholm-park-and-glen" target="_blank" rel="noopener">Peasholm Park</a></li>
+            <li><a href="http://www.scarboroughsmaritimeheritage.org.uk/" target="_blank" rel="noopener">Maritime Centre</a></li>
+            <li><a href="https://www.scarboroughmuseumstrust.com/scarborough-art-gallery/" target="_blank" rel="noopener">Local Art Gallery</a></li>
+            <li><a href="https://www.visitengland.com/things-to-do/scarborough" target="_blank" rel="noopener">VisitEngland</a></li>
+            <li><a href="https://www.google.com/maps/search/Captains+Cottage+Scarborough" target="_blank" rel="noopener">Google Maps</a></li>
+            <li><a href="https://www.tripadvisor.co.uk/Search?q=Captains+Cottage+Scarborough" target="_blank" rel="noopener">TripAdvisor</a></li>
           </ul>
         </div>
       </div>
@@ -507,11 +527,11 @@
           For reservations and inquiries, please visit <a href="https://www.booking.com" target="_blank" rel="noopener">Booking.com</a> or contact us directly:
         </p>
         <p>
-          &#x260E; <strong>Phone:</strong> +44 1244 746200<br>
-          &#x2709; <strong>Email:</strong> <a href="mailto:info@SYKESCOTTAGES.CO.UK">info@SYKESCOTTAGES.CO.UK</a>
+          <strong>Phone:</strong> +44 1244 746200<br>
+          <strong>Email:</strong> <a href="mailto:info@SYKESCOTTAGES.CO.UK">info@SYKESCOTTAGES.CO.UK</a>
         </p>
         <p>
-          Explore guest reviews on our profile at <a href="https://SYKESCOTTAGES.CO.UK" target="_blank" rel="noopener">Sykes Cottages</a>.
+          You may also explore guest reviews on our profile at <a href="https://SYKESCOTTAGES.CO.UK" target="_blank" rel="noopener">Sykes Cottages</a>.
         </p>
       </div>
     </section>
@@ -598,7 +618,7 @@
   <!-- Footer CTA Bar -->
   <div class="footer-cta" style="background: var(--primary-color); padding: 30px 20px; text-align: center; color: var(--white);">
     <h2>Embark on Your Next Exquisite Getaway</h2>
-    <a href="#booking" class="cta-button">Reserve Your Stay &#x2708;</a>
+    <a href="#booking" class="cta-button">Reserve Your Stay</a>
   </div>
 
   <!-- Main Footer -->
@@ -627,7 +647,7 @@
         navMenu.classList.toggle('active');
       });
 
-      // Rotating logo (if desired)
+      // Rotating logo (optional)
       const logo = document.getElementById('logo');
       logo.addEventListener('click', () => {
         logo.style.transform = 'rotate(360deg)';
@@ -677,7 +697,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 
-      // Optional: Dynamic Navigation Indicator (if desired)
+      // Optional: Dynamic Navigation Indicator
       const navCurrent = document.getElementById('nav-current-section');
       const navLinks = document.querySelectorAll('nav ul li a');
       const sections = document.querySelectorAll('section');
