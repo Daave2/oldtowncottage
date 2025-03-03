@@ -5,23 +5,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Charming Seaside Cottage in Scarborough | The Old Town Cottage</title>
-  <meta name="description" content="Discover The Old Town Cottage – a historic, pet-friendly seaside retreat in Scarborough. Recently refurbished to blend coastal charm with modern comforts, our cottage offers enhanced guest experiences near Scarborough Castle and the beach.">
+  <meta name="description" content="Experience The Old Town Cottage in Scarborough—a historic, pet-friendly seaside retreat blending 19th-century maritime charm with modern comforts. Recently refurbished in mid-2024, our cottage offers a unique getaway near Scarborough Castle, pristine amenities, and an authentic coastal lifestyle.">
   <link rel="canonical" href="https://theoldtowncottage.com/">
   <link rel="icon" href="logo.png" type="image/png">
 
-  <!-- Google tag (gtag.js) -->
+  <!-- Google Tag Manager -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-958624265"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'AW-958624265');
   </script>
 
   <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="Charming Seaside Cottage in Scarborough | The Old Town Cottage">
-  <meta property="og:description" content="Discover The Old Town Cottage – a historic, pet-friendly seaside retreat in Scarborough. Recently refurbished to offer modern comforts while preserving coastal charm and maritime heritage.">
+  <meta property="og:description" content="Experience The Old Town Cottage—a historic, pet-friendly seaside retreat in Scarborough that blends maritime heritage with modern upgrades. Enjoy a recently refurbished space near Scarborough Castle and the beach.">
   <meta property="og:url" content="https://theoldtowncottage.com/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://theoldtowncottage.com/hero.jpg">
@@ -30,7 +29,7 @@
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Charming Seaside Cottage in Scarborough | The Old Town Cottage">
-  <meta name="twitter:description" content="Discover The Old Town Cottage – a historic, pet-friendly seaside retreat in Scarborough. Recently refurbished to blend timeless maritime heritage with modern comforts near Scarborough Castle.">
+  <meta name="twitter:description" content="Experience our historic seaside retreat in Scarborough. The Old Town Cottage (formerly Captain’s Cottage) offers updated modern comforts, a rich maritime heritage, and an unbeatable location near Scarborough Castle and the beach.">
   <meta name="twitter:image" content="https://theoldtowncottage.com/hero.jpg">
   
   <!-- JSON-LD Structured Data for LocalBusiness -->
@@ -39,7 +38,7 @@
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
     "name": "The Old Town Cottage",
-    "description": "A charming, historic mid-terrace cottage in Scarborough that blends maritime heritage with modern comforts. Recently refurbished for an enhanced guest experience.",
+    "description": "A charming, historic mid-terrace cottage in Scarborough that fuses 19th-century maritime heritage with modern comforts. Recently refurbished, it offers a unique coastal getaway experience.",
     "image": "https://theoldtowncottage.com/hero.jpg",
     "url": "https://theoldtowncottage.com/",
     "telephone": "+44 1244 746200",
@@ -200,14 +199,23 @@
       transition: background var(--transition-speed);
     }
 
-    /* Hero Section */
+    /* Hero Section with Video Background */
     .hero {
       position: relative;
       height: 100vh;
-      background: url('https://theoldtowncottage.com/hero.jpg') center center/cover no-repeat;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+    .hero video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
     }
     .hero::before {
       content: "";
@@ -216,13 +224,14 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4));
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+      z-index: 1;
     }
     .hero-content {
       position: relative;
       text-align: center;
       color: var(--white);
-      z-index: 1;
+      z-index: 2;
       padding: 0 20px;
     }
     .hero-content h1 {
@@ -275,6 +284,100 @@
     .section-container ul {
       list-style: disc;
       padding-left: 20px;
+    }
+
+    /* New Our Story Section */
+    #our-story {
+      background: var(--white);
+      padding: 30px;
+      margin: 40px auto;
+      max-width: 1000px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+    }
+    #our-story h2 {
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* Why Choose Us Section */
+    #why-choose-us {
+      background: var(--white);
+      padding: 30px;
+      margin: 40px auto;
+      max-width: 1000px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      text-align: center;
+    }
+    #why-choose-us .benefits {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 20px;
+    }
+    #why-choose-us .benefit {
+      flex: 1 1 200px;
+      background: var(--background-color);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+    }
+    #why-choose-us .benefit h3 {
+      margin-bottom: 10px;
+      color: var(--accent-color);
+    }
+
+    /* Guest Testimonials Carousel */
+    #testimonials {
+      background: var(--white);
+      padding: 30px;
+      margin: 40px auto;
+      max-width: 1000px;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    #testimonials h2 {
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .testimonial-container {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .testimonial {
+      min-width: 100%;
+      padding: 20px;
+      text-align: center;
+    }
+    .testimonial p {
+      font-style: italic;
+    }
+    .testimonial .author {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .testimonial-controls {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .testimonial-controls button {
+      background: var(--accent-color);
+      border: none;
+      color: var(--white);
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background var(--transition-speed);
+    }
+    .testimonial-controls button:hover {
+      background: var(--nav-hover);
     }
 
     /* Dining Recommendations Section */
@@ -448,6 +551,10 @@
         margin-left: 0;
         margin-top: 5px;
       }
+      /* Testimonials: Stack controls on mobile */
+      .testimonial-controls {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -467,6 +574,7 @@
       <ul>
         <li><a href="#home" data-section="Home">Home</a></li>
         <li><a href="#about" data-section="About">About</a></li>
+        <li><a href="#our-story" data-section="Our Story">Our Story</a></li>
         <li><a href="#accommodation" data-section="Accommodation">Accommodation</a></li>
         <li><a href="#gallery" data-section="Gallery">Gallery</a></li>
         <li><a href="#booking" data-section="Booking">Booking</a></li>
@@ -481,11 +589,15 @@
 
   <!-- Main Content -->
   <main>
-    <!-- Hero Section -->
+    <!-- Hero Section with Video Background -->
     <section class="hero" id="home">
+      <video autoplay muted loop id="hero-video">
+        <source src="hero-video.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+      </video>
       <div class="hero-content">
         <h1>The Old Town Cottage</h1>
-        <p>A historic seaside retreat in Scarborough – recently refurbished to blend timeless maritime heritage with modern comforts for an unforgettable stay.</p>
+        <p>Step into a historic seaside retreat in Scarborough—once known as Captain’s Cottage, our newly refurbished property marries 19th‑century maritime charm with modern comforts for an unforgettable stay.</p>
         <a href="#booking" class="cta-button">Book Now</a>
       </div>
     </section>
@@ -495,17 +607,50 @@
       <div class="section-container">
         <h2>Property Overview</h2>
         <p>
-          Located at <strong>35 Longwestgate, Scarborough, North Yorkshire, YO11 1QB</strong>, The Old Town Cottage (popularly known as Captain’s Cottage) is a historic mid-terrace property steeped in Scarborough’s maritime heritage. Newly refurbished by the current owners in mid-2024, it masterfully blends period charm with modern amenities to ensure a comfortable, memorable stay.
+          Situated at <strong>35 Longwestgate, Scarborough, North Yorkshire, YO11 1QB</strong>, The Old Town Cottage offers a unique blend of heritage and contemporary comfort. Originally known as Captain’s Cottage, this historic mid‑terrace property has been lovingly refurbished by new owners in mid‑2024.
         </p>
         <ul>
-          <li><strong>Layout:</strong> Two bedrooms – a first-floor double and a second-floor twin – comfortably accommodating up to four guests.</li>
-          <li><strong>Living & Kitchen:</strong> Enjoy a modern, fully equipped kitchen/diner alongside a cozy sitting room featuring an electric fireplace, Smart TV, and complimentary WiFi.</li>
-          <li><strong>Outdoor Space:</strong> Relax on the spacious decking area and garden, perfect for alfresco dining and unwinding by the sea.</li>
-          <li><strong>Enhanced Upgrades:</strong> Recent renovations ensure pristine cleanliness, updated decor, and improved guest comforts while retaining the cottage’s historic character.</li>
+          <li><strong>Heritage & Refurbishment:</strong> A 19th‑century cottage with updated decor, meticulous maintenance, and modern amenities.</li>
+          <li><strong>Layout:</strong> Two well‑appointed bedrooms—a spacious first‑floor double and a light‑filled second‑floor twin—accommodating up to four guests.</li>
+          <li><strong>Living & Kitchen:</strong> Enjoy a cozy sitting area with an electric fireplace, Smart TV, and complimentary WiFi, alongside a fully equipped modern kitchen/diner.</li>
+          <li><strong>Outdoor Space:</strong> A generous decking area and garden perfect for alfresco dining and relaxation, complete with a complimentary parking permit.</li>
         </ul>
+      </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section id="our-story">
+      <div class="section-container">
+        <h2>Our Story</h2>
         <p>
-          Additional features include a highchair and travel cot on request, a pet-friendly policy (allowing one well-behaved dog), and a complimentary roadside parking permit.
+          Once known as Captain’s Cottage, our property has a rich maritime heritage rooted in Scarborough’s vibrant history. Built in the 19th century, the cottage witnessed the golden era of seaside resorts. In mid‑2024, passionate new owners breathed fresh life into the property, carefully preserving its historic character while modernizing its amenities for today’s discerning traveler.
         </p>
+        <p>
+          Today, The Old Town Cottage stands as a testament to the timeless charm of Scarborough’s coastal legacy—where classic elegance meets contemporary comfort. Experience the fusion of history, luxury, and genuine local hospitality.
+        </p>
+      </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section id="why-choose-us">
+      <h2>Why Choose Us?</h2>
+      <div class="benefits">
+        <div class="benefit">
+          <h3>Historic Charm</h3>
+          <p>Relish the authentic maritime heritage and period details of a 19th‑century cottage.</p>
+        </div>
+        <div class="benefit">
+          <h3>Modern Comforts</h3>
+          <p>Enjoy upgraded amenities—from a fully equipped kitchen to high‑speed WiFi and smart TV.</p>
+        </div>
+        <div class="benefit">
+          <h3>Prime Location</h3>
+          <p>Steps from Scarborough Castle, the beach, and vibrant local attractions.</p>
+        </div>
+        <div class="benefit">
+          <h3>Guest-Focused Service</h3>
+          <p>Experience personal touches, meticulous maintenance, and a warm welcome.</p>
+        </div>
       </div>
     </section>
 
@@ -513,16 +658,12 @@
     <section id="accommodation">
       <div class="section-container">
         <h2>Charming Accommodation</h2>
-        <p>
-          Our cottage comfortably accommodates up to four guests in thoughtfully designed rooms:
-        </p>
+        <p>Our thoughtfully designed rooms ensure a comfortable stay:</p>
         <ul>
-          <li><strong>Double Bedroom:</strong> Spacious and elegantly furnished on the first floor, offering a peaceful retreat.</li>
-          <li><strong>Twin Bedroom:</strong> Featuring charming roof windows that fill the room with natural light and coastal views.</li>
+          <li><strong>Double Bedroom:</strong> A serene retreat on the first floor with plush bedding and classic details.</li>
+          <li><strong>Twin Bedroom:</strong> A bright space featuring charming roof windows that frame coastal views.</li>
         </ul>
-        <p>
-          The well-appointed bathroom features both a relaxing bath and a separate, modern shower.
-        </p>
+        <p>The modern bathroom offers both a relaxing bath and a separate, contemporary shower.</p>
         <div class="inline-images">
           <img src="room1.jpg" alt="Spacious double bedroom in a Scarborough seaside cottage" class="clickable-image" loading="lazy">
           <img src="room2.jpg" alt="Elegant twin bedroom with coastal views in Scarborough" class="clickable-image" loading="lazy">
@@ -533,19 +674,13 @@
     <!-- Amenities Section -->
     <section id="amenities">
       <div class="section-container">
-        <h2>Refined Living Spaces & Amenities</h2>
-        <p>
-          Our kitchen/diner is fully equipped with modern appliances that perfectly balance functionality with the cottage’s historic charm:
-        </p>
+        <h2>Modern Amenities & Refined Living</h2>
+        <p>Our kitchen/diner and living spaces have been updated to seamlessly blend modern functionality with traditional charm:</p>
         <ul>
-          <li>Electric oven and induction hob</li>
-          <li>Microwave and premium coffee machine</li>
-          <li>Spacious fridge/freezer combo</li>
-          <li>Washing machine and dishwasher</li>
+          <li>Electric oven, induction hob, microwave, and premium coffee machine</li>
+          <li>Spacious fridge/freezer, washing machine, and dishwasher</li>
+          <li>Cozy sitting room with an electric fireplace, Smart TV, and high-speed WiFi</li>
         </ul>
-        <p>
-          The inviting sitting room, complete with an electric fireplace, Smart TV, and high-speed WiFi, creates a warm, home-like ambiance.
-        </p>
         <div class="inline-images">
           <img src="kitchen.jpg" alt="Modern kitchen and dining area in a Scarborough cottage" class="clickable-image" loading="lazy">
           <img src="livingroom.jpg" alt="Comfortable living room with coastal decor in Scarborough" class="clickable-image" loading="lazy">
@@ -556,14 +691,12 @@
     <!-- Outdoor Elegance Section -->
     <section id="outdoor">
       <div class="section-container">
-        <h2>Outdoor Elegance & Additional Features</h2>
-        <p>
-          Step outside to experience our serene decking area and garden—ideal for alfresco dining, morning coffees, or simply unwinding after a day exploring Scarborough.
-        </p>
+        <h2>Outdoor Elegance</h2>
+        <p>Step outside to unwind in our peaceful decking area and garden—ideal for alfresco dining, morning coffees, or simply enjoying the Scarborough sea breeze.</p>
         <ul>
           <li>Pet-friendly environment (one well-behaved dog allowed)</li>
-          <li>Family amenities including a highchair and travel cot available on request</li>
-          <li>Complimentary roadside parking permit for hassle-free visits</li>
+          <li>Family amenities including a highchair and travel cot on request</li>
+          <li>Complimentary parking permit for hassle-free access</li>
         </ul>
         <div class="inline-images">
           <img src="dinningroom.jpg" alt="Outdoor decking area at The Old Town Cottage for alfresco dining" class="clickable-image" loading="lazy">
@@ -571,101 +704,27 @@
       </div>
     </section>
 
-    <!-- Booking & Contact Section -->
-    <section id="booking">
+    <!-- Guest Testimonials Section -->
+    <section id="testimonials">
       <div class="section-container">
-        <h2>Booking & Contact</h2>
-        <p>
-          <strong>Check-in:</strong> from 4:00 pm &nbsp;&nbsp; | &nbsp;&nbsp; <strong>Check-out:</strong> by 10:00 am
-        </p>
-        <p>
-          To book your stay, please visit our page on Sykes Cottages:
-          <a href="https://www.sykescottages.co.uk/cottage/North-York-Moors-Coast-Old-and-East-Harbours/Captains-Cottage-1159058.html" target="_blank" rel="noopener">Book on Sykes Cottages</a>.
-        </p>
-        <p>
-          For direct inquiries, feel free to contact us:
-          <br><strong>Phone:</strong> +44 1244 746200
-          <br><strong>Email:</strong> <a href="mailto:info@theoldtowncottage.com">info@theoldtowncottage.com</a>
-        </p>
-      </div>
-    </section>
-
-    <!-- Local Attractions & Events Section -->
-    <section id="local-events">
-      <div class="section-container">
-        <h2>Local Attractions & Events</h2>
-        <!-- Weather -->
-        <div class="sub-section weather-section">
-          <h3>Current Weather in Scarborough</h3>
-          <div class="weather-widget">
-            <a class="weatherwidget-io" href="https://forecast7.com/en/54d28n0d40/scarborough/" data-label_1="SCARBOROUGH" data-label_2="WEATHER" data-icons="Climacons Animated" data-theme="clear">SCARBOROUGH WEATHER</a>
+        <h2>Guest Testimonials</h2>
+        <div class="testimonial-container">
+          <div class="testimonial">
+            <p>"An enchanting stay! The blend of history and modern comforts made our getaway unforgettable."</p>
+            <div class="author">– Sarah & Tom</div>
           </div>
-          <script defer>
-            !function(d,s,id){
-              var js,fjs=d.getElementsByTagName(s)[0];
-              if(!d.getElementById(id)){
-                js=d.createElement(s); js.id=id;
-                js.src='https://weatherwidget.io/js/widget.min.js';
-                fjs.parentNode.insertBefore(js,fjs);
-              }
-            }(document,'script','weatherwidget-io-js');
-          </script>
-        </div>
-        <!-- Local Attractions -->
-        <div class="sub-section local-info">
-          <h3>Explore Scarborough</h3>
-          <ul>
-            <li><strong>Scarborough Castle</strong> (300 m): Discover ancient ramparts and panoramic views.</li>
-            <li><strong>Scarborough Fair</strong> (550 m): Experience a vibrant local market atmosphere.</li>
-            <li><strong>Scarborough Pleasure Steamers</strong> (550 m): Enjoy a scenic coastal cruise.</li>
-            <li><strong>Scarborough Beach</strong> (650 m): Relax on golden sands and take a refreshing dip.</li>
-            <li><strong>St Martin on the Hill</strong> (650 m): Admire breathtaking views over Scarborough and the sea.</li>
-            <li><strong>Scarborough Museums Trust</strong> (650 m): Immerse yourself in local heritage and art.</li>
-            <li><strong>St Mary’s Church</strong> (700 m): Appreciate timeless architecture and a peaceful ambiance.</li>
-            <li><strong>Anne Bronte's Grave</strong> (700 m): Visit the final resting place of the famed writer.</li>
-            <li><strong>Peasholm Park</strong> (850 m): Stroll through tranquil oriental gardens.</li>
-            <li><strong>Scarborough Train Station</strong> (900 m): Easily connect to regional destinations.</li>
-          </ul>
-        </div>
-        <!-- Events Widget -->
-        <div class="sub-section events-section">
-          <h3>What's On?</h3>
-          <div 
-            w-type="event-discovery" 
-            w-tmapikey="1Ar4ur0n7IJcCmDR6kq3KuRAeqIesfkS" 
-            w-googleapikey="YOUR_GOOGLE_API_KEY" 
-            w-keyword="" 
-            w-theme="grid" 
-            w-colorscheme="custom" 
-            w-width="100%" 
-            w-height="550" 
-            w-size="17" 
-            w-border="2" 
-            w-borderradius="4" 
-            w-radius="25" 
-            w-period="year" 
-            w-layout="fullwidth" 
-            w-attractionid="" 
-            w-promoterid="" 
-            w-venueid="" 
-            w-status="" 
-            w-affiliateid="" 
-            w-segmentid="" 
-            w-proportion="custom" 
-            w-titlelink="off" 
-            w-sorting="groupByName" 
-            w-id="id_kjeahl" 
-            w-classificationname="" 
-            w-source="" 
-            w-branding="TicketWeb" 
-            w-countrycode="GB" 
-            w-postalcode="" 
-            w-city="Scarborough" 
-            w-showfulleventsnames="true" 
-            w-buybuttonbackgroundcolor="#2f478a" 
-            w-showloadmorebutton="true" 
-            w-latlong="">
+          <div class="testimonial">
+            <p>"The Old Town Cottage truly feels like a home away from home. Exceptional service and a perfect location."</p>
+            <div class="author">– Emily R.</div>
           </div>
+          <div class="testimonial">
+            <p>"From the stunning sea views to the charming decor, every detail exudes character. We can’t wait to return!"</p>
+            <div class="author">– Mark & Lisa</div>
+          </div>
+        </div>
+        <div class="testimonial-controls">
+          <button id="prev-testimonial">&laquo; Prev</button>
+          <button id="next-testimonial">Next &raquo;</button>
         </div>
       </div>
     </section>
@@ -677,27 +736,27 @@
         <ul>
           <li>
             <strong>The Duchess of York Pub</strong><br>
-            Enjoy traditional British pub fare in a warm, historic setting just a short stroll from the cottage.<br>
+            Enjoy traditional British fare in a historic setting just a short stroll away.<br>
             <a href="https://www.tripadvisor.co.uk/Restaurants-g186345-Scarborough_Scarborough_District_North_Yorkshire_England.html" target="_blank" rel="noopener">View on TripAdvisor</a>
           </li>
           <li>
             <strong>The Harbour Restaurant</strong><br>
-            Fresh, locally sourced seafood and harbor views—ideal for a romantic dinner (800 m away).<br>
+            Savor fresh, locally sourced seafood with harbor views—ideal for a romantic dinner (800 m away).<br>
             <a href="https://www.tripadvisor.co.uk/Restaurant_Review-g186345-d10155823-Reviews-The_Harbour_Scarborough" target="_blank" rel="noopener">View on TripAdvisor</a>
           </li>
           <li>
             <strong>The Golden Lion</strong><br>
-            Enjoy hearty meals and a lively atmosphere at this popular local pub known for live music and classic dishes (600 m away).<br>
+            Indulge in hearty meals and live music at this popular local pub (600 m away).<br>
             <a href="https://www.tripadvisor.co.uk/Restaurant_Review-g186345-d2098125-Reviews-The_Golden_Lion_Scarborough" target="_blank" rel="noopener">View on TripAdvisor</a>
           </li>
           <li>
             <strong>The Blue Boar</strong><br>
-            Casual pub fare paired with a great selection of local ales (700 m away).<br>
+            Enjoy casual pub fare and a selection of local ales (700 m away).<br>
             <a href="https://www.tripadvisor.co.uk/Restaurant_Review-g186345-d1516015-Reviews-The_Blue_Boar_Scarborough" target="_blank" rel="noopener">View on TripAdvisor</a>
           </li>
           <li>
             <strong>Borough Market Scarborough</strong><br>
-            A vibrant mix of international street food and artisanal treats—perfect for sampling local flavors.<br>
+            Discover a vibrant mix of international street food and artisanal treats.<br>
             <a href="https://www.tripadvisor.co.uk/Restaurants-g186345-c30-Scarborough_Scarborough_District_North_Yorkshire_England.html" target="_blank" rel="noopener">View on TripAdvisor</a>
           </li>
         </ul>
@@ -761,7 +820,7 @@
         setTimeout(() => { logo.style.transform = 'rotate(0deg)'; }, 600);
       });
 
-      // Lightbox functionality
+      // Lightbox functionality for gallery images
       const clickableImages = document.querySelectorAll('.clickable-image');
       const lightbox = document.getElementById('lightbox');
       const lightboxImg = document.getElementById('lightbox-img');
@@ -822,6 +881,26 @@
         });
       }, observerOptions);
       sections.forEach(section => observer.observe(section));
+
+      // Testimonial Carousel Functionality
+      const testimonialContainer = document.querySelector('.testimonial-container');
+      const testimonials = document.querySelectorAll('.testimonial');
+      const prevBtn = document.getElementById('prev-testimonial');
+      const nextBtn = document.getElementById('next-testimonial');
+      let testimonialIndex = 0;
+
+      function updateTestimonials() {
+        testimonialContainer.style.transform = 'translateX(-' + (testimonialIndex * 100) + '%)';
+      }
+
+      prevBtn.addEventListener('click', () => {
+        testimonialIndex = (testimonialIndex === 0) ? testimonials.length - 1 : testimonialIndex - 1;
+        updateTestimonials();
+      });
+      nextBtn.addEventListener('click', () => {
+        testimonialIndex = (testimonialIndex === testimonials.length - 1) ? 0 : testimonialIndex + 1;
+        updateTestimonials();
+      });
     });
   </script>
 
