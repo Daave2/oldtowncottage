@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Charming Seaside Cottage in Scarborough | The Old Town Cottage</title>
-  <meta name="description" content="Experience The Old Town Cottage in Scarborough—a historic, pet-friendly seaside retreat blending 19th-century maritime charm with modern comforts. Recently refurbished in mid-2024, our cottage offers a unique getaway near Scarborough Castle, pristine amenities, and an authentic coastal lifestyle.">
+  <meta name="description" content="Experience The Old Town Cottage in Scarborough—a historic, pet-friendly seaside retreat blending 19th-century maritime charm with modern comforts.">
   <link rel="canonical" href="https://theoldtowncottage.com/">
   <link rel="icon" href="logo.png" type="image/png">
 
@@ -20,7 +20,7 @@
 
   <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="Charming Seaside Cottage in Scarborough | The Old Town Cottage">
-  <meta property="og:description" content="Experience The Old Town Cottage—a historic, pet-friendly seaside retreat in Scarborough that blends maritime heritage with modern upgrades. Enjoy a recently refurbished space near Scarborough Castle and the beach.">
+  <meta property="og:description" content="Experience our historic seaside retreat in Scarborough, blending maritime charm with modern comforts.">
   <meta property="og:url" content="https://theoldtowncottage.com/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://theoldtowncottage.com/hero.jpg">
@@ -29,7 +29,7 @@
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Charming Seaside Cottage in Scarborough | The Old Town Cottage">
-  <meta name="twitter:description" content="Experience our historic seaside retreat in Scarborough. The Old Town Cottage (formerly Captain’s Cottage) offers updated modern comforts, a rich maritime heritage, and an unbeatable location near Scarborough Castle and the beach.">
+  <meta name="twitter:description" content="Experience our historic seaside retreat in Scarborough, blending maritime charm with modern comforts.">
   <meta name="twitter:image" content="https://theoldtowncottage.com/hero.jpg">
   
   <!-- JSON-LD Structured Data for LocalBusiness -->
@@ -214,16 +214,8 @@
       object-fit: cover;
       z-index: -1;
     }
-    .hero::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4));
-      z-index: 0;
-    }
+    /* Removed overlay ::before to keep video colors intact */
+
     .hero-content {
       position: relative;
       text-align: center;
@@ -284,16 +276,7 @@
     }
 
     /* Our Story & Why Choose Us Sections */
-    #our-story {
-      margin: 40px auto;
-      max-width: 1000px;
-      background: var(--white);
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: var(--box-shadow);
-      animation: fadeInUp 0.8s ease-out;
-    }
-    #why-choose-us {
+    #our-story, #why-choose-us {
       margin: 40px auto;
       max-width: 1000px;
       background: var(--white);
@@ -531,15 +514,15 @@
 
   <!-- Main Content -->
   <main>
-    <!-- Hero Section with Video Background (Debug Version) -->
+    <!-- Hero Section with Video Background -->
     <section class="hero" id="home">
-      <video autoplay muted loop playsinline preload="auto" poster="hero.jpg" controls>
+      <video autoplay muted loop playsinline preload="auto">
         <source src="hero.mp4" type="video/mp4">
         Your browser does not support the video tag.
       </video>
       <div class="hero-content">
         <h1>The Old Town Cottage</h1>
-        <p>Step into a historic seaside retreat in Scarborough—once known as Captain’s Cottage, our newly refurbished property marries 19th-century maritime charm with modern amenities for an unforgettable stay.</p>
+        <p>A historic seaside retreat in Scarborough blending maritime charm with modern comforts.</p>
         <a href="#booking" class="cta-button">Book Now</a>
       </div>
     </section>
