@@ -205,7 +205,8 @@
       height: 100vh;
       overflow: hidden;
     }
-    .hero video {
+    /* The hero video uses an ID and a fallback poster */
+    #hero-video {
       position: absolute;
       top: 0;
       left: 0;
@@ -214,8 +215,8 @@
       object-fit: cover;
       z-index: -1;
     }
-    /* Fallback content inside video */
-    .hero video img {
+    /* Fallback content if video is not supported */
+    #hero-video img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -381,7 +382,7 @@
       font-size: 0.9rem;
     }
 
-    /* Lightbox Modal */
+    /* Lightbox Modal for Media */
     .lightbox {
       display: none;
       position: fixed;
@@ -402,7 +403,6 @@
       max-width: 90%;
       max-height: 90%;
     }
-    /* The lightbox-media container will dynamically hold either an image or a video */
     #lightbox-media img,
     #lightbox-media video {
       width: 100%;
@@ -522,9 +522,9 @@
   <main>
     <!-- Hero Section with Video Background -->
     <section class="hero" id="home">
-      <video autoplay muted loop playsinline preload="auto" poster="hero.jpg">
+      <video id="hero-video" autoplay muted playsinline preload="auto" poster="hero.jpg">
         <source src="hero.mp4" type="video/mp4">
-        <!-- Fallback content if video tag is not supported -->
+        <!-- Fallback image if video tag not supported -->
         <img src="hero.jpg" alt="The Old Town Cottage">
       </video>
       <div class="hero-content">
@@ -824,6 +824,21 @@
   <!-- JavaScript -->
   <script defer>
     document.addEventListener('DOMContentLoaded', () => {
+      // Custom video bounce loop for hero video
+      const heroVideo = document.getElementById('hero-video');
+      // Start playing forward
+      heroVideo.playbackRate = 1;
+      heroVideo.addEventListener('timeupdate', () => {
+        // If playing forward and near the end, reverse direction
+        if (heroVideo.playbackRate > 0 && heroVideo.currentTime >= heroVideo.duration - 0.1) {
+          heroVideo.playbackRate = -1;
+        }
+        // If playing backward and near the beginning, play forward
+        else if (heroVideo.playbackRate < 0 && heroVideo.currentTime <= 0.1) {
+          heroVideo.playbackRate = 1;
+        }
+      });
+
       // Mobile Menu Toggle
       const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
       const navMenu = document.getElementById('nav-menu').querySelector('ul');
