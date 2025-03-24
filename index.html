@@ -199,14 +199,20 @@
       transition: background var(--transition-speed);
     }
 
-    /* Hero Section */
+    /* Hero Section with Video Background and Fallback Image */
     .hero {
       position: relative;
       height: 100vh;
-      background: url('https://theoldtowncottage.com/hero.jpg') center center/cover no-repeat;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      overflow: hidden;
+    }
+    .hero video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
     }
     .hero::before {
       content: "";
@@ -216,6 +222,7 @@
       width: 100%;
       height: 100%;
       background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4));
+      z-index: 0;
     }
     .hero-content {
       position: relative;
@@ -524,8 +531,13 @@
 
   <!-- Main Content -->
   <main>
-    <!-- Hero Section -->
+    <!-- Hero Section with Video Background and Fallback Image -->
     <section class="hero" id="home">
+      <video autoplay muted loop playsinline poster="hero.jpg">
+        <source src="hero.mp4" type="video/mp4">
+        <!-- Fallback content for browsers that don't support the video element -->
+        <img src="hero.jpg" alt="The Old Town Cottage">
+      </video>
       <div class="hero-content">
         <h1>The Old Town Cottage</h1>
         <p>Step into a historic seaside retreat in Scarborough—once known as Captain’s Cottage, our newly refurbished property marries 19th-century maritime charm with modern amenities for an unforgettable stay.</p>
