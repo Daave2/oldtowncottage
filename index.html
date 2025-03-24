@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Charming Seaside Cottage in Scarborough | The Old Town Cottage</title>
-  <meta name="description" content="Experience The Old Town Cottage in Scarborough—a historic, pet-friendly seaside retreat blending 19th-century maritime charm with modern comforts.">
+  <meta name="description" content="Experience The Old Town Cottage in Scarborough—a historic, pet-friendly seaside retreat blending maritime charm with modern comforts.">
   <link rel="canonical" href="https://theoldtowncottage.com/">
   <link rel="icon" href="logo.png" type="image/png">
 
@@ -214,8 +214,12 @@
       object-fit: cover;
       z-index: -1;
     }
-    /* Removed overlay ::before to keep video colors intact */
-
+    /* Fallback content inside video */
+    .hero video img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .hero-content {
       position: relative;
       text-align: center;
@@ -340,13 +344,13 @@
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
     }
-    .gallery img {
+    .gallery img, .gallery video {
       width: 100%;
       border-radius: 5px;
       cursor: pointer;
       transition: transform 0.3s;
     }
-    .gallery img:hover {
+    .gallery img:hover, .gallery video:hover {
       transform: scale(1.05);
     }
 
@@ -398,7 +402,9 @@
       max-width: 90%;
       max-height: 90%;
     }
-    .lightbox-content img {
+    /* The lightbox-media container will dynamically hold either an image or a video */
+    #lightbox-media img,
+    #lightbox-media video {
       width: 100%;
       height: auto;
       border-radius: 5px;
@@ -516,9 +522,10 @@
   <main>
     <!-- Hero Section with Video Background -->
     <section class="hero" id="home">
-      <video autoplay muted loop playsinline preload="auto">
+      <video autoplay muted loop playsinline preload="auto" poster="hero.jpg">
         <source src="hero.mp4" type="video/mp4">
-        Your browser does not support the video tag.
+        <!-- Fallback content if video tag is not supported -->
+        <img src="hero.jpg" alt="The Old Town Cottage">
       </video>
       <div class="hero-content">
         <h1>The Old Town Cottage</h1>
@@ -595,8 +602,8 @@
         </ul>
         <p>The modern bathroom offers both a relaxing bath and a separate, contemporary shower.</p>
         <div class="inline-images">
-          <img src="room1.jpg" alt="Spacious double bedroom in a Scarborough seaside cottage" class="clickable-image" loading="lazy">
-          <img src="room2.jpg" alt="Elegant twin bedroom with coastal views in Scarborough" class="clickable-image" loading="lazy">
+          <img src="room1.jpg" alt="Spacious double bedroom in a Scarborough seaside cottage" class="clickable-media" loading="lazy">
+          <img src="room2.jpg" alt="Elegant twin bedroom with coastal views in Scarborough" class="clickable-media" loading="lazy">
         </div>
       </div>
     </section>
@@ -613,8 +620,8 @@
         </ul>
         <p>Every detail is designed to offer comfort while preserving the authentic character of the cottage.</p>
         <div class="inline-images">
-          <img src="kitchen.jpg" alt="Modern kitchen and dining area in a Scarborough cottage" class="clickable-image" loading="lazy">
-          <img src="livingroom.jpg" alt="Comfortable living room with coastal decor in Scarborough" class="clickable-image" loading="lazy">
+          <img src="kitchen.jpg" alt="Modern kitchen and dining area in a Scarborough cottage" class="clickable-media" loading="lazy">
+          <img src="livingroom.jpg" alt="Comfortable living room with coastal decor in Scarborough" class="clickable-media" loading="lazy">
         </div>
       </div>
     </section>
@@ -630,7 +637,7 @@
           <li>Complimentary parking permit for hassle-free access</li>
         </ul>
         <div class="inline-images">
-          <img src="dinningroom.jpg" alt="Outdoor decking area at The Old Town Cottage for alfresco dining" class="clickable-image" loading="lazy">
+          <img src="dinningroom.jpg" alt="Outdoor decking area at The Old Town Cottage for alfresco dining" class="clickable-media" loading="lazy">
         </div>
       </div>
     </section>
@@ -772,15 +779,21 @@
     <section id="gallery">
       <div class="section-container">
         <h2>Gallery</h2>
-        <p style="text-align:center;">Click an image to enlarge the view.</p>
+        <p style="text-align:center;">Click a media item to enlarge the view.</p>
         <div class="gallery">
-          <img src="entrance.jpg" alt="Gallery view of the entrance at The Old Town Cottage" class="clickable-image" loading="lazy">
-          <img src="livingroom.jpg" alt="Gallery view of the elegant living room at The Old Town Cottage" class="clickable-image" loading="lazy">
-          <img src="kitchen.jpg" alt="Gallery view of the modern kitchen at The Old Town Cottage" class="clickable-image" loading="lazy">
-          <img src="room1.jpg" alt="Gallery view of the spacious double bedroom at The Old Town Cottage" class="clickable-image" loading="lazy">
-          <img src="room2.jpg" alt="Gallery view of the twin bedroom with scenic views at The Old Town Cottage" class="clickable-image" loading="lazy">
-          <img src="bathroom.jpg" alt="Gallery view of the well-appointed bathroom at The Old Town Cottage" class="clickable-image" loading="lazy">
-          <img src="dinningroom.jpg" alt="Gallery view of the outdoor dining area at The Old Town Cottage" class="clickable-image" loading="lazy">
+          <!-- Video gallery item -->
+          <video class="clickable-media" preload="metadata" playsinline muted poster="hero.jpg">
+            <source src="hero.mp4" type="video/mp4">
+            <img src="hero.jpg" alt="The Old Town Cottage Video">
+          </video>
+          <!-- Other image gallery items -->
+          <img src="entrance.jpg" alt="Gallery view of the entrance at The Old Town Cottage" class="clickable-media" loading="lazy">
+          <img src="livingroom.jpg" alt="Gallery view of the elegant living room at The Old Town Cottage" class="clickable-media" loading="lazy">
+          <img src="kitchen.jpg" alt="Gallery view of the modern kitchen at The Old Town Cottage" class="clickable-media" loading="lazy">
+          <img src="room1.jpg" alt="Gallery view of the spacious double bedroom at The Old Town Cottage" class="clickable-media" loading="lazy">
+          <img src="room2.jpg" alt="Gallery view of the twin bedroom with scenic views at The Old Town Cottage" class="clickable-media" loading="lazy">
+          <img src="bathroom.jpg" alt="Gallery view of the well-appointed bathroom at The Old Town Cottage" class="clickable-media" loading="lazy">
+          <img src="dinningroom.jpg" alt="Gallery view of the outdoor dining area at The Old Town Cottage" class="clickable-media" loading="lazy">
         </div>
       </div>
     </section>
@@ -797,11 +810,11 @@
     <p>&copy; 2025 The Old Town Cottage | All Rights Reserved</p>
   </footer>
 
-  <!-- Lightbox Modal for Images -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+  <!-- Lightbox Modal for Media -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Media preview">
     <div class="lightbox-content">
       <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
-      <img src="" alt="Enlarged image view" id="lightbox-img">
+      <div id="lightbox-media"></div>
     </div>
   </div>
 
@@ -825,18 +838,40 @@
         setTimeout(() => { logo.style.transform = 'rotate(0deg)'; }, 600);
       });
 
-      // Lightbox functionality
-      const clickableImages = document.querySelectorAll('.clickable-image');
+      // Lightbox functionality for both images and videos
+      const clickableMedia = document.querySelectorAll('.clickable-media');
       const lightbox = document.getElementById('lightbox');
-      const lightboxImg = document.getElementById('lightbox-img');
+      const lightboxMedia = document.getElementById('lightbox-media');
       const lightboxClose = document.getElementById('lightbox-close');
-      clickableImages.forEach(img => {
-        img.addEventListener('click', () => {
+
+      clickableMedia.forEach(media => {
+        media.addEventListener('click', () => {
           lightbox.classList.add('active');
-          lightboxImg.src = img.src;
+          // Clear any previous content
+          lightboxMedia.innerHTML = "";
+          if(media.tagName === "IMG") {
+            const img = document.createElement("img");
+            img.src = media.src;
+            lightboxMedia.appendChild(img);
+          } else if (media.tagName === "VIDEO") {
+            const video = document.createElement("video");
+            video.controls = true;
+            video.autoplay = true;
+            // Use the source from the first <source> tag inside the video element
+            const source = media.querySelector('source');
+            if(source) {
+              video.src = source.src;
+            }
+            lightboxMedia.appendChild(video);
+          }
         });
       });
-      const closeLightbox = () => lightbox.classList.remove('active');
+
+      const closeLightbox = () => {
+        lightbox.classList.remove('active');
+        lightboxMedia.innerHTML = "";
+      };
+
       lightboxClose.addEventListener('click', closeLightbox);
       lightbox.addEventListener('click', (e) => {
         if (e.target === lightbox) closeLightbox();
