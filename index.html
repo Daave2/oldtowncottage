@@ -205,7 +205,7 @@
       height: 100vh;
       overflow: hidden;
     }
-    /* The hero video uses an ID and a fallback poster */
+    /* The hero video element with fallback poster */
     #hero-video {
       position: absolute;
       top: 0;
@@ -215,7 +215,7 @@
       object-fit: cover;
       z-index: -1;
     }
-    /* Fallback content if video is not supported */
+    /* Fallback content inside video tag for unsupported browsers */
     #hero-video img {
       width: 100%;
       height: 100%;
@@ -524,7 +524,6 @@
     <section class="hero" id="home">
       <video id="hero-video" autoplay muted playsinline preload="auto" poster="hero.jpg">
         <source src="hero.mp4" type="video/mp4">
-        <!-- Fallback image if video tag not supported -->
         <img src="hero.jpg" alt="The Old Town Cottage">
       </video>
       <div class="hero-content">
@@ -824,21 +823,32 @@
   <!-- JavaScript -->
   <script defer>
     document.addEventListener('DOMContentLoaded', () => {
-      // Custom video bounce loop for hero video
+      // Simulated ping-pong loop for hero video (for browsers without negative playbackRate support)
       const heroVideo = document.getElementById('hero-video');
-      // Start playing forward
-      heroVideo.playbackRate = 1;
-      heroVideo.addEventListener('timeupdate', () => {
-        // If playing forward and near the end, reverse direction
-        if (heroVideo.playbackRate > 0 && heroVideo.currentTime >= heroVideo.duration - 0.1) {
-          heroVideo.playbackRate = -1;
+      let reversing = false;
+      
+      function reversePlayback() {
+        reversing = true;
+        heroVideo.pause();
+        function step() {
+          if (heroVideo.currentTime > 0) {
+            // Decrement currentTime by a small step; adjust the step value for speed
+            heroVideo.currentTime = Math.max(0, heroVideo.currentTime - 0.03);
+            requestAnimationFrame(step);
+          } else {
+            reversing = false;
+            heroVideo.play();
+          }
         }
-        // If playing backward and near the beginning, play forward
-        else if (heroVideo.playbackRate < 0 && heroVideo.currentTime <= 0.1) {
-          heroVideo.playbackRate = 1;
-        }
+        requestAnimationFrame(step);
+      }
+      
+      // When the video ends (forward playback), start reverse simulation
+      heroVideo.addEventListener('ended', () => {
+        heroVideo.currentTime = heroVideo.duration;
+        reversePlayback();
       });
-
+      
       // Mobile Menu Toggle
       const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
       const navMenu = document.getElementById('nav-menu').querySelector('ul');
@@ -862,7 +872,7 @@
       clickableMedia.forEach(media => {
         media.addEventListener('click', () => {
           lightbox.classList.add('active');
-          // Clear any previous content
+          // Clear previous lightbox content
           lightboxMedia.innerHTML = "";
           if(media.tagName === "IMG") {
             const img = document.createElement("img");
@@ -872,7 +882,6 @@
             const video = document.createElement("video");
             video.controls = true;
             video.autoplay = true;
-            // Use the source from the first <source> tag inside the video element
             const source = media.querySelector('source');
             if(source) {
               video.src = source.src;
