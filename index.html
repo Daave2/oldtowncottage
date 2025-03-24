@@ -199,7 +199,7 @@
       transition: background var(--transition-speed);
     }
 
-    /* Hero Section with Video Background and Fallback Image */
+    /* Hero Section with Video Background */
     .hero {
       position: relative;
       height: 100vh;
@@ -531,12 +531,11 @@
 
   <!-- Main Content -->
   <main>
-    <!-- Hero Section with Video Background and Fallback Image -->
+    <!-- Hero Section with Video Background -->
     <section class="hero" id="home">
-      <video autoplay muted loop playsinline poster="hero.jpg">
+      <video autoplay muted loop playsinline>
         <source src="hero.mp4" type="video/mp4">
-        <!-- Fallback content for browsers that don't support the video element -->
-        <img src="hero.jpg" alt="The Old Town Cottage">
+        Your browser does not support the video tag.
       </video>
       <div class="hero-content">
         <h1>The Old Town Cottage</h1>
