@@ -31,7 +31,7 @@
             margin: auto;
         }
         #controls { grid-area: controls; }
-        #chart-container { grid-area: chart; position: relative; }
+        #chart-container { grid-area: chart; position: relative; } /* Relative for key */
         #statistics { grid-area: stats; background-color: #e9f5f1; }
         #event-management { grid-area: events; }
         #min-stay-management { grid-area: minstay; }
@@ -66,14 +66,14 @@
 
         /* --- Chart Container & Key Styling --- */
         #chart-container {
-            height: 450px;
-            padding-bottom: 30px; /* Increased bottom padding for X-axis label */
-         }
+            height: 450px; /* Maintain height */
+            padding-bottom: 40px; /* INCREASED padding for X axis label */
+        }
         #chart-key {
             position: absolute;
-            top: 45px; /* Adjust as needed */
+            top: 45px;
             right: 25px;
-            background-color: rgba(255, 255, 255, 0.9); /* Slightly more opaque */
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 8px 12px;
             border-radius: 5px;
             border: 1px solid #ccc;
@@ -157,7 +157,7 @@
          }
         @media (max-width: 900px) {
             .container { grid-template-areas: "controls" "chart" "stats" "events" "minstay" "table"; grid-template-columns: 1fr; }
-            #chart-container { height: 300px; padding-bottom: 20px; /* Adjust padding for smaller */ }
+            #chart-container { height: 300px; padding-bottom: 20px; }
             #chart-key { top: 40px; right: 10px; font-size: 0.75em;}
             .table-actions { flex-direction: column; gap: 10px; align-items: stretch; }
             .table-actions button { width: 100%; }
@@ -221,13 +221,13 @@
     const seasonMonths = { Low: [0, 1, 10], Shoulder: [2, 3, 4, 8, 9], High: [5], Peak: [6, 7] };
     const schoolHolidayData = [ { name: "Feb Half Term", start: "2025-02-15", end: "2025-02-23" }, { name: "Easter Holidays", start: "2025-04-04", end: "2025-04-21" }, { name: "May Half Term", start: "2025-05-24", end: "2025-06-01" }, { name: "Oct Half Term", start: "2025-10-24", end: "2025-11-02" }, { name: "Christmas Break", start: "2025-12-20", end: "2026-01-04" }];
 
-    // --- Annotation Colors (Slightly more transparent) ---
+    // --- Annotation Colors ---
     const annotationColors = {
-        Holiday: 'rgba(255, 230, 153, 0.25)', // Light Yellow
-        Low: 'rgba(173, 216, 230, 0.25)',     // Light Blue
-        Medium: 'rgba(255, 160, 122, 0.25)', // Light Salmon
-        High: 'rgba(255, 182, 193, 0.25)',   // Light Pink
-        Peak: 'rgba(255, 100, 100, 0.25)'    // Lighter Red
+        Holiday: 'rgba(255, 230, 153, 0.3)', // Light Yellow
+        Low: 'rgba(173, 216, 230, 0.3)',     // Light Blue
+        Medium: 'rgba(255, 160, 122, 0.3)', // Light Salmon
+        High: 'rgba(255, 182, 193, 0.3)',   // Light Pink
+        Peak: 'rgba(255, 100, 100, 0.3)'    // Light Red
     };
 
 
@@ -250,27 +250,15 @@
     function updateStatistics(priceData, inputs) { if (!priceData || priceData.length === 0) return; const prices = priceData.map(d => d.price); const totalPotentialRevenue = prices.reduce((sum, price) => sum + price, 0); const avgRate = totalPotentialRevenue / prices.length; const minRate = Math.min(...prices); const maxRate = Math.max(...prices); const estAnnualRevenue = totalPotentialRevenue * inputs.occupancyRate; const priceOverrideCount = Object.keys(priceOverrides).length; const minStayOverrideCount = Object.keys(minStayOverrides).length; const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] }; const weekdayPrices = []; const weekendPrices = []; priceData.forEach(d => { if (seasonalPrices[d.season]) { seasonalPrices[d.season].push(d.price); } if (d.day === 5 || d.day === 6) { weekendPrices.push(d.price); } else { weekdayPrices.push(d.price); } }); const calculateAverage = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; document.getElementById('statAvgRate').textContent = formatCurrency(avgRate); document.getElementById('statAvgWeekday').textContent = formatCurrency(calculateAverage(weekdayPrices)); document.getElementById('statAvgWeekend').textContent = formatCurrency(calculateAverage(weekendPrices)); document.getElementById('statMinRate').textContent = formatCurrency(minRate); document.getElementById('statMaxRate').textContent = formatCurrency(maxRate); document.getElementById('statAvgLow').textContent = formatCurrency(calculateAverage(seasonalPrices.Low)); document.getElementById('statAvgShoulder').textContent = formatCurrency(calculateAverage(seasonalPrices.Shoulder)); document.getElementById('statAvgHigh').textContent = formatCurrency(calculateAverage(seasonalPrices.High)); document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak)); document.getElementById('statPriceOverrideCount').textContent = priceOverrideCount.toString(); document.getElementById('statMinStayOverrideCount').textContent = minStayOverrideCount.toString(); document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0); document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue); }
 
     // --- Chart Function ---
-    // UPDATED generateAnnotations to constrain Y axis
+    // UPDATED generateAnnotations to use maxYValue
     function generateAnnotations(maxYValue) {
         const annotations = {};
         const colors = annotationColors;
 
-        // Add School Holidays first
+        // Add School Holidays
         schoolHolidayData.forEach((holiday, index) => {
-            const endDate = new Date(holiday.end + 'T00:00:00Z');
-            endDate.setUTCDate(endDate.getUTCDate() + 1);
-            const endDateStr = endDate.toISOString().split('T')[0];
-
-            annotations[`holiday-${index}`] = {
-                type: 'box',
-                xMin: holiday.start, xMax: endDateStr,
-                yMin: 0, // Start from bottom axis
-                yMax: maxYValue, // Go up to max price value
-                yScaleID: 'y', // Explicitly use the y-axis scale
-                backgroundColor: colors.Holiday,
-                borderColor: 'rgba(0,0,0,0)', borderWidth: 0,
-                drawTime: 'beforeDatasetsDraw'
-            };
+            const endDate = new Date(holiday.end + 'T00:00:00Z'); endDate.setUTCDate(endDate.getUTCDate() + 1); const endDateStr = endDate.toISOString().split('T')[0];
+            annotations[`holiday-${index}`] = { type: 'box', xMin: holiday.start, xMax: endDateStr, yMin: 0, yMax: maxYValue, yScaleID: 'y', backgroundColor: colors.Holiday, borderColor: 'rgba(0,0,0,0)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' };
         });
 
         // Add Events
@@ -281,17 +269,7 @@
                 if (event.date) { startStr = event.date; const endDate = new Date(event.date + 'T00:00:00Z'); endDate.setUTCDate(endDate.getUTCDate() + 1); endStr = endDate.toISOString().split('T')[0]; }
                 else if (event.dateRange) { startStr = event.dateRange[0]; const endDate = new Date(event.dateRange[1] + 'T00:00:00Z'); endDate.setUTCDate(endDate.getUTCDate() + 1); endStr = endDate.toISOString().split('T')[0]; }
                 else { return; }
-
-                annotations[`event-${impactLevel}-${index}`] = {
-                    type: 'box',
-                    xMin: startStr, xMax: endStr,
-                    yMin: 0, // Start from bottom axis
-                    yMax: maxYValue, // Go up to max price value
-                    yScaleID: 'y',
-                    backgroundColor: colors[event.impact],
-                    borderColor: 'rgba(0,0,0,0)', borderWidth: 0,
-                    drawTime: 'beforeDatasetsDraw'
-                };
+                annotations[`event-${impactLevel}-${index}`] = { type: 'box', xMin: startStr, xMax: endStr, yMin: 0, yMax: maxYValue, yScaleID: 'y', backgroundColor: colors[event.impact], borderColor: 'rgba(0,0,0,0)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' };
             });
         });
         return annotations;
@@ -302,8 +280,8 @@
          const ctx = document.getElementById('priceChart').getContext('2d');
          const labels = priceData.map(d => d.dateStr);
          const dataPoints = priceData.map(d => Math.round(d.price));
-         const currentInputs = getInputs(); // Get current inputs to find max price
-         const annotations = generateAnnotations(currentInputs.maxPrice); // Pass max price
+         const currentInputs = getInputs(); // Get current inputs
+         const annotations = generateAnnotations(currentInputs.maxPrice); // Pass max price to limit annotation height
 
          if (priceChart) {
              priceChart.data.labels = labels;
@@ -316,6 +294,12 @@
                  data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: '#007f5f', borderWidth: 1.5, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] },
                  options: {
                      responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
+                     // ADD layout padding
+                     layout: {
+                         padding: {
+                             bottom: 10 // Add padding below chart for labels
+                         }
+                     },
                      scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yyyy' } }, title: { display: true, text: 'Date (2025)' }, ticks: { autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)' }, ticks: { callback: function(value) { return '£' + value; } } } },
                      plugins: {
                          tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData){ label += `\n  Min Stay: ${dayData.minStay}`; if(dayData.notes){ const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note}`; }); } } return label; } } },
@@ -327,12 +311,7 @@
          }
      }
 
-     function renderChartKey() {
-         const keyList = document.getElementById('key-list');
-         keyList.innerHTML = '';
-         const keyItems = [ { label: 'School Holiday', color: annotationColors.Holiday }, { label: 'Low Impact Event', color: annotationColors.Low }, { label: 'Medium Impact Event', color: annotationColors.Medium }, { label: 'High Impact Event', color: annotationColors.High }, { label: 'Peak Impact Event', color: annotationColors.Peak } ];
-         keyItems.forEach(item => { const li = document.createElement('li'); const swatch = document.createElement('span'); swatch.className = 'key-color-swatch'; swatch.style.backgroundColor = item.color; li.appendChild(swatch); li.appendChild(document.createTextNode(item.label)); keyList.appendChild(li); });
-     }
+     function renderChartKey() { const keyList = document.getElementById('key-list'); keyList.innerHTML = ''; const keyItems = [ { label: 'School Holiday', color: annotationColors.Holiday }, { label: 'Low Impact Event', color: annotationColors.Low }, { label: 'Medium Impact Event', color: annotationColors.Medium }, { label: 'High Impact Event', color: annotationColors.High }, { label: 'Peak Impact Event', color: annotationColors.Peak } ]; keyItems.forEach(item => { const li = document.createElement('li'); const swatch = document.createElement('span'); swatch.className = 'key-color-swatch'; swatch.style.backgroundColor = item.color; li.appendChild(swatch); li.appendChild(document.createTextNode(item.label)); keyList.appendChild(li); }); }
 
     // --- Table Function ---
     function populateTable(priceData) { const tableBody = document.getElementById('pricingTableBody'); tableBody.innerHTML = ''; priceData.forEach(data => { const row = tableBody.insertRow(); row.classList.add(`day-${data.day}`); if (data.day === 5 || data.day === 6) row.classList.add('weekend'); if (isSchoolHoliday(data.dateStr)) row.classList.add('holiday'); if (getEventInfoForDate(data.dateStr)) row.classList.add('event'); if (data.isPriceOverridden || data.isMinStayOverridden) row.classList.add('override-row'); row.insertCell().textContent = dateFormatter.format(data.date); row.insertCell().textContent = dayFormatter.format(data.date); const minStayCell = row.insertCell(); minStayCell.textContent = data.minStay; minStayCell.classList.add('min-stay-cell'); minStayCell.dataset.date = data.dateStr; if (data.isMinStayOverridden) minStayCell.classList.add('min-stay-override'); const priceCell = row.insertCell(); priceCell.textContent = Math.round(data.price).toString(); priceCell.classList.add('price-cell'); priceCell.dataset.date = data.dateStr; if (data.isPriceOverridden) priceCell.classList.add('price-override'); row.insertCell().innerHTML = `<span class="notes">${data.notes || ''}</span>`; }); }
