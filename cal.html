@@ -16,6 +16,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; line-height: 1.5; }
         .container {
             display: grid;
+            /* Updated grid layout */
             grid-template-areas:
                 "controls controls" /* Controls full width at top */
                 "chart chart"      /* Chart full width below controls */
@@ -241,11 +242,6 @@
 </div>
 
 <script>
-    // --- All JavaScript from the previous version remains the same ---
-    // (Includes global vars, data definitions, helpers, calculations, stats,
-    // chart, table, event management, min stay management, export,
-    // price overrides, min stay overrides, debounce, input linking, init)
-
     // --- Global Variables ---
     let priceChart = null;
     let priceDataCache = [];
@@ -311,42 +307,20 @@
     function handleRevertMinStayOverride(event) { const button = event.target.closest('button'); const dateStr = button.dataset.date; if (minStayOverrides.hasOwnProperty(dateStr)) { delete minStayOverrides[dateStr]; updateAll(); } else { const cell = button.closest('td'); if(cell && cell.classList.contains('editing')){ const input = cell.querySelector('.min-stay-input'); const originalValue = input ? input.dataset.originalValue : cell.textContent; cell.innerHTML = originalValue; cell.classList.remove('editing'); } } event.stopPropagation(); }
 
     // --- Main Update Trigger ---
-    const debouncedUpdateAll = debounce(updateAll, 250); // Debounce updates from sliders/inputs
-    function updateAll() { // Instant update for direct actions
-        // console.log("Updating All..."); // Uncomment for debugging debounce
-        const inputs = getInputs();
-        const priceData = calculateAllPrices(inputs);
-        updateStatistics(priceData, inputs);
-        renderOrUpdateChart(priceData);
-        populateTable(priceData);
-    }
+    const debouncedUpdateAll = debounce(updateAll, 250);
+    function updateAll() { const inputs = getInputs(); const priceData = calculateAllPrices(inputs); updateStatistics(priceData, inputs); renderOrUpdateChart(priceData); populateTable(priceData); }
 
     // --- Input Linking ---
-    function linkSliderAndNumber(rangeInputId, numberInputId) {
-         const rangeInput = document.getElementById(rangeInputId); const numberInput = document.getElementById(numberInputId); if (!rangeInput || !numberInput) { console.warn(`Link failed: ${rangeInputId}, ${numberInputId}`); return; }
-         // Update number when range changes (use debounce)
-         rangeInput.addEventListener('input', () => { numberInput.value = rangeInput.value; debouncedUpdateAll(); });
-          // Update range when number changes (use debounce)
-         numberInput.addEventListener('input', () => { const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); let value = parseFloat(numberInput.value); if (isNaN(value)) return; if (value < min) value = min; if (value > max) value = max; rangeInput.value = value; if (parseFloat(numberInput.value) !== value) { numberInput.value = value; } debouncedUpdateAll(); });
-         // Use INSTANT update on 'change' (blur/enter) after validation
-         numberInput.addEventListener('change', () => { const step = parseFloat(numberInput.step) || 1; let value = parseFloat(numberInput.value); if (!isNaN(value)) { value = Math.round(value / step) * step; const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); if (value < min) value = min; if (value > max) value = max; const decimals = step < 1 ? (step.toString().split('.')[1] || '').length : 0; numberInput.value = value.toFixed(decimals); rangeInput.value = value; updateAll(); /* Instant update */ } });
-     }
+    function linkSliderAndNumber(rangeInputId, numberInputId) { const rangeInput = document.getElementById(rangeInputId); const numberInput = document.getElementById(numberInputId); if (!rangeInput || !numberInput) { console.warn(`Link failed: ${rangeInputId}, ${numberInputId}`); return; } rangeInput.addEventListener('input', () => { numberInput.value = rangeInput.value; debouncedUpdateAll(); }); numberInput.addEventListener('input', () => { const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); let value = parseFloat(numberInput.value); if (isNaN(value)) return; if (value < min) value = min; if (value > max) value = max; rangeInput.value = value; if (parseFloat(numberInput.value) !== value) { numberInput.value = value; } debouncedUpdateAll(); }); numberInput.addEventListener('change', () => { const step = parseFloat(numberInput.step) || 1; let value = parseFloat(numberInput.value); if (!isNaN(value)) { value = Math.round(value / step) * step; const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); if (value < min) value = min; if (value > max) value = max; const decimals = step < 1 ? (step.toString().split('.')[1] || '').length : 0; numberInput.value = value.toFixed(decimals); rangeInput.value = value; updateAll(); } }); }
 
     // --- Initialisation ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Link sliders & numbers
         linkSliderAndNumber('occupancyRateRange', 'occupancyRateNumber'); linkSliderAndNumber('weekendMultiplierRange', 'weekendMultiplierNumber'); linkSliderAndNumber('schoolHolidayMultiplierRange', 'schoolHolidayMultiplierNumber'); linkSliderAndNumber('lowSeasonMultiplierRange', 'lowSeasonMultiplierNumber'); linkSliderAndNumber('shoulderSeasonMultiplierRange', 'shoulderSeasonMultiplierNumber'); linkSliderAndNumber('highSeasonMultiplierRange', 'highSeasonMultiplierNumber'); linkSliderAndNumber('peakSeasonMultiplierRange', 'peakSeasonMultiplierNumber'); linkSliderAndNumber('eventLowImpactMultiplierRange', 'eventLowImpactMultiplierNumber'); linkSliderAndNumber('eventMediumImpactMultiplierRange', 'eventMediumImpactMultiplierNumber'); linkSliderAndNumber('eventHighImpactMultiplierRange', 'eventHighImpactMultiplierNumber'); linkSliderAndNumber('eventPeakImpactMultiplierRange', 'eventPeakImpactMultiplierNumber');
-        // Add debounced listeners for single number inputs
         document.getElementById('basePrice').addEventListener('input', debouncedUpdateAll); document.getElementById('maxPrice').addEventListener('input', debouncedUpdateAll); document.getElementById('defaultMinStay').addEventListener('input', debouncedUpdateAll);
-        // Initial renders
         renderEventList(); renderMinStayRules();
-        // Toggle date inputs
         toggleDateInputs('event'); toggleDateInputs('minStay');
-        // Table editing listeners
         const tableBody = document.getElementById('pricingTableBody'); if(tableBody) { tableBody.addEventListener('dblclick', handlePriceCellDoubleClick); tableBody.addEventListener('dblclick', handleMinStayCellDoubleClick); } else { console.error("Table body not found"); }
-        // Initial calculation
         updateAll();
-         // Set initial number inputs from sliders
         const rangeInputs = document.querySelectorAll('#controls input[type=range]'); rangeInputs.forEach(range => { const numberInputId = range.id.replace('Range', 'Number'); const numberInput = document.getElementById(numberInputId); if (numberInput) { numberInput.value = range.value; } });
     });
 
