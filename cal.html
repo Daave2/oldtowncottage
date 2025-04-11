@@ -16,11 +16,13 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; line-height: 1.5; }
         .container {
             display: grid;
+             /* --- UPDATED GRID LAYOUT --- */
             grid-template-areas:
-                "controls controls" /* Controls full width at top */
-                "chart chart"      /* Chart full width below controls */
+                "controls controls"
+                "chart chart"
                 "stats events"     /* Stats and Events side-by-side */
-                "minstay table";   /* Min Stay and Table side-by-side */
+                "minstay minstay"  /* Min Stay full width below */
+                "table table";     /* Table full width at bottom */
             grid-template-columns: 1fr 1fr; /* Maintain two columns */
             grid-gap: 20px;
             max-width: 1600px;
@@ -31,13 +33,16 @@
         #chart-container { grid-area: chart; }
         #statistics { grid-area: stats; background-color: #e9f5f1; }
         #event-management { grid-area: events; }
-        #min-stay-management { grid-area: minstay; }
-        #pricing-table-container { grid-area: table; }
+        #min-stay-management { grid-area: minstay; } /* Assign new area */
+        #pricing-table-container {
+            grid-area: table;
+            /* Removed max-height and overflow-y to allow full growth */
+        }
 
         /* General container styling */
         #controls, #statistics, #event-management, #min-stay-management, #chart-container, #pricing-table-container {
             background-color: #fff;
-            padding: 15px 20px; /* Slightly reduced vertical padding */
+            padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
@@ -56,15 +61,13 @@
         .input-pair input[type=number]::-webkit-outer-spin-button, .input-pair input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .control-group .description { font-size: 0.8em; color: #666; margin-top: 2px; }
          .control-group input#basePrice, .control-group input#maxPrice {
-             /* Adjust width slightly if needed when in 3-col grid */
-             width: 90%; /* Or specific px like 100px */
+             width: 90%;
              margin-bottom: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;
          }
          .control-group input#defaultMinStay {
               width: 90%;
               margin-bottom: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;
          }
-         /* Default width for occupancy number input */
          .control-group input#occupancyRateNumber { width: 70px; }
 
         /* Grid layout for groups */
@@ -72,11 +75,11 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px 20px;
-            align-items: end; /* Align items to the bottom for better label alignment */
+            align-items: end;
             padding-top: 5px;
         }
         .control-grid-3col .control-group {
-             margin-bottom: 0; /* Remove bottom margin */
+             margin-bottom: 0;
         }
 
         /* --- Chart Container Styling --- */
@@ -107,7 +110,7 @@
         .date-range-inputs label { margin-top: 5px; }
 
         /* --- Table Styling --- */
-        #pricing-table-container { max-height: none; }
+        /* #pricing-table-container { max-height: none; } */ /* Removed to allow full growth */
         #pricingTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
         #pricingTable th, #pricingTable td { border: 1px solid #ddd; padding: 6px; text-align: left; position: relative; }
         #pricingTable th { background-color: #e9f5f1; color: #005f73; position: sticky; top: 0; z-index: 1;}
@@ -148,7 +151,16 @@
              #statistics li span { text-align: left; margin-left: 10px; }
          }
         @media (max-width: 900px) {
-            .container { grid-template-areas: "controls" "chart" "stats" "events" "minstay" "table"; grid-template-columns: 1fr; }
+            .container {
+                 grid-template-areas: /* Stack everything */
+                    "controls"
+                    "chart"
+                    "stats"
+                    "events"
+                    "minstay"
+                    "table";
+                 grid-template-columns: 1fr; /* Single column */
+            }
             #chart-container { height: 300px; }
             .table-actions { flex-direction: column; gap: 10px; align-items: stretch; }
             .table-actions button { width: 100%; }
@@ -241,11 +253,6 @@
 </div>
 
 <script>
-    // --- All JavaScript from the previous version remains the same ---
-    // (Includes global vars, data definitions, helpers, calculations, stats,
-    // chart, table, event management, min stay management, export,
-    // price overrides, min stay overrides, debounce, input linking, init)
-
     // --- Global Variables ---
     let priceChart = null;
     let priceDataCache = [];
