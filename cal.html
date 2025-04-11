@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Captain's Cottage Dynamic Pricing Tool (2025)</title>
-    <!-- Include Chart.js library -->
+
+    <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- ADD THIS LINE for Date Adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; }
         .container { display: grid; grid-template-areas: "controls stats" "chart chart" "table table"; grid-template-columns: 1fr 1fr; grid-gap: 20px; max-width: 1400px; margin: auto; }
@@ -229,7 +234,7 @@
         return `£${Math.round(value).toLocaleString()}`;
     }
 
-    function getEventInfoForDate(dateStr) { /* ... same as previous ... */
+    function getEventInfoForDate(dateStr) {
          let highestImpact = null;
          let impactLevelValue = 0; // 0:None, 1:Low, 2:Medium, 3:High, 4:Peak
          for (const event of eventData) {
@@ -257,22 +262,19 @@
          }
          return highestImpact;
     }
-    function isSchoolHoliday(dateStr) { /* ... same as previous ... */
+    function isSchoolHoliday(dateStr) {
         const currentDate = new Date(dateStr + 'T00:00:00Z');
         for (const holiday of schoolHolidayData) {
             const start = new Date(holiday.start + 'T00:00:00Z');
             const end = new Date(holiday.end + 'T00:00:00Z');
             end.setUTCDate(end.getUTCDate() + 1); // Make end date inclusive
             if (currentDate >= start && currentDate < end) {
-                // Exclude peak summer (July/Aug) from this specific premium logic if needed
-                // if (currentDate.getUTCMonth() !== 6 && currentDate.getUTCMonth() !== 7) {
-                   return holiday.name;
-                // }
+               return holiday.name;
             }
         }
         return null;
     }
-    function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') { /* ... modified ... */
+    function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') {
         const slider = document.getElementById(sliderId);
         const outputSpan = document.getElementById(sliderId + 'Value');
         outputSpan.textContent = parseFloat(slider.value).toFixed(decimalPlaces) + suffix;
@@ -311,62 +313,65 @@
         let holidayMultiplier = 1.0;
         let eventMultiplier = 1.0;
         let seasonName = "Shoulder"; // Default
+        let baseSeasonNote = "";
 
-        // 1. Apply Seasonal Factor
+        // 1. Determine Base Seasonal Factor & Note
         if (seasonMonths.Low.includes(month)) {
             seasonMultiplier = inputs.lowSeasonMultiplier;
             seasonName = "Low";
-            notes.push("Low Season");
+            baseSeasonNote = "Low Season";
         } else if (seasonMonths.Shoulder.includes(month)) {
             seasonMultiplier = inputs.shoulderSeasonMultiplier;
             seasonName = "Shoulder";
-            notes.push("Shoulder Season");
-        } else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15) ) {
+            baseSeasonNote = "Shoulder Season";
+        } else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15) ) { // June + early July
             seasonMultiplier = inputs.highSeasonMultiplier;
              seasonName = "High";
-            notes.push("High Season");
-        } else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) {
+            baseSeasonNote = "High Season";
+        } else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) { // Late July + August
             seasonMultiplier = inputs.peakSeasonMultiplier;
              seasonName = "Peak";
-            notes.push("Peak Season");
+            baseSeasonNote = "Peak Season";
         }
+        notes.push(baseSeasonNote); // Start with the base season
 
         // 2. Apply Weekend Factor (Fri/Sat)
         if (dayOfWeek === 5 || dayOfWeek === 6) {
             weekendMultiplier = inputs.weekendMultiplier;
-            if (!notes.includes("Weekend")) notes.push("Weekend");
+            if (weekendMultiplier !== 1.0) notes.push("Weekend"); // Only add if different from 1.0
         }
 
-         // 3. Check for School Holidays
+         // 3. Check for School Holidays & Apply Stacking Multiplier
          const holidayName = isSchoolHoliday(dateStr);
          if (holidayName) {
-             // Stack holiday multiplier on top of seasonal/weekend
              holidayMultiplier = inputs.schoolHolidayMultiplier;
-             if (!notes.includes(holidayName)) notes.push(holidayName);
+             if (holidayMultiplier !== 1.0) notes.push(holidayName); // Only add if different from 1.0
          }
 
-        // 4. Check for Specific Events (find highest impact)
+        // 4. Check for Specific Events & Apply Stacking Multiplier (find highest impact)
         const eventInfo = getEventInfoForDate(dateStr);
          if (eventInfo) {
-            const eventPremiumMult = inputs.eventMultipliers[eventInfo.impact];
-             // Stack event multiplier
-             eventMultiplier = eventPremiumMult;
-             if (!notes.includes(eventInfo.name)) notes.push(eventInfo.name);
+            eventMultiplier = inputs.eventMultipliers[eventInfo.impact];
+             if (eventMultiplier !== 1.0) notes.push(eventInfo.name); // Only add if different from 1.0
          }
 
          // Calculate final price: Base * Season * Weekend * Holiday * Event
          currentPrice = inputs.basePrice * seasonMultiplier * weekendMultiplier * holidayMultiplier * eventMultiplier;
 
-        // Clean up notes
-         if (notes.length > 1 && notes.includes(notes[0]) && (eventInfo || (holidayName && holidayMultiplier > 1))) {
-             notes.shift(); // Remove basic season note if more specific notes exist
+        // Clean up notes: Remove base season note if more specific factors applied
+         if (notes.length > 1 && notes[0] === baseSeasonNote && (weekendMultiplier !== 1.0 || holidayMultiplier !== 1.0 || eventMultiplier !== 1.0)) {
+             notes.shift();
+         }
+         // Ensure base season is shown if no other factors applied significantly
+         if (notes.length === 0 && baseSeasonNote) {
+             notes.push(baseSeasonNote);
          }
 
 
         return {
             date: date,
             dateStr: dateStr,
-            day: date.getUTCDay(), // Keep day index for stats
+            day: date.getUTCDay(),
             season: seasonName,
             price: currentPrice,
             notes: notes.join(', ')
@@ -389,11 +394,11 @@
         if (!priceData || priceData.length === 0) return;
 
         const prices = priceData.map(d => d.price);
-        const totalRevenue = prices.reduce((sum, price) => sum + price, 0);
-        const avgRate = totalRevenue / prices.length;
+        const totalPotentialRevenue = prices.reduce((sum, price) => sum + price, 0);
+        const avgRate = totalPotentialRevenue / prices.length;
         const minRate = Math.min(...prices);
         const maxRate = Math.max(...prices);
-        const estAnnualRevenue = totalRevenue * inputs.occupancyRate;
+        const estAnnualRevenue = totalPotentialRevenue * inputs.occupancyRate;
 
         const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] };
         priceData.forEach(d => {
@@ -418,28 +423,63 @@
     // --- Chart Function ---
     function renderOrUpdateChart(priceData) {
         const ctx = document.getElementById('priceChart').getContext('2d');
-        const labels = priceData.map(d => d.dateStr); // Use YYYY-MM-DD for labels
+        const labels = priceData.map(d => d.dateStr);
         const dataPoints = priceData.map(d => Math.round(d.price));
+
+        // Define a mapping from notes to point background colors
+        const noteColorMap = {
+            'Low Season': 'rgba(150, 150, 150, 0.6)', // Greyish for low season emphasis if needed
+            'Easter Bank Holiday Weekend': 'rgba(255, 215, 0, 0.8)', // Gold
+            'OAT Concert': 'rgba(255, 100, 100, 0.8)', // Reddish for concerts
+            'Armed Forces Day Weekend': 'rgba(0, 0, 139, 0.8)', // Dark Blue
+            'August Bank Holiday Weekend': 'rgba(255, 0, 0, 1)', // Bright Red for peak event
+            'Default': 'rgba(0, 127, 95, 0.1)' // Default background color
+        };
+
+        // Create point background colors based on notes
+        const pointBackgroundColors = priceData.map(d => {
+            let color = noteColorMap['Default']; // Start with default
+             if (!d.notes) return color; // Handle cases with no notes
+
+             // Prioritize event colors
+             if (d.notes.includes('August Bank Holiday Weekend')) return noteColorMap['August Bank Holiday Weekend'];
+             if (d.notes.includes('OAT Concert')) return noteColorMap['OAT Concert'];
+             if (d.notes.includes('Armed Forces Day Weekend')) return noteColorMap['Armed Forces Day Weekend'];
+             if (d.notes.includes('Easter Bank Holiday Weekend')) return noteColorMap['Easter Bank Holiday Weekend'];
+             // Add more specific event checks if desired
+
+             // If no major event, maybe highlight low season start/end points? (Optional)
+            // if (d.notes.includes('Low Season') && ...) return noteColorMap['Low Season'];
+
+            return color;
+        });
+
 
         if (priceChart) {
             // Update existing chart
             priceChart.data.labels = labels;
             priceChart.data.datasets[0].data = dataPoints;
+            // Update point colors if needed (optional, can impact performance slightly)
+            // priceChart.data.datasets[0].backgroundColor = pointBackgroundColors;
+            // priceChart.data.datasets[0].borderColor = pointBackgroundColors.map(c => c.replace('0.1', '1').replace('0.6','1').replace('0.8','1')); // Make border opaque version of background
             priceChart.update();
         } else {
             // Create new chart
             priceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels, // X-axis labels (dates)
                     datasets: [{
                         label: 'Nightly Price (£)',
-                        data: dataPoints,
-                        borderColor: '#007f5f',
-                        backgroundColor: 'rgba(0, 127, 95, 0.1)',
+                        data: dataPoints, // Y-axis data (prices)
+                        borderColor: '#007f5f', // Line color
                         borderWidth: 1.5,
-                        pointRadius: 0, // Hide points for clarity
-                        tension: 0.1 // Slight curve
+                        // backgroundColor: pointBackgroundColors, // Use dynamic colors for points (optional)
+                        backgroundColor: 'rgba(0, 127, 95, 0.1)', // Fill color under line
+                        fill: true, // Fill area under the line
+                        pointRadius: 2, // Show small points for events/emphasis
+                        pointHoverRadius: 5, // Enlarge point on hover
+                        tension: 0.1 // Slight curve to the line
                     }]
                 },
                 options: {
@@ -447,19 +487,19 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: {
-                            type: 'time', // Use time scale if dates are parsed correctly by Chart.js adapter
+                            type: 'time',
                             time: {
                                 unit: 'month',
-                                tooltipFormat: 'dd MMM yyyy', // Tooltip format
+                                tooltipFormat: 'dd MMM yyyy',
                                 displayFormats: {
-                                    month: 'MMM yyyy' // Display format on axis
+                                    month: 'MMM yyyy'
                                 }
                             },
-                            title: { display: true, text: 'Date' },
+                            title: { display: true, text: 'Date (2025)' },
                             ticks: { autoSkip: true, maxTicksLimit: 12 }
                         },
                         y: {
-                            beginAtZero: false, // Don't always start at 0
+                            beginAtZero: false,
                             title: { display: true, text: 'Price (£)' },
                             ticks: {
                                 callback: function(value) { return '£' + value; }
@@ -468,47 +508,35 @@
                     },
                     plugins: {
                         tooltip: {
+                             mode: 'index', // Show tooltip for all datasets at that index
+                             intersect: false, // Show tooltip even when not directly hovering over point
                              callbacks: {
                                  label: function(context) {
                                      let label = context.dataset.label || '';
                                      if (label) { label += ': '; }
                                      label += formatCurrency(context.parsed.y);
-                                     // Add notes to tooltip (find corresponding day data)
+                                     // Add notes to tooltip
                                      const dataIndex = context.dataIndex;
                                      const dayData = priceData[dataIndex];
                                      if(dayData && dayData.notes) {
-                                         label += ` (${dayData.notes})`;
+                                          // Split notes for better readability in tooltip if long
+                                          const notesArray = dayData.notes.split(', ');
+                                          notesArray.forEach(note => { label += `\n  - ${note}`; });
                                      }
                                      return label;
                                  }
                              }
                         }
-                    }
+                    },
+                    interaction: { // Optimize hover interactions
+                       mode: 'nearest',
+                       axis: 'x',
+                       intersect: false
+                   }
                 }
             });
         }
     }
-     // Requires including Chart.js date adapter (e.g., chartjs-adapter-date-fns) for time scale
-     // Simplified X scale for now if adapter isn't included:
-      /*
-       options: { ...
-         scales: {
-             x: {
-                  title: { display: true, text: 'Date (Day of Year)' },
-                  ticks: {
-                     callback: function(value, index, ticks) {
-                         // Show roughly monthly labels
-                         return index % 30 === 0 ? labels[index] : '';
-                     },
-                      autoSkip: false, // Disable autoSkip if using manual callback
-                      maxRotation: 0,
-                      minRotation: 0
-                  }
-              }, ...
-         }
-       }
-      */
-
 
     // --- Table Function ---
      function populateTable(priceData) {
@@ -531,7 +559,7 @@
          const inputs = getInputs();
          const priceData = calculateAllPrices(inputs);
          updateStatistics(priceData, inputs);
-         renderOrUpdateChart(priceData); // Pass priceData which includes dates/notes
+         renderOrUpdateChart(priceData);
          populateTable(priceData);
      }
 
