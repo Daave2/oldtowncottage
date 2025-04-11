@@ -11,7 +11,7 @@
     <!-- Chart.js Date Adapter -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
-    <!-- NEW: Chart.js Annotation Plugin -->
+    <!-- Chart.js Annotation Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
 
@@ -31,7 +31,7 @@
             margin: auto;
         }
         #controls { grid-area: controls; }
-        #chart-container { grid-area: chart; }
+        #chart-container { grid-area: chart; position: relative; /* Needed for absolute key */ }
         #statistics { grid-area: stats; background-color: #e9f5f1; }
         #event-management { grid-area: events; }
         #min-stay-management { grid-area: minstay; }
@@ -64,8 +64,30 @@
         .control-grid-3col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px 20px; align-items: end; padding-top: 5px; }
         .control-grid-3col .control-group { margin-bottom: 0; }
 
-        /* --- Chart Container Styling --- */
-        #chart-container { height: 450px; position: relative; /* Needed for annotation labels if used */ }
+        /* --- Chart Container & Key Styling --- */
+        #chart-container { height: 450px; }
+        #chart-key {
+            position: absolute;
+            top: 45px; /* Adjust position below title */
+            right: 25px;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 0.8em;
+            z-index: 10; /* Ensure key is above chart annotations */
+        }
+        #chart-key h4 { margin: 0 0 5px 0; padding-bottom: 3px; border-bottom: 1px solid #eee; font-size: 1.1em; color: #333;}
+        #chart-key ul { list-style: none; margin: 0; padding: 0; }
+        #chart-key li { margin-bottom: 4px; display: flex; align-items: center; }
+        .key-color-swatch {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            border: 1px solid rgba(0,0,0,0.2);
+            vertical-align: middle;
+        }
 
         /* --- Statistics Styling --- */
         #statistics ul { list-style: none; padding: 0; margin: 0; }
@@ -92,6 +114,7 @@
         .date-range-inputs label { margin-top: 5px; }
 
         /* --- Table Styling --- */
+        #pricing-table-container { max-height: none; }
         #pricingTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
         #pricingTable th, #pricingTable td { border: 1px solid #ddd; padding: 6px; text-align: left; position: relative; }
         #pricingTable th { background-color: #e9f5f1; color: #005f73; position: sticky; top: 0; z-index: 1;}
@@ -135,6 +158,7 @@
             .table-actions { flex-direction: column; gap: 10px; align-items: stretch; }
             .table-actions button { width: 100%; }
             .clear-btn-group { flex-direction: column; width: 100%; }
+            #chart-key { top: 40px; right: 10px; font-size: 0.75em;} /* Adjust key for smaller screens */
         }
     </style>
 </head>
@@ -152,7 +176,15 @@
     </div>
 
      <div id="chart-container">
-          <h2>Annual Price Fluctuation</h2> <canvas id="priceChart"></canvas>
+          <h2>Annual Price Fluctuation</h2>
+          <canvas id="priceChart"></canvas>
+          <!-- NEW: Chart Key -->
+          <div id="chart-key">
+              <h4>Annotation Key</h4>
+              <ul id="key-list">
+                  <!-- Key items added by JS -->
+              </ul>
+          </div>
       </div>
 
     <div id="statistics">
@@ -188,6 +220,16 @@
     const seasonMonths = { Low: [0, 1, 10], Shoulder: [2, 3, 4, 8, 9], High: [5], Peak: [6, 7] };
     const schoolHolidayData = [ { name: "Feb Half Term", start: "2025-02-15", end: "2025-02-23" }, { name: "Easter Holidays", start: "2025-04-04", end: "2025-04-21" }, { name: "May Half Term", start: "2025-05-24", end: "2025-06-01" }, { name: "Oct Half Term", start: "2025-10-24", end: "2025-11-02" }, { name: "Christmas Break", start: "2025-12-20", end: "2026-01-04" }];
 
+    // --- NEW: Annotation Colors ---
+    const annotationColors = {
+        Holiday: 'rgba(255, 230, 153, 0.3)', // Light Yellow
+        Low: 'rgba(173, 216, 230, 0.3)',     // Light Blue
+        Medium: 'rgba(255, 160, 122, 0.3)', // Light Salmon
+        High: 'rgba(255, 182, 193, 0.3)',   // Light Pink
+        Peak: 'rgba(255, 100, 100, 0.3)'    // Light Red
+    };
+
+
     // --- Helper Functions ---
     const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' });
     const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -210,40 +252,26 @@
     // NEW: Function to generate annotations
     function generateAnnotations() {
         const annotations = {};
-        const colors = {
-            Holiday: 'rgba(255, 230, 153, 0.3)', // Light Yellow
-            Low: 'rgba(173, 216, 230, 0.3)',     // Light Blue
-            Medium: 'rgba(255, 160, 122, 0.3)', // Light Salmon
-            High: 'rgba(255, 105, 180, 0.3)',   // Light Pink/HotPink
-            Peak: 'rgba(255, 0, 0, 0.25)'        // Lighter Red
-        };
+        const colors = annotationColors; // Use the global colors object
 
-        // Add School Holidays
+        // Add School Holidays first (drawn below events)
         schoolHolidayData.forEach((holiday, index) => {
-            // Adjust end date for annotation plugin (needs day *after* last day)
             const endDate = new Date(holiday.end + 'T00:00:00Z');
-            endDate.setUTCDate(endDate.getUTCDate() + 1);
+            endDate.setUTCDate(endDate.getUTCDate() + 1); // Make end date exclusive for annotation
             const endDateStr = endDate.toISOString().split('T')[0];
 
             annotations[`holiday-${index}`] = {
                 type: 'box',
-                xScaleID: 'x',
-                yScaleID: 'y',
                 xMin: holiday.start,
                 xMax: endDateStr,
                 backgroundColor: colors.Holiday,
-                borderColor: 'rgba(255, 215, 0, 0.1)',
-                borderWidth: 1,
-                drawTime: 'beforeDatasetsDraw',
-                label: {
-                    // enabled: true, // Optional: uncomment to show labels
-                    // content: holiday.name,
-                    // position: 'start'
-                }
+                borderColor: 'rgba(0,0,0,0)', // No border for cleaner look
+                borderWidth: 0,
+                drawTime: 'beforeDatasetsDraw' // Draw behind data lines
             };
         });
 
-        // Add Events (higher impact events draw later, potentially overlapping)
+        // Add Events (higher impact events might slightly overlap, drawn on top of lower impact)
         ['Low', 'Medium', 'High', 'Peak'].forEach(impactLevel => {
             eventData.forEach((event, index) => {
                 if (event.impact !== impactLevel) return;
@@ -260,29 +288,20 @@
                     endDate.setUTCDate(endDate.getUTCDate() + 1);
                     endStr = endDate.toISOString().split('T')[0];
                 } else {
-                    return; // Skip if no date info
+                    return;
                 }
 
                 annotations[`event-${impactLevel}-${index}`] = {
                     type: 'box',
-                    xScaleID: 'x',
-                    yScaleID: 'y',
                     xMin: startStr,
                     xMax: endStr,
-                    backgroundColor: colors[event.impact],
-                    borderColor: 'rgba(0,0,0,0.05)',
-                    borderWidth: 1,
-                    drawTime: 'beforeDatasetsDraw',
-                     label: {
-                       // enabled: event.impact === 'Peak' || event.impact === 'High', // Only label High/Peak?
-                       // content: event.name.substring(0, 15), // Shorten name
-                       // position: 'start',
-                       // font: { size: 9 }
-                    }
+                    backgroundColor: colors[event.impact], // Get color based on impact
+                    borderColor: 'rgba(0,0,0,0)',
+                    borderWidth: 0,
+                    drawTime: 'beforeDatasetsDraw'
                 };
             });
         });
-
         return annotations;
     }
 
@@ -296,8 +315,7 @@
          if (priceChart) {
              priceChart.data.labels = labels;
              priceChart.data.datasets[0].data = dataPoints;
-             // Update annotations - requires replacing the whole options object or specific plugin options
-             priceChart.options.plugins.annotation.annotations = annotations;
+             priceChart.options.plugins.annotation.annotations = annotations; // Update annotations
              priceChart.update('none');
          } else {
              priceChart = new Chart(ctx, {
@@ -309,13 +327,38 @@
                      plugins: {
                          tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData){ label += `\n  Min Stay: ${dayData.minStay}`; if(dayData.notes){ const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note}`; }); } } return label; } } },
                          annotation: { // Configure annotation plugin
-                             annotations: annotations
+                             annotations: annotations,
+                             drawTime: 'beforeDatasetsDraw' // Ensure annotations are behind the line
                          }
                      },
                      interaction: { mode: 'nearest', axis: 'x', intersect: false }
                  }
              });
          }
+     }
+
+     // NEW: Render Chart Key
+     function renderChartKey() {
+         const keyList = document.getElementById('key-list');
+         keyList.innerHTML = ''; // Clear existing keys
+
+         const keyItems = [
+             { label: 'School Holiday', color: annotationColors.Holiday },
+             { label: 'Low Impact Event', color: annotationColors.Low },
+             { label: 'Medium Impact Event', color: annotationColors.Medium },
+             { label: 'High Impact Event', color: annotationColors.High },
+             { label: 'Peak Impact Event', color: annotationColors.Peak }
+         ];
+
+         keyItems.forEach(item => {
+             const li = document.createElement('li');
+             const swatch = document.createElement('span');
+             swatch.className = 'key-color-swatch';
+             swatch.style.backgroundColor = item.color;
+             li.appendChild(swatch);
+             li.appendChild(document.createTextNode(item.label));
+             keyList.appendChild(li);
+         });
      }
 
     // --- Table Function ---
@@ -352,42 +395,20 @@
     function handleRevertMinStayOverride(event) { const button = event.target.closest('button'); const dateStr = button.dataset.date; if (minStayOverrides.hasOwnProperty(dateStr)) { delete minStayOverrides[dateStr]; updateAll(); } else { const cell = button.closest('td'); if(cell && cell.classList.contains('editing')){ const input = cell.querySelector('.min-stay-input'); const originalValue = input ? input.dataset.originalValue : cell.textContent; cell.innerHTML = originalValue; cell.classList.remove('editing'); } } event.stopPropagation(); }
 
     // --- Main Update Trigger ---
-    const debouncedUpdateAll = debounce(updateAll, 250); // Debounce updates from sliders/inputs
-    function updateAll() { // Instant update for direct actions
-        // console.log("Updating All..."); // Uncomment for debugging debounce
-        const inputs = getInputs();
-        const priceData = calculateAllPrices(inputs);
-        updateStatistics(priceData, inputs);
-        renderOrUpdateChart(priceData);
-        populateTable(priceData);
-    }
+    const debouncedUpdateAll = debounce(updateAll, 250);
+    function updateAll() { const inputs = getInputs(); const priceData = calculateAllPrices(inputs); updateStatistics(priceData, inputs); renderOrUpdateChart(priceData); populateTable(priceData); }
 
     // --- Input Linking ---
-    function linkSliderAndNumber(rangeInputId, numberInputId) {
-         const rangeInput = document.getElementById(rangeInputId); const numberInput = document.getElementById(numberInputId); if (!rangeInput || !numberInput) { console.warn(`Link failed: ${rangeInputId}, ${numberInputId}`); return; }
-         // Update number when range changes (use debounce)
-         rangeInput.addEventListener('input', () => { numberInput.value = rangeInput.value; debouncedUpdateAll(); });
-          // Update range when number changes (use debounce)
-         numberInput.addEventListener('input', () => { const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); let value = parseFloat(numberInput.value); if (isNaN(value)) return; if (value < min) value = min; if (value > max) value = max; rangeInput.value = value; if (parseFloat(numberInput.value) !== value) { numberInput.value = value; } debouncedUpdateAll(); });
-         // Use INSTANT update on 'change' (blur/enter) after validation
-         numberInput.addEventListener('change', () => { const step = parseFloat(numberInput.step) || 1; let value = parseFloat(numberInput.value); if (!isNaN(value)) { value = Math.round(value / step) * step; const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); if (value < min) value = min; if (value > max) value = max; const decimals = step < 1 ? (step.toString().split('.')[1] || '').length : 0; numberInput.value = value.toFixed(decimals); rangeInput.value = value; updateAll(); /* Instant update */ } });
-     }
+    function linkSliderAndNumber(rangeInputId, numberInputId) { const rangeInput = document.getElementById(rangeInputId); const numberInput = document.getElementById(numberInputId); if (!rangeInput || !numberInput) { console.warn(`Link failed: ${rangeInputId}, ${numberInputId}`); return; } rangeInput.addEventListener('input', () => { numberInput.value = rangeInput.value; debouncedUpdateAll(); }); numberInput.addEventListener('input', () => { const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); let value = parseFloat(numberInput.value); if (isNaN(value)) return; if (value < min) value = min; if (value > max) value = max; rangeInput.value = value; if (parseFloat(numberInput.value) !== value) { numberInput.value = value; } debouncedUpdateAll(); }); numberInput.addEventListener('change', () => { const step = parseFloat(numberInput.step) || 1; let value = parseFloat(numberInput.value); if (!isNaN(value)) { value = Math.round(value / step) * step; const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); if (value < min) value = min; if (value > max) value = max; const decimals = step < 1 ? (step.toString().split('.')[1] || '').length : 0; numberInput.value = value.toFixed(decimals); rangeInput.value = value; updateAll(); } }); }
 
     // --- Initialisation ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Link sliders & numbers
         linkSliderAndNumber('occupancyRateRange', 'occupancyRateNumber'); linkSliderAndNumber('weekendMultiplierRange', 'weekendMultiplierNumber'); linkSliderAndNumber('schoolHolidayMultiplierRange', 'schoolHolidayMultiplierNumber'); linkSliderAndNumber('lowSeasonMultiplierRange', 'lowSeasonMultiplierNumber'); linkSliderAndNumber('shoulderSeasonMultiplierRange', 'shoulderSeasonMultiplierNumber'); linkSliderAndNumber('highSeasonMultiplierRange', 'highSeasonMultiplierNumber'); linkSliderAndNumber('peakSeasonMultiplierRange', 'peakSeasonMultiplierNumber'); linkSliderAndNumber('eventLowImpactMultiplierRange', 'eventLowImpactMultiplierNumber'); linkSliderAndNumber('eventMediumImpactMultiplierRange', 'eventMediumImpactMultiplierNumber'); linkSliderAndNumber('eventHighImpactMultiplierRange', 'eventHighImpactMultiplierNumber'); linkSliderAndNumber('eventPeakImpactMultiplierRange', 'eventPeakImpactMultiplierNumber');
-        // Add debounced listeners for single number inputs
         document.getElementById('basePrice').addEventListener('input', debouncedUpdateAll); document.getElementById('maxPrice').addEventListener('input', debouncedUpdateAll); document.getElementById('defaultMinStay').addEventListener('input', debouncedUpdateAll);
-        // Initial renders
-        renderEventList(); renderMinStayRules();
-        // Toggle date inputs
+        renderEventList(); renderMinStayRules(); renderChartKey(); // Render Key on load
         toggleDateInputs('event'); toggleDateInputs('minStay');
-        // Table editing listeners
         const tableBody = document.getElementById('pricingTableBody'); if(tableBody) { tableBody.addEventListener('dblclick', handlePriceCellDoubleClick); tableBody.addEventListener('dblclick', handleMinStayCellDoubleClick); } else { console.error("Table body not found"); }
-        // Initial calculation
         updateAll();
-         // Set initial number inputs from sliders
         const rangeInputs = document.querySelectorAll('#controls input[type=range]'); rangeInputs.forEach(range => { const numberInputId = range.id.replace('Range', 'Number'); const numberInput = document.getElementById(numberInputId); if (numberInput) { numberInput.value = range.value; } });
     });
 
