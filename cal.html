@@ -12,73 +12,56 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; }
-        .container {
-            display: grid;
-            /* Updated grid layout */
-            grid-template-areas:
-                "controls stats"
-                "events events" /* Added events area */
-                "chart chart"
-                "table table";
-            grid-template-columns: 1fr 1fr;
-            grid-gap: 20px;
-            max-width: 1400px;
-            margin: auto;
-        }
-        #controls { grid-area: controls; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #statistics { grid-area: stats; background-color: #e9f5f1; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        /* Event Management Styling */
-        #event-management { grid-area: events; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #event-list { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 4px; }
-        #event-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px dashed #eee; font-size: 0.9em; flex-wrap: wrap; gap: 10px;}
-        #event-list li span { flex-grow: 1; min-width: 200px; }
-        #event-list li .event-controls { display: flex; align-items: center; gap: 8px; }
-        #event-list li select { padding: 3px; font-size: 0.85em; border-radius: 3px; border: 1px solid #ccc; }
-        #event-list li button { padding: 3px 8px; font-size: 0.85em; cursor: pointer; background-color: #e63946; color: white; border: none; border-radius: 3px; }
-        #event-list li button:hover { background-color: #d62828; }
-        #add-event-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; border-top: 2px solid #eee; padding-top: 15px; }
-        #add-event-form .form-group { display: flex; flex-direction: column; }
-        #add-event-form label { font-weight: 600; margin-bottom: 3px; font-size: 0.9em; color: #005f73;}
-        #add-event-form input[type=text], #add-event-form input[type=date], #add-event-form select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
-        #add-event-form button { grid-column: 1 / -1; /* Span full width */ padding: 8px 15px; background-color: #007f5f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
-        #add-event-form button:hover { background-color: #006d50; }
-        #date-range-inputs { display: none; } /* Initially hidden */
-        #date-range-inputs label { margin-top: 5px; }
-
-        #chart-container { grid-area: chart; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 400px; /* Adjust as needed */ }
-        #pricing-table-container { grid-area: table; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto; }
-        #exportCsvButton { display: block; margin: 15px auto 5px auto; padding: 10px 20px; background-color: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
-        #exportCsvButton:hover { background-color: #004c5a; }
-
-
-        #controls h2, #statistics h2, #event-management h2, #chart-container h2, #pricing-table-container h2 { margin-top: 0; color: #005f73; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; }
-        .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .control-group { display: flex; flex-direction: column; }
-        .control-group label { font-weight: 600; margin-bottom: 5px; font-size: 0.9em; color: #005f73; }
-        .control-group input[type=number], .control-group input[type=range] { width: 95%; margin-bottom: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
-        .control-group input[type=range] { padding: 0; height: 5px; cursor: pointer; }
-        .control-group span { font-size: 0.85em; color: #555; display: inline-block; min-width: 40px; text-align: right; margin-left: 5px; font-weight: bold; }
-        .value-display { display: flex; align-items: center; }
-
-        #statistics ul { list-style: none; padding: 0; }
-        #statistics li { margin-bottom: 10px; font-size: 0.95em; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
-        #statistics li strong { color: #007f5f; min-width: 150px; display: inline-block; }
-
-        #pricingTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-        #pricingTable th, #pricingTable td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        #pricingTable th { background-color: #e9f5f1; color: #005f73; position: sticky; top: 0; z-index: 1;}
-        #pricingTable tbody tr:nth-child(odd) { background-color: #f8f8f8; }
-        .notes { font-style: italic; color: #333; font-size: 0.9em; white-space: normal; max-width: 300px;}
-
-        /* Responsive adjustments */
-        @media (max-width: 900px) {
-            .container {
-                grid-template-areas: "controls" "stats" "events" "chart" "table"; /* Stack all areas */
-                grid-template-columns: 1fr;
-            }
-            #chart-container { height: 300px; }
-        }
+        /* --- Same CSS as before --- */
+         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; }
+         .container { display: grid; grid-template-areas: "controls stats" "events events" "chart chart" "table table"; grid-template-columns: 1fr 1fr; grid-gap: 20px; max-width: 1400px; margin: auto; }
+         #controls, #statistics, #event-management, #chart-container, #pricing-table-container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+         #controls { grid-area: controls; }
+         #statistics { grid-area: stats; background-color: #e9f5f1; }
+         #event-management { grid-area: events; }
+         #chart-container { grid-area: chart; height: 400px; }
+         #pricing-table-container { grid-area: table; max-height: 500px; overflow-y: auto; }
+         h2 { margin-top: 0; color: #005f73; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; }
+         .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+         .control-group { display: flex; flex-direction: column; }
+         .control-group label { font-weight: 600; margin-bottom: 5px; font-size: 0.9em; color: #005f73; }
+         .control-group input[type=number], .control-group input[type=range] { width: 95%; margin-bottom: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
+         .control-group input[type=range] { padding: 0; height: 5px; cursor: pointer; }
+         .control-group span { font-size: 0.85em; color: #555; display: inline-block; min-width: 40px; text-align: right; margin-left: 5px; font-weight: bold; }
+         .value-display { display: flex; align-items: center; }
+         #statistics ul { list-style: none; padding: 0; }
+         #statistics li { margin-bottom: 10px; font-size: 0.95em; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
+         #statistics li strong { color: #007f5f; min-width: 150px; display: inline-block; }
+         #event-list { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 4px; }
+         #event-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px dashed #eee; font-size: 0.9em; flex-wrap: wrap; gap: 10px;}
+         #event-list li span { flex-grow: 1; min-width: 200px; }
+         #event-list li .event-controls { display: flex; align-items: center; gap: 8px; }
+         #event-list li select { padding: 3px; font-size: 0.85em; border-radius: 3px; border: 1px solid #ccc; }
+         #event-list li button { padding: 3px 8px; font-size: 0.85em; cursor: pointer; background-color: #e63946; color: white; border: none; border-radius: 3px; }
+         #event-list li button:hover { background-color: #d62828; }
+         #add-event-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; border-top: 2px solid #eee; padding-top: 15px; }
+         #add-event-form .form-group { display: flex; flex-direction: column; }
+         #add-event-form label { font-weight: 600; margin-bottom: 3px; font-size: 0.9em; color: #005f73;}
+         #add-event-form input[type=text], #add-event-form input[type=date], #add-event-form select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
+         #add-event-form button { grid-column: 1 / -1; padding: 8px 15px; background-color: #007f5f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+         #add-event-form button:hover { background-color: #006d50; }
+         #date-range-inputs { display: none; }
+         #date-range-inputs label { margin-top: 5px; }
+         #pricingTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+         #pricingTable th, #pricingTable td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+         #pricingTable th { background-color: #e9f5f1; color: #005f73; position: sticky; top: 0; z-index: 1;}
+         #pricingTable tbody tr:nth-child(odd) { background-color: #f8f8f8; }
+         .notes { font-style: italic; color: #333; font-size: 0.9em; white-space: normal; max-width: 300px;}
+         .price-cell { cursor: pointer; }
+         .price-override { font-weight: bold; background-color: #fff3cd; }
+         .price-input { width: 60px; padding: 3px; font-size: inherit; border: 1px solid #007f5f; text-align: right; }
+         .table-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;}
+         .table-actions button { padding: 10px 20px; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+         #exportCsvButton { background-color: #005f73;}
+         #exportCsvButton:hover { background-color: #004c5a; }
+         #clearOverridesButton { background-color: #d62828; margin-left: 10px; }
+         #clearOverridesButton:hover { background-color: #b32020; }
+        @media (max-width: 900px) { .container { grid-template-areas: "controls" "stats" "events" "chart" "table"; grid-template-columns: 1fr; } #chart-container { height: 300px; } .table-actions { flex-direction: column; gap: 10px; align-items: stretch; } .table-actions button { width: 100%; } }
     </style>
 </head>
 <body>
@@ -86,200 +69,203 @@
 <div class="container">
 
     <div id="controls">
-        <!-- Pricing Factors Controls (Same as before) -->
-        <h2>Pricing Factors</h2>
-        <div class="control-grid">
-            <div class="control-group">
-                <label for="basePrice">Base Nightly Price (£):</label>
-                <input type="number" id="basePrice" value="90" min="50" step="5" oninput="updateAll()">
-            </div>
-            <div class="control-group">
-                <label for="occupancyRate">Est. Occupancy (%):</label>
-                <div class="value-display">
-                    <input type="range" id="occupancyRate" value="65" min="0" max="100" step="1" oninput="updateSliderValue('occupancyRate'); updateAll();">
-                    <span id="occupancyRateValue">65%</span>
-                </div>
-                <span>For Annual Revenue Estimate</span>
-            </div>
+         <h2>Pricing Factors</h2>
+         <div class="control-grid">
              <div class="control-group">
-                <label for="weekendMultiplier">Weekend Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="weekendMultiplier" value="1.3" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('weekendMultiplier', 2, 'x'); updateAll();">
-                    <span id="weekendMultiplierValue">1.30x</span>
-                 </div>
-                 <span>Multiplier for Friday & Saturday nights.</span>
-            </div>
-            <div class="control-group">
-                <label for="lowSeasonMultiplier">Low Season Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="lowSeasonMultiplier" value="0.85" min="0.5" max="1.2" step="0.01" oninput="updateSliderValue('lowSeasonMultiplier', 2, 'x'); updateAll();">
-                    <span id="lowSeasonMultiplierValue">0.85x</span>
-                 </div>
-                 <span>Nov, Jan, Feb (excl. holidays)</span>
-            </div>
+                 <label for="basePrice">Base Nightly Price (£):</label>
+                 <input type="number" id="basePrice" value="90" min="50" step="5" oninput="updateAll()">
+             </div>
+              <!-- NEW Max Price Input -->
+              <div class="control-group">
+                 <label for="maxPrice">Maximum Nightly Price (£):</label>
+                 <input type="number" id="maxPrice" value="300" min="100" step="10" oninput="updateAll()">
+                 <span>Set a ceiling for calculated prices.</span>
+             </div>
              <div class="control-group">
-                <label for="shoulderSeasonMultiplier">Shoulder Season Multiplier:</label>
+                 <label for="occupancyRate">Est. Occupancy (%):</label>
                  <div class="value-display">
-                    <input type="range" id="shoulderSeasonMultiplier" value="1.0" min="0.7" max="1.5" step="0.01" oninput="updateSliderValue('shoulderSeasonMultiplier', 2, 'x'); updateAll();">
-                    <span id="shoulderSeasonMultiplierValue">1.00x</span>
+                     <input type="range" id="occupancyRate" value="65" min="0" max="100" step="1" oninput="updateSliderValue('occupancyRate'); updateAll();">
+                     <span id="occupancyRateValue">65%</span>
                  </div>
-                 <span>Mar, Apr, May, Sep, Oct (excl. holidays)</span>
-            </div>
+                 <span>For Annual Revenue Estimate</span>
+             </div>
+              <div class="control-group">
+                 <label for="weekendMultiplier">Weekend Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="weekendMultiplier" value="1.3" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('weekendMultiplier', 2, 'x'); updateAll();">
+                     <span id="weekendMultiplierValue">1.30x</span>
+                  </div>
+                  <span>Multiplier for Friday & Saturday nights.</span>
+             </div>
              <div class="control-group">
-                <label for="highSeasonMultiplier">High Season Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="highSeasonMultiplier" value="1.3" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('highSeasonMultiplier', 2, 'x'); updateAll();">
-                    <span id="highSeasonMultiplierValue">1.30x</span>
-                 </div>
-                 <span>June, early July</span>
-            </div>
-            <div class="control-group">
-                <label for="peakSeasonMultiplier">Peak Season Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="peakSeasonMultiplier" value="1.6" min="1.2" max="2.5" step="0.05" oninput="updateSliderValue('peakSeasonMultiplier', 2, 'x'); updateAll();">
-                    <span id="peakSeasonMultiplierValue">1.60x</span>
-                 </div>
-                 <span>Late July & August</span>
-            </div>
+                 <label for="lowSeasonMultiplier">Low Season Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="lowSeasonMultiplier" value="0.85" min="0.5" max="1.2" step="0.01" oninput="updateSliderValue('lowSeasonMultiplier', 2, 'x'); updateAll();">
+                     <span id="lowSeasonMultiplierValue">0.85x</span>
+                  </div>
+                  <span>Nov, Jan, Feb (excl. holidays)</span>
+             </div>
+              <div class="control-group">
+                 <label for="shoulderSeasonMultiplier">Shoulder Season Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="shoulderSeasonMultiplier" value="1.0" min="0.7" max="1.5" step="0.01" oninput="updateSliderValue('shoulderSeasonMultiplier', 2, 'x'); updateAll();">
+                     <span id="shoulderSeasonMultiplierValue">1.00x</span>
+                  </div>
+                  <span>Mar, Apr, May, Sep, Oct (excl. holidays)</span>
+             </div>
+              <div class="control-group">
+                 <label for="highSeasonMultiplier">High Season Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="highSeasonMultiplier" value="1.3" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('highSeasonMultiplier', 2, 'x'); updateAll();">
+                     <span id="highSeasonMultiplierValue">1.30x</span>
+                  </div>
+                  <span>June, early July</span>
+             </div>
              <div class="control-group">
-                <label for="schoolHolidayMultiplier">School Holiday Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="schoolHolidayMultiplier" value="1.2" min="1.0" max="1.8" step="0.05" oninput="updateSliderValue('schoolHolidayMultiplier', 2, 'x'); updateAll();">
-                    <span id="schoolHolidayMultiplierValue">1.20x</span>
-                 </div>
-                 <span>Stacking multiplier for non-summer school breaks.</span>
-            </div>
+                 <label for="peakSeasonMultiplier">Peak Season Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="peakSeasonMultiplier" value="1.6" min="1.2" max="2.5" step="0.05" oninput="updateSliderValue('peakSeasonMultiplier', 2, 'x'); updateAll();">
+                     <span id="peakSeasonMultiplierValue">1.60x</span>
+                  </div>
+                  <span>Late July & August</span>
+             </div>
+              <div class="control-group">
+                 <label for="schoolHolidayMultiplier">School Holiday Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="schoolHolidayMultiplier" value="1.2" min="1.0" max="1.8" step="0.05" oninput="updateSliderValue('schoolHolidayMultiplier', 2, 'x'); updateAll();">
+                     <span id="schoolHolidayMultiplierValue">1.20x</span>
+                  </div>
+                  <span>Stacking multiplier for non-summer school breaks.</span>
+             </div>
+              <div class="control-group">
+                 <label for="eventLowImpactMultiplier">Low Event Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="eventLowImpactMultiplier" value="1.1" min="1.0" max="1.5" step="0.01" oninput="updateSliderValue('eventLowImpactMultiplier', 2, 'x'); updateAll();">
+                     <span id="eventLowImpactMultiplierValue">1.10x</span>
+                  </div>
+                  <span>Smaller festivals, niche events.</span>
+             </div>
              <div class="control-group">
-                <label for="eventLowImpactMultiplier">Low Event Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="eventLowImpactMultiplier" value="1.1" min="1.0" max="1.5" step="0.01" oninput="updateSliderValue('eventLowImpactMultiplier', 2, 'x'); updateAll();">
-                    <span id="eventLowImpactMultiplierValue">1.10x</span>
-                 </div>
-                 <span>Smaller festivals, niche events.</span>
-            </div>
-            <div class="control-group">
-                <label for="eventMediumImpactMultiplier">Medium Event Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="eventMediumImpactMultiplier" value="1.25" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('eventMediumImpactMultiplier', 2, 'x'); updateAll();">
-                    <span id="eventMediumImpactMultiplierValue">1.25x</span>
-                 </div>
-                 <span>Significant events, concerts, non-peak Bank Hols.</span>
-            </div>
-             <div class="control-group">
-                <label for="eventHighImpactMultiplier">High Event Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="eventHighImpactMultiplier" value="1.4" min="1.1" max="2.2" step="0.05" oninput="updateSliderValue('eventHighImpactMultiplier', 2, 'x'); updateAll();">
-                    <span id="eventHighImpactMultiplierValue">1.40x</span>
-                 </div>
-                 <span>Major events, concerts, peak Bank Hols.</span>
-            </div>
-             <div class="control-group">
-                <label for="eventPeakImpactMultiplier">Peak Event Multiplier:</label>
-                 <div class="value-display">
-                    <input type="range" id="eventPeakImpactMultiplier" value="1.7" min="1.2" max="2.8" step="0.05" oninput="updateSliderValue('eventPeakImpactMultiplier', 2, 'x'); updateAll();">
-                    <span id="eventPeakImpactMultiplierValue">1.70x</span>
-                 </div>
-                 <span>Absolute peak demand (e.g., Aug Bank Hol + Headline Act).</span>
-            </div>
-        </div>
-    </div>
+                 <label for="eventMediumImpactMultiplier">Medium Event Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="eventMediumImpactMultiplier" value="1.25" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('eventMediumImpactMultiplier', 2, 'x'); updateAll();">
+                     <span id="eventMediumImpactMultiplierValue">1.25x</span>
+                  </div>
+                  <span>Significant events, concerts, non-peak Bank Hols.</span>
+             </div>
+              <div class="control-group">
+                 <label for="eventHighImpactMultiplier">High Event Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="eventHighImpactMultiplier" value="1.4" min="1.1" max="2.2" step="0.05" oninput="updateSliderValue('eventHighImpactMultiplier', 2, 'x'); updateAll();">
+                     <span id="eventHighImpactMultiplierValue">1.40x</span>
+                  </div>
+                  <span>Major events, concerts, peak Bank Hols.</span>
+             </div>
+              <div class="control-group">
+                 <label for="eventPeakImpactMultiplier">Peak Event Multiplier:</label>
+                  <div class="value-display">
+                     <input type="range" id="eventPeakImpactMultiplier" value="1.7" min="1.2" max="2.8" step="0.05" oninput="updateSliderValue('eventPeakImpactMultiplier', 2, 'x'); updateAll();">
+                     <span id="eventPeakImpactMultiplierValue">1.70x</span>
+                  </div>
+                  <span>Absolute peak demand (e.g., Aug Bank Hol + Headline Act).</span>
+             </div>
+         </div>
+     </div>
 
     <div id="statistics">
-        <!-- Key Statistics Display (Same as before) -->
-        <h2>Key Statistics</h2>
-        <ul>
-            <li><strong>Overall Average Rate:</strong> <span id="statAvgRate">---</span></li>
-            <li><strong>Minimum Nightly Rate:</strong> <span id="statMinRate">---</span></li>
-            <li><strong>Maximum Nightly Rate:</strong> <span id="statMaxRate">---</span></li>
-            <li><strong>Average Low Season Rate:</strong> <span id="statAvgLow">---</span></li>
-            <li><strong>Average Shoulder Season Rate:</strong> <span id="statAvgShoulder">---</span></li>
-            <li><strong>Average High Season Rate:</strong> <span id="statAvgHigh">---</span></li>
-            <li><strong>Average Peak Season Rate:</strong> <span id="statAvgPeak">---</span></li>
-            <li><strong>Est. Annual Revenue (@ <span id="statOccupancyRate">---</span>% Occ.):</strong> <span id="statEstRevenue">---</span></li>
-        </ul>
-    </div>
+         <!-- Key Statistics Display (Same as before) -->
+         <h2>Key Statistics</h2>
+         <ul>
+              <li><strong>Overall Average Rate:</strong> <span id="statAvgRate">---</span></li>
+              <li><strong>Minimum Nightly Rate:</strong> <span id="statMinRate">---</span></li>
+              <li><strong>Maximum Nightly Rate:</strong> <span id="statMaxRate">---</span></li>
+              <li><strong>Average Low Season Rate:</strong> <span id="statAvgLow">---</span></li>
+              <li><strong>Average Shoulder Season Rate:</strong> <span id="statAvgShoulder">---</span></li>
+              <li><strong>Average High Season Rate:</strong> <span id="statAvgHigh">---</span></li>
+              <li><strong>Average Peak Season Rate:</strong> <span id="statAvgPeak">---</span></li>
+              <li><strong>Est. Annual Revenue (@ <span id="statOccupancyRate">---</span>% Occ.):</strong> <span id="statEstRevenue">---</span></li>
+         </ul>
+     </div>
 
-    <!-- NEW Event Management Section -->
     <div id="event-management">
-        <h2>Manage Events</h2>
-        <h3>Current Events</h3>
-        <ul id="event-list">
-            <!-- Event list will be populated by JavaScript -->
-        </ul>
-        <h3>Add New Event</h3>
-        <form id="add-event-form" onsubmit="handleAddEvent(event)">
-            <div class="form-group">
-                <label>Date Type:</label>
-                <div>
-                    <input type="radio" id="eventTypeSingle" name="eventType" value="single" checked onchange="toggleDateInputs()"> <label for="eventTypeSingle">Single Date</label>
-                    <input type="radio" id="eventTypeRange" name="eventType" value="range" onchange="toggleDateInputs()"> <label for="eventTypeRange">Date Range</label>
-                </div>
-            </div>
-             <div class="form-group" id="single-date-input">
-                <label for="addEventDate">Date:</label>
-                <input type="date" id="addEventDate">
-            </div>
-             <div class="form-group" id="date-range-inputs">
-                 <label for="addEventStartDate">Start Date:</label>
-                 <input type="date" id="addEventStartDate">
-                 <label for="addEventEndDate">End Date:</label>
-                 <input type="date" id="addEventEndDate">
-            </div>
-            <div class="form-group">
-                <label for="addEventImpact">Impact Level:</label>
-                <select id="addEventImpact">
-                    <option value="Low">Low</option>
-                    <option value="Medium" selected>Medium</option>
-                    <option value="High">High</option>
-                    <option value="Peak">Peak</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="addEventName">Event Name:</label>
-                <input type="text" id="addEventName" required>
-            </div>
-            <button type="submit">Add Event</button>
-        </form>
-    </div>
+         <!-- Event Management (Same as before) -->
+         <h2>Manage Events</h2>
+         <h3>Current Events</h3>
+         <ul id="event-list"></ul>
+         <h3>Add New Event</h3>
+         <form id="add-event-form" onsubmit="handleAddEvent(event)">
+             <div class="form-group">
+                 <label>Date Type:</label>
+                 <div>
+                     <input type="radio" id="eventTypeSingle" name="eventType" value="single" checked onchange="toggleDateInputs()"> <label for="eventTypeSingle">Single Date</label>
+                     <input type="radio" id="eventTypeRange" name="eventType" value="range" onchange="toggleDateInputs()"> <label for="eventTypeRange">Date Range</label>
+                 </div>
+             </div>
+              <div class="form-group" id="single-date-input">
+                 <label for="addEventDate">Date:</label>
+                 <input type="date" id="addEventDate">
+             </div>
+              <div class="form-group" id="date-range-inputs">
+                  <label for="addEventStartDate">Start Date:</label>
+                  <input type="date" id="addEventStartDate">
+                  <label for="addEventEndDate">End Date:</label>
+                  <input type="date" id="addEventEndDate">
+             </div>
+             <div class="form-group">
+                 <label for="addEventImpact">Impact Level:</label>
+                 <select id="addEventImpact">
+                     <option value="Low">Low</option>
+                     <option value="Medium" selected>Medium</option>
+                     <option value="High">High</option>
+                     <option value="Peak">Peak</option>
+                 </select>
+             </div>
+             <div class="form-group">
+                 <label for="addEventName">Event Name:</label>
+                 <input type="text" id="addEventName" required>
+             </div>
+             <button type="submit">Add Event</button>
+         </form>
+     </div>
 
     <div id="chart-container">
          <!-- Chart Canvas (Same as before) -->
          <h2>Annual Price Fluctuation</h2>
          <canvas id="priceChart"></canvas>
-    </div>
+     </div>
 
     <div id="pricing-table-container">
-        <!-- Pricing Table (Container) -->
-        <h2>Daily Pricing Detail (2025)</h2>
-        <table id="pricingTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Day</th>
-                    <th>Price (£)</th>
-                    <th class="notes">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Prices will be populated here by JavaScript -->
-            </tbody>
-        </table>
-        <!-- NEW Export Button -->
-        <button id="exportCsvButton" onclick="exportToCsv()">Export Table as CSV</button>
-    </div>
+         <!-- Pricing Table (Container) -->
+         <h2>Daily Pricing Detail (2025)</h2>
+         <table id="pricingTable">
+             <thead>
+                 <tr>
+                     <th>Date</th>
+                     <th>Day</th>
+                     <th>Price (£)</th>
+                     <th class="notes">Notes</th>
+                 </tr>
+             </thead>
+             <tbody id="pricingTableBody"></tbody>
+         </table>
+         <div class="table-actions">
+              <button id="exportCsvButton" onclick="exportToCsv()">Export Table as CSV</button>
+              <button id="clearOverridesButton" onclick="clearAllOverrides()">Clear All Price Overrides</button>
+          </div>
+     </div>
 
 </div>
 
 <script>
     // --- Global Variables ---
-    let priceChart = null; // To hold the chart instance
-    let priceDataCache = []; // Cache the calculated price data for export
+    let priceChart = null;
+    let priceDataCache = [];
+    let priceOverrides = {};
 
     // --- Data Definitions ---
     const seasonMonths = { Low: [0, 1, 10], Shoulder: [2, 3, 4, 8, 9], High: [5], Peak: [6, 7] };
     const schoolHolidayData = [ { name: "Feb Half Term", start: "2025-02-15", end: "2025-02-23" }, { name: "Easter Holidays", start: "2025-04-04", end: "2025-04-21" }, { name: "May Half Term", start: "2025-05-24", end: "2025-06-01" }, { name: "Oct Half Term", start: "2025-10-24", end: "2025-11-02" }, { name: "Christmas Break", start: "2025-12-20", end: "2026-01-04" }];
-    // Use let for eventData so it can be modified
-    let eventData = [
+    let eventData = [ /* ... same initial events ... */
         { date: "2025-01-01", impact: "Medium", name: "New Year's Day" },
         { dateRange: ["2025-04-12", "2025-04-13"], impact: "Medium", name: "Food & Drink Festival" },
         { dateRange: ["2025-04-18", "2025-04-21"], impact: "High", name: "Easter Bank Holiday Weekend" },
@@ -319,67 +305,35 @@
     // --- Helper Functions ---
     const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' });
     const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-     function formatCurrency(value) { /* ... same ... */
-        return `£${Math.round(value).toLocaleString()}`;
+    function formatCurrency(value) { return `£${Math.round(value).toLocaleString()}`; }
+    function getEventInfoForDate(dateStr) { /* ... same ... */
+         let highestImpact = null; let impactLevelValue = 0;
+         for (const event of eventData) {
+             let currentImpactValue = 0; if (event.impact === 'Low') currentImpactValue = 1; else if (event.impact === 'Medium') currentImpactValue = 2; else if (event.impact === 'High') currentImpactValue = 3; else if (event.impact === 'Peak') currentImpactValue = 4;
+             let isEventDay = false; if (event.date && event.date === dateStr) { isEventDay = true; } else if (event.dateRange) { const start = new Date(event.dateRange[0] + 'T00:00:00Z'); const end = new Date(event.dateRange[1] + 'T00:00:00Z'); const current = new Date(dateStr + 'T00:00:00Z'); end.setUTCDate(end.getUTCDate() + 1); if (current >= start && current < end) { isEventDay = true; } }
+             if (isEventDay && currentImpactValue > impactLevelValue) { impactLevelValue = currentImpactValue; highestImpact = { impact: event.impact, name: event.name }; }
+         } return highestImpact;
      }
-     function getEventInfoForDate(dateStr) { /* ... same ... */
-         let highestImpact = null;
-         let impactLevelValue = 0; // 0:None, 1:Low, 2:Medium, 3:High, 4:Peak
-         for (const event of eventData) { // Use the modifiable eventData
-             let currentImpactValue = 0;
-             if (event.impact === 'Low') currentImpactValue = 1;
-             else if (event.impact === 'Medium') currentImpactValue = 2;
-             else if (event.impact === 'High') currentImpactValue = 3;
-             else if (event.impact === 'Peak') currentImpactValue = 4;
-             let isEventDay = false;
-             if (event.date && event.date === dateStr) {
-                 isEventDay = true;
-             } else if (event.dateRange) {
-                 const start = new Date(event.dateRange[0] + 'T00:00:00Z');
-                 const end = new Date(event.dateRange[1] + 'T00:00:00Z');
-                 const current = new Date(dateStr + 'T00:00:00Z');
-                 end.setUTCDate(end.getUTCDate() + 1); // Make end date inclusive
-                 if (current >= start && current < end) {
-                     isEventDay = true;
-                 }
-             }
-             if (isEventDay && currentImpactValue > impactLevelValue) {
-                 impactLevelValue = currentImpactValue;
-                 highestImpact = { impact: event.impact, name: event.name };
-             }
-         }
-         return highestImpact;
-      }
-     function isSchoolHoliday(dateStr) { /* ... same ... */
-        const currentDate = new Date(dateStr + 'T00:00:00Z');
-        for (const holiday of schoolHolidayData) {
-            const start = new Date(holiday.start + 'T00:00:00Z');
-            const end = new Date(holiday.end + 'T00:00:00Z');
-            end.setUTCDate(end.getUTCDate() + 1); // Make end date inclusive
-            if (currentDate >= start && currentDate < end) {
-               return holiday.name;
-            }
-        }
-        return null;
+    function isSchoolHoliday(dateStr) { /* ... same ... */
+         const currentDate = new Date(dateStr + 'T00:00:00Z');
+         for (const holiday of schoolHolidayData) { const start = new Date(holiday.start + 'T00:00:00Z'); const end = new Date(holiday.end + 'T00:00:00Z'); end.setUTCDate(end.getUTCDate() + 1); if (currentDate >= start && currentDate < end) { return holiday.name; } } return null;
      }
-     function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') { /* ... same ... */
-        const slider = document.getElementById(sliderId);
-        const outputSpan = document.getElementById(sliderId + 'Value');
-        outputSpan.textContent = parseFloat(slider.value).toFixed(decimalPlaces) + suffix;
+    function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') { /* ... same ... */
+        const slider = document.getElementById(sliderId); const outputSpan = document.getElementById(sliderId + 'Value'); outputSpan.textContent = parseFloat(slider.value).toFixed(decimalPlaces) + suffix;
      }
-     // NEW Helper for Event List
-     function formatDateForDisplay(dateStr) {
-         if (!dateStr) return '';
-         const [year, month, day] = dateStr.split('-');
-         return `${day}/${month}/${year}`;
+    function formatDateForDisplay(dateStr) { /* ... same ... */
+        if (!dateStr) return ''; const [year, month, day] = dateStr.split('-'); return `${day}/${month}/${year}`;
      }
 
 
     // --- Calculation Functions ---
-     function getInputs() { /* ... same ... */
+    // UPDATED getInputs to include maxPrice
+    function getInputs() {
+        const maxPriceInput = document.getElementById('maxPrice').value;
         return {
             basePrice: parseFloat(document.getElementById('basePrice').value) || 90,
+            // Use a very high number if maxPrice is empty or invalid, effectively disabling it
+            maxPrice: parseFloat(maxPriceInput) > 0 ? parseFloat(maxPriceInput) : 99999,
             occupancyRate: parseFloat(document.getElementById('occupancyRate').value) / 100 || 0.65,
             weekendMultiplier: parseFloat(document.getElementById('weekendMultiplier').value) || 1.0,
             lowSeasonMultiplier: parseFloat(document.getElementById('lowSeasonMultiplier').value) || 1.0,
@@ -394,115 +348,106 @@
                 Peak: parseFloat(document.getElementById('eventPeakImpactMultiplier').value) || 1.0
             }
         };
-     }
-     function calculateSingleDayPrice(date, inputs) { /* ... same logic ... */
-        const month = date.getUTCMonth(); // 0-11
-        const dayOfWeek = date.getUTCDay(); // 0=Sun, 6=Sat
+    }
+
+    // UPDATED calculateSingleDayPrice to apply maxPrice cap
+    function calculateSingleDayPrice(date, inputs) {
+        const month = date.getUTCMonth();
+        const dayOfWeek = date.getUTCDay();
         const dateStr = date.toISOString().split('T')[0];
 
-        let currentPrice = inputs.basePrice;
+        let finalPrice; // Renamed from currentPrice for clarity
         let notes = [];
-        let seasonMultiplier = 1.0;
-        let weekendMultiplier = 1.0;
-        let holidayMultiplier = 1.0;
-        let eventMultiplier = 1.0;
-        let seasonName = "Shoulder"; // Default
-        let baseSeasonNote = "";
+        let seasonName = "Shoulder";
+        let isOverridden = false;
 
-        // 1. Determine Base Seasonal Factor & Note
-        if (seasonMonths.Low.includes(month)) {
-            seasonMultiplier = inputs.lowSeasonMultiplier;
-            seasonName = "Low";
-            baseSeasonNote = "Low Season";
-        } else if (seasonMonths.Shoulder.includes(month)) {
-            seasonMultiplier = inputs.shoulderSeasonMultiplier;
-            seasonName = "Shoulder";
-            baseSeasonNote = "Shoulder Season";
-        } else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15) ) { // June + early July
-            seasonMultiplier = inputs.highSeasonMultiplier;
-             seasonName = "High";
-            baseSeasonNote = "High Season";
-        } else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) { // Late July + August
-            seasonMultiplier = inputs.peakSeasonMultiplier;
-             seasonName = "Peak";
-            baseSeasonNote = "Peak Season";
+        // Check for override FIRST
+        if (priceOverrides.hasOwnProperty(dateStr)) {
+            finalPrice = priceOverrides[dateStr];
+            isOverridden = true;
+            notes.push("Manual Override");
+            // Determine season even for overrides for stats
+            if (seasonMonths.Low.includes(month)) seasonName = "Low";
+            else if (seasonMonths.Shoulder.includes(month)) seasonName = "Shoulder";
+            else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15) ) seasonName = "High";
+            else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) seasonName = "Peak";
+
+        } else {
+            // Calculate dynamically
+            let calculatedPrice; // Intermediate variable
+            let seasonMultiplier = 1.0, weekendMultiplier = 1.0, holidayMultiplier = 1.0, eventMultiplier = 1.0;
+            let baseSeasonNote = "";
+
+            // 1. Determine Seasonal Factor
+            if (seasonMonths.Low.includes(month)) { seasonMultiplier = inputs.lowSeasonMultiplier; seasonName = "Low"; baseSeasonNote = "Low Season"; }
+            else if (seasonMonths.Shoulder.includes(month)) { seasonMultiplier = inputs.shoulderSeasonMultiplier; seasonName = "Shoulder"; baseSeasonNote = "Shoulder Season"; }
+            else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15)) { seasonMultiplier = inputs.highSeasonMultiplier; seasonName = "High"; baseSeasonNote = "High Season"; }
+            else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) { seasonMultiplier = inputs.peakSeasonMultiplier; seasonName = "Peak"; baseSeasonNote = "Peak Season"; }
+            notes.push(baseSeasonNote);
+
+            // 2. Apply Weekend Factor
+            if (dayOfWeek === 5 || dayOfWeek === 6) { weekendMultiplier = inputs.weekendMultiplier; if (weekendMultiplier !== 1.0) notes.push("Weekend"); }
+
+            // 3. Apply School Holiday Factor
+            const holidayName = isSchoolHoliday(dateStr);
+            if (holidayName) { holidayMultiplier = inputs.schoolHolidayMultiplier; if (holidayMultiplier !== 1.0) notes.push(holidayName); }
+
+            // 4. Apply Event Factor
+            const eventInfo = getEventInfoForDate(dateStr);
+            if (eventInfo) { eventMultiplier = inputs.eventMultipliers[eventInfo.impact]; if (eventMultiplier !== 1.0) notes.push(eventInfo.name); }
+
+            // Calculate base price * all factors
+            calculatedPrice = inputs.basePrice * seasonMultiplier * weekendMultiplier * holidayMultiplier * eventMultiplier;
+
+            // APPLY MAX PRICE CAP to calculated price
+            if (calculatedPrice > inputs.maxPrice) {
+                finalPrice = inputs.maxPrice;
+                notes.push(`(Max Price Cap Applied: ${formatCurrency(inputs.maxPrice)})`); // Add note if capped
+            } else {
+                finalPrice = calculatedPrice;
+            }
+
+            // Clean up notes
+            if (notes.length > 1 && notes[0] === baseSeasonNote && (weekendMultiplier !== 1.0 || holidayMultiplier !== 1.0 || eventMultiplier !== 1.0)) { notes.shift(); }
+            if (notes.length === 0 && baseSeasonNote) { notes.push(baseSeasonNote); }
+             // Ensure Max Price note is last if added
+            const maxPriceNoteIndex = notes.findIndex(note => note.startsWith('(Max Price Cap'));
+            if (maxPriceNoteIndex > -1 && maxPriceNoteIndex < notes.length -1) {
+                const maxNote = notes.splice(maxPriceNoteIndex, 1)[0];
+                notes.push(maxNote);
+            }
         }
-        notes.push(baseSeasonNote); // Start with the base season
-
-        // 2. Apply Weekend Factor (Fri/Sat)
-        if (dayOfWeek === 5 || dayOfWeek === 6) {
-            weekendMultiplier = inputs.weekendMultiplier;
-            if (weekendMultiplier !== 1.0) notes.push("Weekend"); // Only add if different from 1.0
-        }
-
-         // 3. Check for School Holidays & Apply Stacking Multiplier
-         const holidayName = isSchoolHoliday(dateStr);
-         if (holidayName) {
-             holidayMultiplier = inputs.schoolHolidayMultiplier;
-             if (holidayMultiplier !== 1.0) notes.push(holidayName); // Only add if different from 1.0
-         }
-
-        // 4. Check for Specific Events & Apply Stacking Multiplier (find highest impact)
-        const eventInfo = getEventInfoForDate(dateStr);
-         if (eventInfo) {
-            eventMultiplier = inputs.eventMultipliers[eventInfo.impact];
-             if (eventMultiplier !== 1.0) notes.push(eventInfo.name); // Only add if different from 1.0
-         }
-
-         // Calculate final price: Base * Season * Weekend * Holiday * Event
-         currentPrice = inputs.basePrice * seasonMultiplier * weekendMultiplier * holidayMultiplier * eventMultiplier;
-
-        // Clean up notes: Remove base season note if more specific factors applied
-         if (notes.length > 1 && notes[0] === baseSeasonNote && (weekendMultiplier !== 1.0 || holidayMultiplier !== 1.0 || eventMultiplier !== 1.0)) {
-             notes.shift();
-         }
-          // Ensure base season is shown if no other factors applied significantly
-         if (notes.length === 0 && baseSeasonNote) {
-             notes.push(baseSeasonNote);
-         }
-
 
         return {
-            date: date,
-            dateStr: dateStr,
-            day: date.getUTCDay(),
-            season: seasonName,
-            price: currentPrice,
-            notes: notes.join(', ')
+            date: date, dateStr: dateStr, day: date.getUTCDay(), season: seasonName,
+            price: finalPrice, // Use the final (potentially capped or overridden) price
+            isOverridden: isOverridden, notes: notes.join(', ')
         };
-      }
-     function calculateAllPrices(inputs) { /* ... same ... */
+    }
+
+    function calculateAllPrices(inputs) { /* ... same ... */
          const results = [];
          const startDate = new Date(Date.UTC(2025, 0, 1));
          const endDate = new Date(Date.UTC(2025, 11, 31));
-
          for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
              results.push(calculateSingleDayPrice(new Date(d), inputs));
          }
-         priceDataCache = results; // Store for export
+         priceDataCache = results;
          return results;
       }
 
     // --- Statistics Function ---
-     function updateStatistics(priceData, inputs) { /* ... same ... */
+    function updateStatistics(priceData, inputs) { /* ... same ... */
         if (!priceData || priceData.length === 0) return;
-
         const prices = priceData.map(d => d.price);
         const totalPotentialRevenue = prices.reduce((sum, price) => sum + price, 0);
         const avgRate = totalPotentialRevenue / prices.length;
         const minRate = Math.min(...prices);
-        const maxRate = Math.max(...prices);
+        const maxRate = Math.max(...prices); // This will now reflect the capped or overridden max
         const estAnnualRevenue = totalPotentialRevenue * inputs.occupancyRate;
-
         const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] };
-        priceData.forEach(d => {
-            if (seasonalPrices[d.season]) {
-                seasonalPrices[d.season].push(d.price);
-            }
-        });
-
+        priceData.forEach(d => { if (seasonalPrices[d.season]) { seasonalPrices[d.season].push(d.price); } });
         const calculateAverage = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-
         document.getElementById('statAvgRate').textContent = formatCurrency(avgRate);
         document.getElementById('statMinRate').textContent = formatCurrency(minRate);
         document.getElementById('statMaxRate').textContent = formatCurrency(maxRate);
@@ -515,321 +460,129 @@
      }
 
     // --- Chart Function ---
-     function renderOrUpdateChart(priceData) { /* ... same ... */
+    function renderOrUpdateChart(priceData) { /* ... same ... */
         const ctx = document.getElementById('priceChart').getContext('2d');
         const labels = priceData.map(d => d.dateStr);
         const dataPoints = priceData.map(d => Math.round(d.price));
-
-        if (priceChart) {
-            // Update existing chart
-            priceChart.data.labels = labels;
-            priceChart.data.datasets[0].data = dataPoints;
-            priceChart.update();
-        } else {
-            // Create new chart
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels, // X-axis labels (dates)
-                    datasets: [{
-                        label: 'Nightly Price (£)',
-                        data: dataPoints, // Y-axis data (prices)
-                        borderColor: '#007f5f', // Line color
-                        borderWidth: 1.5,
-                        backgroundColor: 'rgba(0, 127, 95, 0.1)', // Fill color under line
-                        fill: true, // Fill area under the line
-                        pointRadius: 0, // Hide points by default
-                        pointHoverRadius: 5, // Enlarge point on hover
-                        tension: 0.1 // Slight curve to the line
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'month',
-                                tooltipFormat: 'dd MMM yyyy',
-                                displayFormats: {
-                                    month: 'MMM yyyy'
-                                }
-                            },
-                            title: { display: true, text: 'Date (2025)' },
-                            ticks: { autoSkip: true, maxTicksLimit: 12 }
-                        },
-                        y: {
-                            beginAtZero: false,
-                            title: { display: true, text: 'Price (£)' },
-                            ticks: {
-                                callback: function(value) { return '£' + value; }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                             mode: 'index', // Show tooltip for all datasets at that index
-                             intersect: false, // Show tooltip even when not directly hovering over point
-                             callbacks: {
-                                 label: function(context) {
-                                     let label = context.dataset.label || '';
-                                     if (label) { label += ': '; }
-                                     label += formatCurrency(context.parsed.y);
-                                     // Add notes to tooltip
-                                     const dataIndex = context.dataIndex;
-                                     // Ensure priceDataCache is used if priceData isn't available in this scope, or pass priceData
-                                     const dayData = priceDataCache[dataIndex]; // Use cache here
-                                     if(dayData && dayData.notes) {
-                                          const notesArray = dayData.notes.split(', ');
-                                          notesArray.forEach(note => { label += `\n  - ${note}`; });
-                                     }
-                                     return label;
-                                 }
-                             }
-                        }
-                    },
-                    interaction: { // Optimize hover interactions
-                       mode: 'nearest',
-                       axis: 'x',
-                       intersect: false
-                   }
-                }
-            });
-        }
+        if (priceChart) { priceChart.data.labels = labels; priceChart.data.datasets[0].data = dataPoints; priceChart.update(); }
+        else { priceChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: '#007f5f', borderWidth: 1.5, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yyyy' } }, title: { display: true, text: 'Date (2025)' }, ticks: { autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)' }, ticks: { callback: function(value) { return '£' + value; } } } }, plugins: { tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData && dayData.notes) { const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note}`; }); } return label; } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false } } }); }
      }
 
     // --- Table Function ---
-     function populateTable(priceData) { /* ... same ... */
-         const tableBody = document.getElementById('pricingTable').getElementsByTagName('tbody')[0];
-         tableBody.innerHTML = ''; // Clear previous results
-
+    function populateTable(priceData) { /* ... same ... */
+         const tableBody = document.getElementById('pricingTableBody');
+         tableBody.innerHTML = '';
          priceData.forEach(data => {
              const row = tableBody.insertRow();
              row.insertCell().textContent = dateFormatter.format(data.date);
              row.insertCell().textContent = dayFormatter.format(data.date);
-             row.insertCell().textContent = Math.round(data.price).toString();
+             const priceCell = row.insertCell();
+             priceCell.textContent = Math.round(data.price).toString();
+             priceCell.classList.add('price-cell');
+             priceCell.dataset.date = data.dateStr;
+             if (data.isOverridden) { priceCell.classList.add('price-override'); }
              row.insertCell().innerHTML = `<span class="notes">${data.notes || ''}</span>`;
          });
       }
 
-    // --- NEW Event Management Functions ---
-    function renderEventList() {
-        const listElement = document.getElementById('event-list');
-        listElement.innerHTML = ''; // Clear existing list
+    // --- Event Management Functions ---
+    function renderEventList() { /* ... same ... */
+        const listElement = document.getElementById('event-list'); listElement.innerHTML = '';
+        eventData.sort((a, b) => { const dateA = a.date || (a.dateRange ? a.dateRange[0] : ''); const dateB = b.date || (b.dateRange ? b.dateRange[0] : ''); if (dateA < dateB) return -1; if (dateA > dateB) return 1; return 0; });
+        eventData.forEach((event, index) => { const li = document.createElement('li'); let dateText = event.date ? formatDateForDisplay(event.date) : `${formatDateForDisplay(event.dateRange[0])} - ${formatDateForDisplay(event.dateRange[1])}`; const descSpan = document.createElement('span'); descSpan.textContent = `${dateText}: ${event.name}`; li.appendChild(descSpan); const controlsDiv = document.createElement('div'); controlsDiv.className = 'event-controls'; const impactSelect = document.createElement('select'); impactSelect.innerHTML = `<option value="Low" ${event.impact === 'Low' ? 'selected' : ''}>Low</option><option value="Medium" ${event.impact === 'Medium' ? 'selected' : ''}>Medium</option><option value="High" ${event.impact === 'High' ? 'selected' : ''}>High</option><option value="Peak" ${event.impact === 'Peak' ? 'selected' : ''}>Peak</option>`; impactSelect.dataset.index = index; impactSelect.addEventListener('change', handleUpdateEventImpact); controlsDiv.appendChild(impactSelect); const deleteButton = document.createElement('button'); deleteButton.textContent = 'Delete'; deleteButton.dataset.index = index; deleteButton.addEventListener('click', handleDeleteEvent); controlsDiv.appendChild(deleteButton); li.appendChild(controlsDiv); listElement.appendChild(li); });
+     }
+    function handleUpdateEventImpact(e) { /* ... same ... */
+         const index = parseInt(e.target.dataset.index, 10); const newImpact = e.target.value; if (index >= 0 && index < eventData.length) { eventData[index].impact = newImpact; console.log(`Updated event ${index} impact to ${newImpact}`); updateAll(); }
+     }
+    function handleDeleteEvent(e) { /* ... same ... */
+         const index = parseInt(e.target.dataset.index, 10); if (index >= 0 && index < eventData.length) { const removed = eventData.splice(index, 1); console.log(`Removed event ${index}: ${removed[0]?.name}`); renderEventList(); updateAll(); }
+     }
+    function toggleDateInputs() { /* ... same ... */
+        const type = document.querySelector('input[name="eventType"]:checked').value; document.getElementById('single-date-input').style.display = (type === 'single') ? 'flex' : 'none'; document.getElementById('date-range-inputs').style.display = (type === 'range') ? 'flex' : 'none';
+     }
+    function handleAddEvent(event) { /* ... same ... */
+         event.preventDefault(); const type = document.querySelector('input[name="eventType"]:checked').value; const impact = document.getElementById('addEventImpact').value; const name = document.getElementById('addEventName').value.trim(); let newEvent = null; if (!name) { alert("Please enter an event name."); return; } if (type === 'single') { const date = document.getElementById('addEventDate').value; if (!date) { alert("Please select a date."); return; } newEvent = { date: date, impact: impact, name: name }; } else { const startDate = document.getElementById('addEventStartDate').value; const endDate = document.getElementById('addEventEndDate').value; if (!startDate || !endDate) { alert("Please select dates."); return; } if (endDate < startDate) { alert("End date cannot be before start."); return; } newEvent = { dateRange: [startDate, endDate], impact: impact, name: name }; } if (newEvent) { eventData.push(newEvent); console.log("Added new event:", newEvent); document.getElementById('add-event-form').reset(); toggleDateInputs(); renderEventList(); updateAll(); }
+      }
 
-        // Sort events by start date (if available) or single date
-        eventData.sort((a, b) => {
-            const dateA = a.date || (a.dateRange ? a.dateRange[0] : '');
-            const dateB = b.date || (b.dateRange ? b.dateRange[0] : '');
-            if (dateA < dateB) return -1;
-            if (dateA > dateB) return 1;
-            return 0;
-        });
+    // --- Export Function ---
+    function escapeCsvCell(cellData) { /* ... same ... */
+         if (cellData === null || cellData === undefined) return ''; const stringData = String(cellData); if (stringData.includes(',') || stringData.includes('"') || stringData.includes('\n')) { const escapedData = stringData.replace(/"/g, '""'); return `"${escapedData}"`; } return stringData;
+      }
+    function exportToCsv() { /* ... same ... */
+         if (!priceDataCache || priceDataCache.length === 0) { alert("No data."); return; } const headers = ["Date", "DayOfWeek", "Price", "IsOverridden", "Notes"]; const csvRows = [headers.join(",")]; priceDataCache.forEach(data => { const dateFormatted = dateFormatter.format(data.date); const dayFormatted = dayFormatter.format(data.date); const priceFormatted = Math.round(data.price); const overrideFormatted = data.isOverridden ? 'Yes' : 'No'; const notesFormatted = escapeCsvCell(data.notes); csvRows.push([dateFormatted, dayFormatted, priceFormatted, overrideFormatted, notesFormatted].join(",")); }); const csvString = csvRows.join("\n"); const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); if (link.download !== undefined) { const url = URL.createObjectURL(blob); link.setAttribute("href", url); link.setAttribute("download", "captain_cottage_pricing_2025.csv"); link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); } else { alert("CSV export not fully supported."); }
+     }
 
+    // --- Price Override Functions ---
+    function handlePriceCellDoubleClick(event) { /* ... same ... */
+        const target = event.target; if (target.tagName === 'TD' && target.classList.contains('price-cell') && target.dataset.date) { const currentDateStr = target.dataset.date; const currentPrice = target.textContent; if (target.querySelector('.price-input')) { return; } const input = document.createElement('input'); input.type = 'number'; input.className = 'price-input'; input.value = currentPrice; input.dataset.date = currentDateStr; input.dataset.originalValue = currentPrice; target.innerHTML = ''; target.appendChild(input); input.focus(); input.select(); input.addEventListener('blur', savePriceEdit); input.addEventListener('keydown', handlePriceEditKeydown); }
+     }
 
-        eventData.forEach((event, index) => {
-            const li = document.createElement('li');
+    // UPDATED savePriceEdit to check maxPrice
+    function savePriceEdit(event) {
+        const input = event.target;
+        const dateStr = input.dataset.date;
+        const originalValue = input.dataset.originalValue;
+        const newValue = input.value.trim();
+        const inputs = getInputs(); // Get current max price setting
 
-            let dateText = '';
-            if (event.date) {
-                dateText = formatDateForDisplay(event.date);
-            } else if (event.dateRange) {
-                dateText = `${formatDateForDisplay(event.dateRange[0])} - ${formatDateForDisplay(event.dateRange[1])}`;
+        if (newValue === '' || newValue === null) {
+            // Remove override
+            if (priceOverrides.hasOwnProperty(dateStr)) {
+                delete priceOverrides[dateStr];
+                console.log(`Override removed for ${dateStr}`);
+                updateAll();
+            } else {
+                input.parentElement.textContent = originalValue; // Revert display if no override existed
             }
-
-            // Event description span
-            const descSpan = document.createElement('span');
-            descSpan.textContent = `${dateText}: ${event.name}`;
-            li.appendChild(descSpan);
-
-            // Controls div
-            const controlsDiv = document.createElement('div');
-            controlsDiv.className = 'event-controls';
-
-            // Impact dropdown
-            const impactSelect = document.createElement('select');
-            impactSelect.innerHTML = `
-                <option value="Low" ${event.impact === 'Low' ? 'selected' : ''}>Low</option>
-                <option value="Medium" ${event.impact === 'Medium' ? 'selected' : ''}>Medium</option>
-                <option value="High" ${event.impact === 'High' ? 'selected' : ''}>High</option>
-                <option value="Peak" ${event.impact === 'Peak' ? 'selected' : ''}>Peak</option>
-            `;
-            impactSelect.dataset.index = index; // Store index for update handler
-            impactSelect.addEventListener('change', handleUpdateEventImpact);
-            controlsDiv.appendChild(impactSelect);
-
-            // Delete button
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.dataset.index = index; // Store index for delete handler
-            deleteButton.addEventListener('click', handleDeleteEvent);
-            controlsDiv.appendChild(deleteButton);
-
-            li.appendChild(controlsDiv);
-            listElement.appendChild(li);
-        });
-    }
-
-    function handleUpdateEventImpact(e) {
-        const index = parseInt(e.target.dataset.index, 10);
-        const newImpact = e.target.value;
-        if (index >= 0 && index < eventData.length) {
-            eventData[index].impact = newImpact;
-            console.log(`Updated event ${index} impact to ${newImpact}`);
-            updateAll(); // Recalculate everything
-        }
-    }
-
-    function handleDeleteEvent(e) {
-        const index = parseInt(e.target.dataset.index, 10);
-        if (index >= 0 && index < eventData.length) {
-            const removed = eventData.splice(index, 1); // Remove event from array
-            console.log(`Removed event ${index}: ${removed[0]?.name}`);
-            renderEventList(); // Update the displayed list
-            updateAll(); // Recalculate everything
-        }
-    }
-
-     function toggleDateInputs() {
-        const type = document.querySelector('input[name="eventType"]:checked').value;
-        document.getElementById('single-date-input').style.display = (type === 'single') ? 'flex' : 'none';
-        document.getElementById('date-range-inputs').style.display = (type === 'range') ? 'flex' : 'none';
-    }
-
-    function handleAddEvent(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        const type = document.querySelector('input[name="eventType"]:checked').value;
-        const impact = document.getElementById('addEventImpact').value;
-        const name = document.getElementById('addEventName').value.trim();
-        let newEvent = null;
-
-        if (!name) {
-            alert("Please enter an event name.");
-            return;
-        }
-
-        if (type === 'single') {
-            const date = document.getElementById('addEventDate').value;
-            if (!date) {
-                alert("Please select a date for the single event.");
-                return;
-            }
-            newEvent = { date: date, impact: impact, name: name };
-        } else { // type === 'range'
-            const startDate = document.getElementById('addEventStartDate').value;
-            const endDate = document.getElementById('addEventEndDate').value;
-            if (!startDate || !endDate) {
-                alert("Please select both start and end dates for the range event.");
-                return;
-            }
-            if (endDate < startDate) {
-                alert("End date cannot be before the start date.");
-                return;
-            }
-            newEvent = { dateRange: [startDate, endDate], impact: impact, name: name };
-        }
-
-        if (newEvent) {
-            eventData.push(newEvent);
-            console.log("Added new event:", newEvent);
-            document.getElementById('add-event-form').reset(); // Clear the form
-             toggleDateInputs(); // Reset date input visibility
-            renderEventList(); // Update the displayed list
-            updateAll(); // Recalculate everything
-        }
-    }
-
-    // --- NEW Export Function ---
-    function escapeCsvCell(cellData) {
-        if (cellData === null || cellData === undefined) {
-            return '';
-        }
-        const stringData = String(cellData);
-        // If the cell contains a comma, double quote, or newline, wrap it in double quotes
-        if (stringData.includes(',') || stringData.includes('"') || stringData.includes('\n')) {
-            // Escape existing double quotes by doubling them
-            const escapedData = stringData.replace(/"/g, '""');
-            return `"${escapedData}"`;
-        }
-        return stringData; // No escaping needed
-    }
-
-    function exportToCsv() {
-        if (!priceDataCache || priceDataCache.length === 0) {
-            alert("No pricing data available to export.");
-            return;
-        }
-
-        const headers = ["Date", "DayOfWeek", "Price", "Notes"];
-        const csvRows = [headers.join(",")]; // Header row
-
-        priceDataCache.forEach(data => {
-            const dateFormatted = dateFormatter.format(data.date);
-            const dayFormatted = dayFormatter.format(data.date);
-            const priceFormatted = Math.round(data.price);
-            const notesFormatted = escapeCsvCell(data.notes);
-
-            csvRows.push([
-                dateFormatted,
-                dayFormatted,
-                priceFormatted,
-                notesFormatted
-            ].join(","));
-        });
-
-        const csvString = csvRows.join("\n");
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-
-        // Create a link element
-        const link = document.createElement("a");
-        if (link.download !== undefined) { // Check if download attribute is supported
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "captain_cottage_pricing_2025.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url); // Clean up
         } else {
-            alert("CSV export is not fully supported in this browser.");
-            // Fallback or message
+            const newPrice = parseFloat(newValue);
+            if (!isNaN(newPrice) && newPrice >= 0) {
+                // Check against max price BEFORE saving override
+                if (newPrice > inputs.maxPrice) {
+                    alert(`Entered price (£${newPrice}) exceeds the maximum allowed price (£${inputs.maxPrice}). Please enter a lower value.`);
+                    input.focus(); // Keep focus on input
+                    // Do NOT save, leave input field visible
+                    return; // Stop execution here
+                }
+
+                // Valid price and within limit, save override
+                priceOverrides[dateStr] = newPrice;
+                console.log(`Override set for ${dateStr}: £${newPrice}`);
+                updateAll();
+            } else {
+                 alert("Please enter a valid positive number for the price.");
+                 input.parentElement.textContent = originalValue; // Revert display
+            }
         }
+        // If we reach here without returning early, the save (or removal) was successful
+        // The updateAll() call will handle re-rendering the cell correctly.
     }
 
+    function handlePriceEditKeydown(event) { /* ... same ... */
+        const input = event.target; if (event.key === 'Enter') { event.preventDefault(); input.blur(); } else if (event.key === 'Escape') { const cell = input.parentElement; const originalValue = input.dataset.originalValue; cell.textContent = originalValue; console.log(`Edit cancelled for ${input.dataset.date}`); }
+     }
+    function clearAllOverrides() { /* ... same ... */
+        if (confirm("Are you sure you want to clear ALL manual price overrides?")) { priceOverrides = {}; console.log("All price overrides cleared."); updateAll(); }
+     }
 
      // --- Main Update Trigger ---
-     function updateAll() {
+     function updateAll() { /* ... same ... */
          const inputs = getInputs();
-         const priceData = calculateAllPrices(inputs); // Recalculates and updates priceDataCache
+         const priceData = calculateAllPrices(inputs);
          updateStatistics(priceData, inputs);
          renderOrUpdateChart(priceData);
          populateTable(priceData);
-         // Note: renderEventList() is called separately when events are added/deleted
      }
 
-
     // --- Initialisation ---
-    document.addEventListener('DOMContentLoaded', () => {
-        // Set initial slider values display
+    document.addEventListener('DOMContentLoaded', () => { /* ... same ... */
         const sliders = document.querySelectorAll('input[type=range]');
-        sliders.forEach(slider => {
-            const isMultiplier = slider.id.toLowerCase().includes('multiplier');
-            const decimalPlaces = isMultiplier ? 2 : 0;
-            const suffix = isMultiplier ? 'x' : '%';
-             updateSliderValue(slider.id, decimalPlaces, suffix);
-        });
-
-         // Render initial event list
-         renderEventList();
-
-         // Set initial visibility for date inputs in add event form
-         toggleDateInputs();
-
-         // Perform initial calculation and render
-         updateAll();
+        sliders.forEach(slider => { const isMultiplier = slider.id.toLowerCase().includes('multiplier'); const decimalPlaces = isMultiplier ? 2 : 0; const suffix = isMultiplier ? 'x' : '%'; updateSliderValue(slider.id, decimalPlaces, suffix); });
+        renderEventList();
+        toggleDateInputs();
+        const tableBody = document.getElementById('pricingTableBody');
+        if(tableBody) { tableBody.addEventListener('dblclick', handlePriceCellDoubleClick); } else { console.error("Could not find table body with ID pricingTableBody"); }
+        updateAll();
     });
 
 </script>
