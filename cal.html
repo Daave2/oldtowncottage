@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Captain's Cottage Dynamic Pricing Tool (2025)</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; }
+        .container { display: grid; grid-template-areas: "controls stats" "chart chart" "table table"; grid-template-columns: 1fr 1fr; grid-gap: 20px; max-width: 1400px; margin: auto; }
+        #controls { grid-area: controls; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #statistics { grid-area: stats; background-color: #e9f5f1; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #chart-container { grid-area: chart; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 400px; /* Adjust as needed */ }
+        #pricing-table-container { grid-area: table; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto; }
+
+        #controls h2, #statistics h2, #chart-container h2, #pricing-table-container h2 { margin-top: 0; color: #005f73; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; }
+        .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .control-group { display: flex; flex-direction: column; }
+        .control-group label { font-weight: 600; margin-bottom: 5px; font-size: 0.9em; color: #005f73; }
+        .control-group input[type=number], .control-group input[type=range] { width: 95%; margin-bottom: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
+        .control-group input[type=range] { padding: 0; height: 5px; cursor: pointer; }
+        .control-group span { font-size: 0.85em; color: #555; display: inline-block; min-width: 40px; text-align: right; margin-left: 5px; font-weight: bold; }
+        .value-display { display: flex; align-items: center; }
+
+        #statistics ul { list-style: none; padding: 0; }
+        #statistics li { margin-bottom: 10px; font-size: 0.95em; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
+        #statistics li strong { color: #007f5f; min-width: 150px; display: inline-block; }
+
+        #pricingTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+        #pricingTable th, #pricingTable td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        #pricingTable th { background-color: #e9f5f1; color: #005f73; position: sticky; top: 0; z-index: 1;}
+        #pricingTable tbody tr:nth-child(odd) { background-color: #f8f8f8; }
+        .notes { font-style: italic; color: #333; font-size: 0.9em; white-space: normal; max-width: 300px;}
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .container { grid-template-areas: "controls" "stats" "chart" "table"; grid-template-columns: 1fr; }
+            #chart-container { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="controls">
+        <h2>Pricing Factors</h2>
+        <div class="control-grid">
+            <div class="control-group">
+                <label for="basePrice">Base Nightly Price (£):</label>
+                <input type="number" id="basePrice" value="90" min="50" step="5" oninput="updateAll()">
+            </div>
+            <div class="control-group">
+                <label for="occupancyRate">Est. Occupancy (%):</label>
+                <div class="value-display">
+                    <input type="range" id="occupancyRate" value="65" min="0" max="100" step="1" oninput="updateSliderValue('occupancyRate'); updateAll();">
+                    <span id="occupancyRateValue">65%</span>
+                </div>
+                <span>For Annual Revenue Estimate</span>
+            </div>
+             <div class="control-group">
+                <label for="weekendMultiplier">Weekend Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="weekendMultiplier" value="1.3" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('weekendMultiplier', 2, 'x'); updateAll();">
+                    <span id="weekendMultiplierValue">1.30x</span>
+                 </div>
+                 <span>Multiplier for Friday & Saturday nights.</span>
+            </div>
+            <div class="control-group">
+                <label for="lowSeasonMultiplier">Low Season Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="lowSeasonMultiplier" value="0.85" min="0.5" max="1.2" step="0.01" oninput="updateSliderValue('lowSeasonMultiplier', 2, 'x'); updateAll();">
+                    <span id="lowSeasonMultiplierValue">0.85x</span>
+                 </div>
+                 <span>Nov, Jan, Feb (excl. holidays)</span>
+            </div>
+             <div class="control-group">
+                <label for="shoulderSeasonMultiplier">Shoulder Season Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="shoulderSeasonMultiplier" value="1.0" min="0.7" max="1.5" step="0.01" oninput="updateSliderValue('shoulderSeasonMultiplier', 2, 'x'); updateAll();">
+                    <span id="shoulderSeasonMultiplierValue">1.00x</span>
+                 </div>
+                 <span>Mar, Apr, May, Sep, Oct (excl. holidays)</span>
+            </div>
+             <div class="control-group">
+                <label for="highSeasonMultiplier">High Season Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="highSeasonMultiplier" value="1.3" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('highSeasonMultiplier', 2, 'x'); updateAll();">
+                    <span id="highSeasonMultiplierValue">1.30x</span>
+                 </div>
+                 <span>June, early July</span>
+            </div>
+            <div class="control-group">
+                <label for="peakSeasonMultiplier">Peak Season Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="peakSeasonMultiplier" value="1.6" min="1.2" max="2.5" step="0.05" oninput="updateSliderValue('peakSeasonMultiplier', 2, 'x'); updateAll();">
+                    <span id="peakSeasonMultiplierValue">1.60x</span>
+                 </div>
+                 <span>Late July & August</span>
+            </div>
+             <div class="control-group">
+                <label for="schoolHolidayMultiplier">School Holiday Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="schoolHolidayMultiplier" value="1.2" min="1.0" max="1.8" step="0.05" oninput="updateSliderValue('schoolHolidayMultiplier', 2, 'x'); updateAll();">
+                    <span id="schoolHolidayMultiplierValue">1.20x</span>
+                 </div>
+                 <span>Stacking multiplier for non-summer school breaks.</span>
+            </div>
+             <div class="control-group">
+                <label for="eventLowImpactMultiplier">Low Event Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="eventLowImpactMultiplier" value="1.1" min="1.0" max="1.5" step="0.01" oninput="updateSliderValue('eventLowImpactMultiplier', 2, 'x'); updateAll();">
+                    <span id="eventLowImpactMultiplierValue">1.10x</span>
+                 </div>
+                 <span>Smaller festivals, niche events.</span>
+            </div>
+            <div class="control-group">
+                <label for="eventMediumImpactMultiplier">Medium Event Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="eventMediumImpactMultiplier" value="1.25" min="1.0" max="2.0" step="0.05" oninput="updateSliderValue('eventMediumImpactMultiplier', 2, 'x'); updateAll();">
+                    <span id="eventMediumImpactMultiplierValue">1.25x</span>
+                 </div>
+                 <span>Significant events, concerts, non-peak Bank Hols.</span>
+            </div>
+             <div class="control-group">
+                <label for="eventHighImpactMultiplier">High Event Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="eventHighImpactMultiplier" value="1.4" min="1.1" max="2.2" step="0.05" oninput="updateSliderValue('eventHighImpactMultiplier', 2, 'x'); updateAll();">
+                    <span id="eventHighImpactMultiplierValue">1.40x</span>
+                 </div>
+                 <span>Major events, concerts, peak Bank Hols.</span>
+            </div>
+             <div class="control-group">
+                <label for="eventPeakImpactMultiplier">Peak Event Multiplier:</label>
+                 <div class="value-display">
+                    <input type="range" id="eventPeakImpactMultiplier" value="1.7" min="1.2" max="2.8" step="0.05" oninput="updateSliderValue('eventPeakImpactMultiplier', 2, 'x'); updateAll();">
+                    <span id="eventPeakImpactMultiplierValue">1.70x</span>
+                 </div>
+                 <span>Absolute peak demand (e.g., Aug Bank Hol + Headline Act).</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="statistics">
+        <h2>Key Statistics</h2>
+        <ul>
+            <li><strong>Overall Average Rate:</strong> <span id="statAvgRate">---</span></li>
+            <li><strong>Minimum Nightly Rate:</strong> <span id="statMinRate">---</span></li>
+            <li><strong>Maximum Nightly Rate:</strong> <span id="statMaxRate">---</span></li>
+            <li><strong>Average Low Season Rate:</strong> <span id="statAvgLow">---</span></li>
+            <li><strong>Average Shoulder Season Rate:</strong> <span id="statAvgShoulder">---</span></li>
+            <li><strong>Average High Season Rate:</strong> <span id="statAvgHigh">---</span></li>
+            <li><strong>Average Peak Season Rate:</strong> <span id="statAvgPeak">---</span></li>
+            <li><strong>Est. Annual Revenue (@ <span id="statOccupancyRate">---</span>% Occ.):</strong> <span id="statEstRevenue">---</span></li>
+        </ul>
+    </div>
+
+    <div id="chart-container">
+         <h2>Annual Price Fluctuation</h2>
+         <canvas id="priceChart"></canvas>
+    </div>
+
+    <div id="pricing-table-container">
+        <h2>Daily Pricing Detail (2025)</h2>
+        <table id="pricingTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Price (£)</th>
+                    <th class="notes">Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Prices will be populated here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // --- Global Variables ---
+    let priceChart = null; // To hold the chart instance
+
+    // --- Data Definitions (Same as previous version) ---
+    const seasonMonths = { Low: [0, 1, 10], Shoulder: [2, 3, 4, 8, 9], High: [5], Peak: [6, 7] };
+    const schoolHolidayData = [ { name: "Feb Half Term", start: "2025-02-15", end: "2025-02-23" }, { name: "Easter Holidays", start: "2025-04-04", end: "2025-04-21" }, { name: "May Half Term", start: "2025-05-24", end: "2025-06-01" }, { name: "Oct Half Term", start: "2025-10-24", end: "2025-11-02" }, { name: "Christmas Break", start: "2025-12-20", end: "2026-01-04" }];
+    const eventData = [
+        { date: "2025-01-01", impact: "Medium", name: "New Year's Day" },
+        { dateRange: ["2025-04-12", "2025-04-13"], impact: "Medium", name: "Food & Drink Festival" },
+        { dateRange: ["2025-04-18", "2025-04-21"], impact: "High", name: "Easter Bank Holiday Weekend" },
+        { dateRange: ["2025-05-03", "2025-05-05"], impact: "High", name: "Early May Bank Holiday Weekend" },
+        { dateRange: ["2025-05-24", "2025-05-26"], impact: "High", name: "Spring Bank Holiday Weekend" },
+        { dateRange: ["2025-05-30", "2025-06-02"], impact: "Medium", name: "Scarborough Streets Festival" },
+        { date: "2025-06-11", impact: "Medium", name: "OAT Concert (The Corrs)" },
+        { date: "2025-06-13", impact: "High", name: "OAT Concert (Gary Barlow)" },
+        { date: "2025-06-14", impact: "Medium", name: "OAT Concert (Basement Jaxx)" },
+        { dateRange: ["2025-06-13", "2025-06-22"], impact: "Low", name: "Fringe Festival Period" },
+        { date: "2025-06-20", impact: "Medium", name: "OAT Concert (Simple Minds)" },
+        { date: "2025-06-21", impact: "Medium", name: "OAT Concert (Anne-Marie)" },
+        { dateRange: ["2025-06-27", "2025-06-29"], impact: "High", name: "Armed Forces Day Weekend" },
+        { date: "2025-06-28", impact: "High", name: "OAT Concert (Travis)" },
+        { dateRange: ["2025-07-05", "2025-08-03"], impact: "Low", name: "Scarborough Fair Period" },
+        { date: "2025-07-05", impact: "Medium", name: "OAT Concert (James Arthur)" },
+        { date: "2025-07-06", impact: "Medium", name: "OAT Concert (Olly Murs)" },
+        { date: "2025-07-10", impact: "High", name: "OAT Concert (The Script)" },
+        { date: "2025-07-11", impact: "Medium", name: "OAT Concert (UB40)" },
+        { dateRange: ["2025-07-12", "2025-07-14"], impact: "Low", name: "Scarborough Extreme Festival" },
+        { date: "2025-07-12", impact: "Medium", name: "OAT Concert (Blossoms)" },
+        { date: "2025-07-19", impact: "Medium", name: "OAT Concert (Rag'n'Bone Man)" },
+        { dateRange: ["2025-07-18", "2025-07-20"], impact: "Medium", name: "Staxtonbury Festival Weekend" },
+        { date: "2025-07-23", impact: "Medium", name: "OAT Concert (McFly)" },
+        { date: "2025-07-26", impact: "Medium", name: "OAT Concert (Craig David)" },
+        { date: "2025-08-02", impact: "Medium", name: "OAT Concert (Faithless)" },
+        { date: "2025-08-13", impact: "Medium", name: "OAT Concert (Texas)" },
+        { dateRange: ["2025-08-23", "2025-08-25"], impact: "Peak", name: "August Bank Holiday Weekend" },
+        { date: "2025-08-24", impact: "Peak", name: "OAT Concert (Will Smith)" },
+        { dateRange: ["2025-09-06", "2025-09-07"], impact: "Medium", name: "Goldwing Light Parade Weekend" },
+        { dateRange: ["2025-09-26", "2025-09-28"], impact: "Medium", name: "Jazz Festival Weekend" },
+        { date: "2025-09-27", impact: "Low", name: "Surf Festival" },
+        { dateRange: ["2025-10-10", "2025-10-12"], impact: "Medium", name: "Northern Soul Weekender" },
+        { dateRange: ["2025-11-28", "2025-11-30"], impact: "Medium", name: "Scarborough Sparkle Weekend" }
+    ];
+
+    // --- Helper Functions ---
+     function formatCurrency(value) {
+        return `£${Math.round(value).toLocaleString()}`;
+    }
+
+    function getEventInfoForDate(dateStr) { /* ... same as previous ... */
+         let highestImpact = null;
+         let impactLevelValue = 0; // 0:None, 1:Low, 2:Medium, 3:High, 4:Peak
+         for (const event of eventData) {
+             let currentImpactValue = 0;
+             if (event.impact === 'Low') currentImpactValue = 1;
+             else if (event.impact === 'Medium') currentImpactValue = 2;
+             else if (event.impact === 'High') currentImpactValue = 3;
+             else if (event.impact === 'Peak') currentImpactValue = 4;
+             let isEventDay = false;
+             if (event.date && event.date === dateStr) {
+                 isEventDay = true;
+             } else if (event.dateRange) {
+                 const start = new Date(event.dateRange[0] + 'T00:00:00Z');
+                 const end = new Date(event.dateRange[1] + 'T00:00:00Z');
+                 const current = new Date(dateStr + 'T00:00:00Z');
+                 end.setUTCDate(end.getUTCDate() + 1); // Make end date inclusive
+                 if (current >= start && current < end) {
+                     isEventDay = true;
+                 }
+             }
+             if (isEventDay && currentImpactValue > impactLevelValue) {
+                 impactLevelValue = currentImpactValue;
+                 highestImpact = { impact: event.impact, name: event.name };
+             }
+         }
+         return highestImpact;
+    }
+    function isSchoolHoliday(dateStr) { /* ... same as previous ... */
+        const currentDate = new Date(dateStr + 'T00:00:00Z');
+        for (const holiday of schoolHolidayData) {
+            const start = new Date(holiday.start + 'T00:00:00Z');
+            const end = new Date(holiday.end + 'T00:00:00Z');
+            end.setUTCDate(end.getUTCDate() + 1); // Make end date inclusive
+            if (currentDate >= start && currentDate < end) {
+                // Exclude peak summer (July/Aug) from this specific premium logic if needed
+                // if (currentDate.getUTCMonth() !== 6 && currentDate.getUTCMonth() !== 7) {
+                   return holiday.name;
+                // }
+            }
+        }
+        return null;
+    }
+    function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') { /* ... modified ... */
+        const slider = document.getElementById(sliderId);
+        const outputSpan = document.getElementById(sliderId + 'Value');
+        outputSpan.textContent = parseFloat(slider.value).toFixed(decimalPlaces) + suffix;
+    }
+
+    // --- Calculation Functions ---
+
+    function getInputs() {
+        return {
+            basePrice: parseFloat(document.getElementById('basePrice').value) || 90,
+            occupancyRate: parseFloat(document.getElementById('occupancyRate').value) / 100 || 0.65,
+            weekendMultiplier: parseFloat(document.getElementById('weekendMultiplier').value) || 1.0,
+            lowSeasonMultiplier: parseFloat(document.getElementById('lowSeasonMultiplier').value) || 1.0,
+            shoulderSeasonMultiplier: parseFloat(document.getElementById('shoulderSeasonMultiplier').value) || 1.0,
+            highSeasonMultiplier: parseFloat(document.getElementById('highSeasonMultiplier').value) || 1.0,
+            peakSeasonMultiplier: parseFloat(document.getElementById('peakSeasonMultiplier').value) || 1.0,
+            schoolHolidayMultiplier: parseFloat(document.getElementById('schoolHolidayMultiplier').value) || 1.0,
+            eventMultipliers: {
+                Low: parseFloat(document.getElementById('eventLowImpactMultiplier').value) || 1.0,
+                Medium: parseFloat(document.getElementById('eventMediumImpactMultiplier').value) || 1.0,
+                High: parseFloat(document.getElementById('eventHighImpactMultiplier').value) || 1.0,
+                Peak: parseFloat(document.getElementById('eventPeakImpactMultiplier').value) || 1.0
+            }
+        };
+    }
+
+    function calculateSingleDayPrice(date, inputs) {
+        const month = date.getUTCMonth(); // 0-11
+        const dayOfWeek = date.getUTCDay(); // 0=Sun, 6=Sat
+        const dateStr = date.toISOString().split('T')[0];
+
+        let currentPrice = inputs.basePrice;
+        let notes = [];
+        let seasonMultiplier = 1.0;
+        let weekendMultiplier = 1.0;
+        let holidayMultiplier = 1.0;
+        let eventMultiplier = 1.0;
+        let seasonName = "Shoulder"; // Default
+
+        // 1. Apply Seasonal Factor
+        if (seasonMonths.Low.includes(month)) {
+            seasonMultiplier = inputs.lowSeasonMultiplier;
+            seasonName = "Low";
+            notes.push("Low Season");
+        } else if (seasonMonths.Shoulder.includes(month)) {
+            seasonMultiplier = inputs.shoulderSeasonMultiplier;
+            seasonName = "Shoulder";
+            notes.push("Shoulder Season");
+        } else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15) ) {
+            seasonMultiplier = inputs.highSeasonMultiplier;
+             seasonName = "High";
+            notes.push("High Season");
+        } else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) {
+            seasonMultiplier = inputs.peakSeasonMultiplier;
+             seasonName = "Peak";
+            notes.push("Peak Season");
+        }
+
+        // 2. Apply Weekend Factor (Fri/Sat)
+        if (dayOfWeek === 5 || dayOfWeek === 6) {
+            weekendMultiplier = inputs.weekendMultiplier;
+            if (!notes.includes("Weekend")) notes.push("Weekend");
+        }
+
+         // 3. Check for School Holidays
+         const holidayName = isSchoolHoliday(dateStr);
+         if (holidayName) {
+             // Stack holiday multiplier on top of seasonal/weekend
+             holidayMultiplier = inputs.schoolHolidayMultiplier;
+             if (!notes.includes(holidayName)) notes.push(holidayName);
+         }
+
+        // 4. Check for Specific Events (find highest impact)
+        const eventInfo = getEventInfoForDate(dateStr);
+         if (eventInfo) {
+            const eventPremiumMult = inputs.eventMultipliers[eventInfo.impact];
+             // Stack event multiplier
+             eventMultiplier = eventPremiumMult;
+             if (!notes.includes(eventInfo.name)) notes.push(eventInfo.name);
+         }
+
+         // Calculate final price: Base * Season * Weekend * Holiday * Event
+         currentPrice = inputs.basePrice * seasonMultiplier * weekendMultiplier * holidayMultiplier * eventMultiplier;
+
+        // Clean up notes
+         if (notes.length > 1 && notes.includes(notes[0]) && (eventInfo || (holidayName && holidayMultiplier > 1))) {
+             notes.shift(); // Remove basic season note if more specific notes exist
+         }
+
+
+        return {
+            date: date,
+            dateStr: dateStr,
+            day: date.getUTCDay(), // Keep day index for stats
+            season: seasonName,
+            price: currentPrice,
+            notes: notes.join(', ')
+        };
+    }
+
+     function calculateAllPrices(inputs) {
+         const results = [];
+         const startDate = new Date(Date.UTC(2025, 0, 1));
+         const endDate = new Date(Date.UTC(2025, 11, 31));
+
+         for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
+             results.push(calculateSingleDayPrice(new Date(d), inputs));
+         }
+         return results;
+     }
+
+    // --- Statistics Function ---
+     function updateStatistics(priceData, inputs) {
+        if (!priceData || priceData.length === 0) return;
+
+        const prices = priceData.map(d => d.price);
+        const totalRevenue = prices.reduce((sum, price) => sum + price, 0);
+        const avgRate = totalRevenue / prices.length;
+        const minRate = Math.min(...prices);
+        const maxRate = Math.max(...prices);
+        const estAnnualRevenue = totalRevenue * inputs.occupancyRate;
+
+        const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] };
+        priceData.forEach(d => {
+            if (seasonalPrices[d.season]) {
+                seasonalPrices[d.season].push(d.price);
+            }
+        });
+
+        const calculateAverage = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+        document.getElementById('statAvgRate').textContent = formatCurrency(avgRate);
+        document.getElementById('statMinRate').textContent = formatCurrency(minRate);
+        document.getElementById('statMaxRate').textContent = formatCurrency(maxRate);
+        document.getElementById('statAvgLow').textContent = formatCurrency(calculateAverage(seasonalPrices.Low));
+        document.getElementById('statAvgShoulder').textContent = formatCurrency(calculateAverage(seasonalPrices.Shoulder));
+        document.getElementById('statAvgHigh').textContent = formatCurrency(calculateAverage(seasonalPrices.High));
+        document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak));
+        document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0);
+        document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue);
+    }
+
+    // --- Chart Function ---
+    function renderOrUpdateChart(priceData) {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const labels = priceData.map(d => d.dateStr); // Use YYYY-MM-DD for labels
+        const dataPoints = priceData.map(d => Math.round(d.price));
+
+        if (priceChart) {
+            // Update existing chart
+            priceChart.data.labels = labels;
+            priceChart.data.datasets[0].data = dataPoints;
+            priceChart.update();
+        } else {
+            // Create new chart
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nightly Price (£)',
+                        data: dataPoints,
+                        borderColor: '#007f5f',
+                        backgroundColor: 'rgba(0, 127, 95, 0.1)',
+                        borderWidth: 1.5,
+                        pointRadius: 0, // Hide points for clarity
+                        tension: 0.1 // Slight curve
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time', // Use time scale if dates are parsed correctly by Chart.js adapter
+                            time: {
+                                unit: 'month',
+                                tooltipFormat: 'dd MMM yyyy', // Tooltip format
+                                displayFormats: {
+                                    month: 'MMM yyyy' // Display format on axis
+                                }
+                            },
+                            title: { display: true, text: 'Date' },
+                            ticks: { autoSkip: true, maxTicksLimit: 12 }
+                        },
+                        y: {
+                            beginAtZero: false, // Don't always start at 0
+                            title: { display: true, text: 'Price (£)' },
+                            ticks: {
+                                callback: function(value) { return '£' + value; }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                             callbacks: {
+                                 label: function(context) {
+                                     let label = context.dataset.label || '';
+                                     if (label) { label += ': '; }
+                                     label += formatCurrency(context.parsed.y);
+                                     // Add notes to tooltip (find corresponding day data)
+                                     const dataIndex = context.dataIndex;
+                                     const dayData = priceData[dataIndex];
+                                     if(dayData && dayData.notes) {
+                                         label += ` (${dayData.notes})`;
+                                     }
+                                     return label;
+                                 }
+                             }
+                        }
+                    }
+                }
+            });
+        }
+    }
+     // Requires including Chart.js date adapter (e.g., chartjs-adapter-date-fns) for time scale
+     // Simplified X scale for now if adapter isn't included:
+      /*
+       options: { ...
+         scales: {
+             x: {
+                  title: { display: true, text: 'Date (Day of Year)' },
+                  ticks: {
+                     callback: function(value, index, ticks) {
+                         // Show roughly monthly labels
+                         return index % 30 === 0 ? labels[index] : '';
+                     },
+                      autoSkip: false, // Disable autoSkip if using manual callback
+                      maxRotation: 0,
+                      minRotation: 0
+                  }
+              }, ...
+         }
+       }
+      */
+
+
+    // --- Table Function ---
+     function populateTable(priceData) {
+         const tableBody = document.getElementById('pricingTable').getElementsByTagName('tbody')[0];
+         tableBody.innerHTML = ''; // Clear previous results
+         const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' });
+         const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+         priceData.forEach(data => {
+             const row = tableBody.insertRow();
+             row.insertCell().textContent = dateFormatter.format(data.date);
+             row.insertCell().textContent = dayFormatter.format(data.date);
+             row.insertCell().textContent = Math.round(data.price).toString();
+             row.insertCell().innerHTML = `<span class="notes">${data.notes || ''}</span>`;
+         });
+     }
+
+     // --- Main Update Trigger ---
+     function updateAll() {
+         const inputs = getInputs();
+         const priceData = calculateAllPrices(inputs);
+         updateStatistics(priceData, inputs);
+         renderOrUpdateChart(priceData); // Pass priceData which includes dates/notes
+         populateTable(priceData);
+     }
+
+
+    // --- Initialisation ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set initial slider values display
+        const sliders = document.querySelectorAll('input[type=range]');
+        sliders.forEach(slider => {
+            const isMultiplier = slider.id.toLowerCase().includes('multiplier');
+            const decimalPlaces = isMultiplier ? 2 : 0;
+            const suffix = isMultiplier ? 'x' : '%';
+             updateSliderValue(slider.id, decimalPlaces, suffix);
+        });
+
+         // Perform initial calculation and render
+         updateAll();
+    });
+
+</script>
+
+</body>
+</html>
