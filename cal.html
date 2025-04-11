@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Captain's Cottage Dynamic Pricing Tool (2025)</title>
+    <title>Dynamic Pricing Tool (2025)</title>
 
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -17,226 +20,145 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <style>
-        /* --- Base Styles & Variables --- */
+        /* --- Improved Styling --- */
         :root {
-            --primary-color: #005f73;
-            --secondary-color: #007f5f;
-            --accent-color: #94d2bd;
-            --highlight-color: #e9f5f1;
-            --override-price-bg: #fff3cd;
-            --override-minstay-bg: #d1e7dd; /* Light green for min stay override */
-            --danger-color: #d62828;
-            --danger-hover-color: #b32020;
-            --light-grey: #f8f9fa;
-            --medium-grey: #dee2e6;
-            --dark-grey: #495057;
-            --font-family: 'Poppins', sans-serif;
+            --primary-color: #005f73; /* Deep Teal */
+            --secondary-color: #007f5f; /* Medium Green */
+            --accent-color: #94d2bd; /* Light Teal/Mint */
+            --bg-color: #f8f9fa; /* Very Light Grey */
+            --light-bg-color: #ffffff;
+            --text-color: #343a40; /* Dark Grey */
+            --light-text-color: #6c757d; /* Medium Grey */
+            --border-color: #dee2e6; /* Light Grey Border */
+            --highlight-bg: #fff3cd; /* Yellow for overrides */
+            --danger-color: #dc3545; /* Red */
+            --danger-hover: #c82333;
+            --weekend-bg: #e7f5ff; /* Light Blue */
+            --holiday-border: #ffc107; /* Yellow */
+            --event-border: #fd7e14; /* Orange */
+
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             --border-radius: 6px;
-            --box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         body {
-            font-family: var(--font-family);
+            font-family: 'Lato', sans-serif;
             padding: 20px;
-            background-color: #eef1f5; /* Lighter page background */
-            color: var(--dark-grey);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             line-height: 1.6;
-            font-size: 15px;
+            font-size: 16px;
         }
-
-        /* --- Layout --- */
         .container {
             display: grid;
-            grid-template-areas:
-                "controls stats"
-                "events minstay"
-                "chart chart"
-                "table table";
+            grid-template-areas: "controls stats" "events minstay" "chart chart" "table table";
             grid-template-columns: 1fr 1fr;
             grid-gap: 25px;
-            max-width: 1700px; /* Slightly wider */
+            max-width: 1600px;
             margin: auto;
         }
-        .card { /* Apply common card styling */
-            background-color: #fff;
+        /* Section Styling */
+        #controls, #statistics, #event-management, #min-stay-management, #chart-container, #pricing-table-container {
+            background-color: var(--light-bg-color);
             padding: 25px;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
         }
         #controls { grid-area: controls; }
-        #statistics { grid-area: stats; background-color: var(--highlight-color); }
+        #statistics { grid-area: stats; background-color: #f0f7f6; } /* Subtle background */
         #event-management { grid-area: events; }
         #min-stay-management { grid-area: minstay; }
-        #chart-container { grid-area: chart; height: 420px; } /* Slightly taller chart */
-        #pricing-table-container { grid-area: table; max-height: 650px; overflow-y: auto; }
+        #chart-container { grid-area: chart; height: 400px; }
+        #pricing-table-container { grid-area: table; max-height: 650px; overflow-y: auto; } /* Increased height */
 
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
-            font-weight: 600;
-            font-size: 1.4em;
-        }
-        h3 {
-            margin-top: 20px;
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-            font-weight: 500;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-            font-size: 1.15em;
-        }
+        /* Headings */
+        h2 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; font-weight: 700; font-size: 1.5em; }
+        h3 { margin-top: 20px; margin-bottom: 15px; color: var(--secondary-color); font-weight: 700; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 1.2em; }
 
-        /* --- Controls Styling --- */
-        #controls fieldset {
-            border: 1px solid var(--medium-grey);
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            padding: 15px 20px 20px 20px;
-            background-color: var(--light-grey);
-        }
-        #controls legend {
-            font-weight: 600;
-            color: var(--secondary-color);
-            padding: 0 8px;
-            font-size: 1.1em;
-            background-color: var(--light-grey); /* Match fieldset bg */
-        }
+        /* Controls Styling */
+        #controls fieldset { border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-bottom: 25px; padding: 15px 20px 20px 20px; }
+        #controls legend { font-weight: 700; color: var(--secondary-color); padding: 0 8px; font-size: 1.15em; }
         .control-group { margin-bottom: 18px; }
-        .control-group label {
-            font-weight: 500; /* Slightly less bold */
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.95em;
-            color: var(--primary-color);
-        }
+        .control-group label { font-weight: 700; display: block; margin-bottom: 6px; font-size: 0.95em; color: var(--primary-color); }
         .input-pair { display: flex; align-items: center; gap: 12px; }
-        .input-pair input[type=range] {
-            flex-grow: 1; height: 8px; cursor: pointer; margin: 0; padding: 0;
-            accent-color: var(--secondary-color); /* Style slider thumb/track */
-            background: var(--highlight-color); border-radius: 4px;
-            appearance: none; -webkit-appearance: none;
-        }
-         /* Custom track styles (optional) */
-         .input-pair input[type=range]::-webkit-slider-runnable-track { height: 8px; background: var(--highlight-color); border-radius: 4px; }
-         .input-pair input[type=range]::-moz-range-track { height: 8px; background: var(--highlight-color); border-radius: 4px; }
-         /* Custom thumb styles (optional) */
-         .input-pair input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; height: 18px; width: 18px; background: var(--secondary-color); border-radius: 50%; margin-top: -5px; }
-         .input-pair input[type=range]::-moz-range-thumb { height: 18px; width: 18px; background: var(--secondary-color); border-radius: 50%; border: none; }
+        .input-pair input[type=range] { flex-grow: 1; height: 8px; cursor: pointer; margin: 0; padding: 0; accent-color: var(--secondary-color); background: #e9ecef; border-radius: 4px;}
+        /* Customizing range track */
+         .input-pair input[type=range]::-webkit-slider-runnable-track { background: #e9ecef; height: 8px; border-radius: 4px; }
+         .input-pair input[type=range]::-moz-range-track { background: #e9ecef; height: 8px; border-radius: 4px; }
+         .input-pair input[type=range]::-webkit-slider-thumb { margin-top: -3px; /* Adjust vertically */ }
+         .input-pair input[type=range]::-moz-range-thumb { margin-top: -3px; /* Adjust vertically */}
 
-        .input-pair input[type=number] {
-            width: 75px; text-align: right; padding: 6px 8px;
-            border: 1px solid var(--medium-grey); border-radius: var(--border-radius);
-            font-size: 0.95em; -moz-appearance: textfield;
-            transition: border-color 0.2s ease;
-        }
+        .input-pair input[type=number] { width: 75px; text-align: right; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: 0.95em; -moz-appearance: textfield; }
         .input-pair input[type=number]:focus { border-color: var(--secondary-color); outline: none; box-shadow: 0 0 0 2px rgba(0, 127, 95, 0.2); }
         .input-pair input[type=number]::-webkit-outer-spin-button, .input-pair input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .control-group .description { font-size: 0.88em; color: #6c757d; margin-top: 5px; }
-        .control-group input#basePrice, .control-group input#maxPrice, .control-group input#defaultMinStay {
-             width: 110px; margin-bottom: 5px; padding: 6px 8px; border: 1px solid var(--medium-grey);
-             border-radius: var(--border-radius); font-size: 0.95em;
-         }
-        .control-group input:focus { border-color: var(--secondary-color); outline: none; box-shadow: 0 0 0 2px rgba(0, 127, 95, 0.2); }
-
+        .control-group .description { font-size: 0.9em; color: var(--light-text-color); margin-top: 5px; }
+        .control-group input#basePrice, .control-group input#maxPrice, .control-group input#defaultMinStay { width: 110px; margin-bottom: 5px; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: 0.95em; }
 
         /* Statistics Styling */
         #statistics ul { list-style: none; padding: 0; }
-        #statistics li { margin-bottom: 12px; font-size: 1em; border-bottom: 1px solid var(--accent-color); padding-bottom: 8px; display: flex; justify-content: space-between; }
-        #statistics li strong { color: var(--secondary-color); flex-basis: 60%; font-weight: 500; }
-        #statistics li span { font-weight: 600; text-align: right; flex-basis: 35%; color: var(--primary-color); }
+        #statistics li { margin-bottom: 12px; font-size: 1em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; justify-content: space-between; }
+        #statistics li strong { color: var(--secondary-color); flex-basis: 60%; font-weight: 700; }
+        #statistics li span { font-weight: 400; text-align: right; flex-basis: 35%; color: var(--text-color); }
 
         /* Event & Min Stay Management Styling */
-        #event-management, #min-stay-management { font-size: 0.95em; }
-        .rule-list { list-style: none; padding: 0; max-height: 280px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e9ecef; padding: 15px; border-radius: var(--border-radius); background-color: var(--light-grey); }
-        .rule-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 10px;}
+        #event-management, #min-stay-management { font-size: 1em; }
+        .rule-list { list-style: none; padding: 0; max-height: 280px; overflow-y: auto; margin-bottom: 20px; border: 1px solid var(--border-color); padding: 15px; border-radius: var(--border-radius); background-color: #fdfdfd; }
+        .rule-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px dashed #eee; flex-wrap: wrap; gap: 10px;}
         .rule-list li:last-child { border-bottom: none; }
-        .rule-list li span { flex-grow: 1; min-width: 200px; line-height: 1.4; }
+        .rule-list li span { flex-grow: 1; min-width: 220px; color: var(--text-color); }
         .rule-list li .rule-controls { display: flex; align-items: center; gap: 10px; }
-        .rule-list li select, .rule-list li input[type=number] { padding: 4px 6px; font-size: 0.9em; border-radius: var(--border-radius); border: 1px solid var(--medium-grey); max-width: 90px;}
-        .rule-list li button.delete-btn { padding: 4px 9px; font-size: 0.9em; cursor: pointer; background-color: #f08080; color: white; border: none; border-radius: var(--border-radius); line-height: 1; transition: background-color 0.2s ease; }
-        .rule-list li button.delete-btn:hover { background-color: var(--danger-color); }
+        .rule-list li select, .rule-list li input[type=number] { padding: 5px 8px; font-size: 0.9em; border-radius: var(--border-radius); border: 1px solid #ccc; max-width: 90px;}
+        .rule-list li button.delete-btn { padding: 4px 8px; font-size: 0.9em; cursor: pointer; background-color: var(--danger-color); color: white; border: none; border-radius: var(--border-radius); transition: background-color 0.2s ease; }
+        .rule-list li button.delete-btn:hover { background-color: var(--danger-hover); }
         .add-rule-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; border-top: 2px solid #eee; padding-top: 20px; }
         .add-rule-form .form-group { display: flex; flex-direction: column; }
-        .add-rule-form label { font-weight: 500; margin-bottom: 5px; font-size: 0.9em; color: var(--primary-color);}
-        .add-rule-form input[type=text], .add-rule-form input[type=date], .add-rule-form input[type=number], .add-rule-form select { padding: 8px; border: 1px solid var(--medium-grey); border-radius: var(--border-radius); font-size: 0.95em; transition: border-color 0.2s ease; }
-        .add-rule-form input:focus, .add-rule-form select:focus { border-color: var(--secondary-color); outline: none; box-shadow: 0 0 0 2px rgba(0, 127, 95, 0.2); }
-        .add-rule-form button { grid-column: 1 / -1; padding: 10px 15px; background-color: var(--secondary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1em; font-weight: 500; margin-top: 10px; transition: background-color 0.2s ease;}
+        .add-rule-form label { font-weight: 700; margin-bottom: 5px; font-size: 0.95em; color: var(--primary-color); }
+        .add-rule-form input[type=text], .add-rule-form input[type=date], .add-rule-form input[type=number], .add-rule-form select { padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: 1em; }
+        .add-rule-form button { grid-column: 1 / -1; padding: 10px 15px; background-color: var(--secondary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1.05em; margin-top: 10px; transition: background-color 0.2s ease; }
         .add-rule-form button:hover { background-color: #006d50; }
         .date-range-inputs { display: none; }
         .date-range-inputs label { margin-top: 8px; }
 
         /* Table Styling */
-        #pricingTable { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
-        #pricingTable th, #pricingTable td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; }
-        #pricingTable th { background-color: var(--highlight-color); color: var(--primary-color); position: sticky; top: 0; z-index: 1; font-weight: 600; text-align: center; }
-        #pricingTable th:first-child { text-align: left; }
-        #pricingTable tbody tr { transition: background-color 0.15s ease; }
-        #pricingTable tbody tr:hover { background-color: #e9ecef; }
-        /* Highlighting - More subtle */
-        #pricingTable tbody tr.weekend { background-color: rgba(173, 216, 230, 0.15); } /* Very light blue */
-        #pricingTable tbody tr.holiday { border-left: 4px solid #ffeeba; } /* Light yellow border */
-        #pricingTable tbody tr.event { border-right: 4px solid #f5c6cb; } /* Light pink border */
-
-        .notes { font-style: italic; color: #6c757d; font-size: 0.9em; white-space: normal; max-width: 300px;}
-        .price-cell, .min-stay-cell { cursor: pointer; position: relative; text-align: center; } /* Center align prices/stays */
-        .price-override { font-weight: 600; background-color: var(--override-price-bg) !important; color: #856404; }
-        .min-stay-override { font-weight: 600; background-color: var(--override-minstay-bg) !important; color: #0f5132; } /* Style min stay overrides */
-        .price-input, .min-stay-input { /* Common input style */
-            width: 70px; padding: 4px; font-size: inherit; border: 1px solid var(--secondary-color); text-align: center; border-radius: 4px;
-            box-shadow: 0 0 5px rgba(0,127,95,0.3); -moz-appearance: textfield;
-        }
-         .price-input::-webkit-outer-spin-button, .price-input::-webkit-inner-spin-button,
-         .min-stay-input::-webkit-outer-spin-button, .min-stay-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #pricingTable { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; font-size: 0.95em; }
+        #pricingTable th, #pricingTable td { border-bottom: 1px solid var(--border-color); padding: 10px 12px; text-align: left; vertical-align: middle; }
+        #pricingTable th { background-color: #e9f5f1; color: var(--primary-color); position: sticky; top: -1px; /* Adjusted for potential container padding */ z-index: 10; font-weight: 700; border-top: 1px solid var(--border-color); }
+        #pricingTable th:first-child { border-top-left-radius: var(--border-radius); }
+        #pricingTable th:last-child { border-top-right-radius: var(--border-radius); }
+        #pricingTable tbody tr:hover { background-color: #f1f1f1; }
+        /* Highlighting */
+        #pricingTable tbody tr.weekend { background-color: var(--weekend-bg); }
+        #pricingTable tbody tr.holiday td:first-child { border-left: 4px solid var(--holiday-border); } /* Indicator on left */
+        #pricingTable tbody tr.event td:last-child { border-right: 4px solid var(--event-border); } /* Indicator on right */
+        .notes { font-style: italic; color: var(--light-text-color); font-size: 0.9em; white-space: normal; max-width: 300px;}
+        .price-cell, .min-stay-cell { cursor: pointer; position: relative; text-align: right; }
+        .price-override, .min-stay-override { font-weight: 700; background-color: var(--highlight-bg) !important; color: #856404; }
+        .editable-input { width: 60px; padding: 4px; font-size: inherit; border: 1px solid var(--secondary-color); text-align: right; border-radius: 3px; }
+        .min-stay-cell { text-align: center; font-style: normal; color: var(--text-color); } /* Centered min stay */
 
         /* Edit controls */
-        .edit-controls { position: absolute; right: 3px; top: 3px; display: none; gap: 4px; background: rgba(255,255,255,0.9); padding: 2px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .price-cell:hover .edit-controls, .min-stay-cell:hover .edit-controls { display: flex; }
+        .edit-controls { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: none; gap: 4px; background: rgba(255, 255, 255, 0.9); padding: 2px 4px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .price-cell:hover .edit-controls, .min-stay-cell:hover .edit-controls,
         .price-cell.editing .edit-controls, .min-stay-cell.editing .edit-controls { display: flex; }
-        .edit-controls button { background: none; border: none; cursor: pointer; padding: 0 4px; font-size: 1.2em; line-height: 1; transition: color 0.2s ease;}
-        .revert-btn { color: #fd7e14; } /* Orange */
-        .revert-btn:hover { color: #e8590c; }
-        .cancel-btn { color: #dc3545; } /* Red */
-        .cancel-btn:hover { color: #c82333; }
+        .edit-controls button { background: none; border: none; cursor: pointer; padding: 0 3px; font-size: 1.1em; line-height: 1; opacity: 0.7; transition: opacity 0.2s ease; }
+        .edit-controls button:hover { opacity: 1; }
+        .revert-btn { color: #ff8c00; } /* Orange */
+        .cancel-btn { color: var(--danger-color); } /* Red */
 
         /* Table Actions Styling */
-        .table-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--medium-grey); flex-wrap: wrap; gap: 15px;}
-        .table-actions button { padding: 10px 25px; color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 0.95em; font-weight: 500; transition: background-color 0.2s ease, transform 0.1s ease; }
-        .table-actions button:hover { transform: translateY(-1px); }
-        .table-actions button:active { transform: translateY(0px); }
+        .table-actions { display: flex; justify-content: flex-end; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); flex-wrap: wrap; gap: 12px;}
+        .table-actions button { padding: 10px 20px; color: white; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1em; transition: background-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
+        .table-actions button:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
         #exportCsvButton { background-color: var(--primary-color);}
         #exportCsvButton:hover { background-color: #004c5a; }
-        .clear-button-group { display: flex; gap: 10px; } /* Group clear buttons */
-        .clear-button-group button { background-color: var(--danger-color); }
-        .clear-button-group button:hover { background-color: var(--danger-hover-color); }
-
-        /* Tooltip styling (using browser default title attribute) */
-        label[title], input[title] { cursor: help; }
-
+        #clearOverridesButton, #clearMinStayOverridesButton { background-color: var(--danger-color); }
+        #clearOverridesButton:hover, #clearMinStayOverridesButton:hover { background-color: var(--danger-hover); }
 
         /* Responsive adjustments */
-         @media (max-width: 1200px) {
-             .container { grid-template-areas: "controls stats" "events events" "minstay minstay" "chart chart" "table table"; }
-             .input-pair input[type=number] { width: 65px; }
-         }
-         @media (max-width: 950px) {
-              .container { grid-template-areas: "controls" "stats" "events" "minstay" "chart" "table"; grid-template-columns: 1fr; }
-              #chart-container { height: 350px; }
-              .table-actions { flex-direction: column; gap: 12px; align-items: stretch; }
-              .table-actions button { width: 100%; }
-              .clear-button-group { width: 100%; flex-direction: column; }
-          }
-         @media (max-width: 600px) {
-              body { padding: 10px; font-size: 14px; }
-              .card { padding: 15px; }
-              h2 { font-size: 1.3em; }
-              h3 { font-size: 1.1em; }
-              .add-rule-form { grid-template-columns: 1fr; } /* Stack form inputs */
-               #pricingTable th, #pricingTable td { padding: 8px 6px; }
-               .notes { max-width: 150px; }
-          }
+        @media (max-width: 1300px) { .container { grid-template-areas: "controls stats" "events events" "minstay minstay" "chart chart" "table table"; } }
+        @media (max-width: 900px) { .container { grid-template-areas: "controls" "stats" "events" "minstay" "chart" "table"; grid-template-columns: 1fr; } #chart-container { height: 300px; } .table-actions { justify-content: center; } }
+        @media (max-width: 600px) { body { padding: 10px; } #controls, #statistics, #event-management, #min-stay-management, #chart-container, #pricing-table-container { padding: 15px; } h2 { font-size: 1.3em; } h3 { font-size: 1.1em; } .rule-list li, .add-rule-form { font-size: 0.9em; } .table-actions button { font-size: 0.95em; padding: 8px 15px; width: 100%; } }
 
     </style>
 </head>
@@ -244,66 +166,76 @@
 
 <div class="container">
 
-    <div id="controls" class="card">
-         <h2>Pricing Factors</h2>
-         <fieldset> <legend>Base Pricing</legend>
-             <div class="control-group"> <label for="basePrice">Base Nightly Price (£):</label> <input type="number" id="basePrice" value="90" min="50" step="5" oninput="updateAll()"> </div>
-             <div class="control-group"> <label for="maxPrice" title="Sets a ceiling for calculated & manually overridden prices.">Maximum Nightly Price (£):</label> <input type="number" id="maxPrice" value="300" min="100" step="10" oninput="updateAll()"> </div>
-             <div class="control-group"> <label for="occupancyRateRange" title="Used for Annual Revenue Estimate only.">Est. Occupancy (%):</label> <div class="input-pair"> <input type="range" id="occupancyRateRange" value="65" min="0" max="100" step="1"> <input type="number" id="occupancyRateNumber" value="65" min="0" max="100" step="1"> </div> </div>
-         </fieldset>
-         <fieldset> <legend>Weekend & Holiday Adjustments</legend>
-             <div class="control-group"> <label for="weekendMultiplierRange" title="Multiplier applied to Friday & Saturday nights.">Weekend Multiplier (Fri/Sat):</label> <div class="input-pair"> <input type="range" id="weekendMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="weekendMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div>
-             <div class="control-group"> <label for="schoolHolidayMultiplierRange" title="Stacking multiplier for non-summer school breaks (Feb, Easter, May, Oct, Xmas).">School Holiday Multiplier:</label> <div class="input-pair"> <input type="range" id="schoolHolidayMultiplierRange" value="1.2" min="1.0" max="1.8" step="0.05"> <input type="number" id="schoolHolidayMultiplierNumber" value="1.2" min="1.0" max="1.8" step="0.05"> </div> </div>
-         </fieldset>
-         <fieldset> <legend>Seasonal Multipliers</legend>
-             <div class="control-group"> <label for="lowSeasonMultiplierRange" title="Multiplier for Nov, Jan, Feb (excl. holidays).">Low Season (Nov, Jan, Feb):</label> <div class="input-pair"> <input type="range" id="lowSeasonMultiplierRange" value="0.85" min="0.5" max="1.2" step="0.01"> <input type="number" id="lowSeasonMultiplierNumber" value="0.85" min="0.5" max="1.2" step="0.01"> </div> </div>
-             <div class="control-group"> <label for="shoulderSeasonMultiplierRange" title="Multiplier for Mar, Apr, May, Sep, Oct (excl. holidays).">Shoulder Season (Spring, Autumn):</label> <div class="input-pair"> <input type="range" id="shoulderSeasonMultiplierRange" value="1.0" min="0.7" max="1.5" step="0.01"> <input type="number" id="shoulderSeasonMultiplierNumber" value="1.0" min="0.7" max="1.5" step="0.01"> </div> </div>
-             <div class="control-group"> <label for="highSeasonMultiplierRange" title="Multiplier for June & early July.">High Season (Jun, early Jul):</label> <div class="input-pair"> <input type="range" id="highSeasonMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="highSeasonMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div>
-             <div class="control-group"> <label for="peakSeasonMultiplierRange" title="Multiplier for late July & August.">Peak Season (Late Jul, Aug):</label> <div class="input-pair"> <input type="range" id="peakSeasonMultiplierRange" value="1.6" min="1.2" max="2.5" step="0.05"> <input type="number" id="peakSeasonMultiplierNumber" value="1.6" min="1.2" max="2.5" step="0.05"> </div> </div>
-         </fieldset>
-         <fieldset> <legend>Event Impact Multipliers</legend>
-             <div class="control-group"> <label for="eventLowImpactMultiplierRange" title="Stacking multiplier for low impact events.">Low Impact Events:</label> <div class="input-pair"> <input type="range" id="eventLowImpactMultiplierRange" value="1.1" min="1.0" max="1.5" step="0.01"> <input type="number" id="eventLowImpactMultiplierNumber" value="1.1" min="1.0" max="1.5" step="0.01"> </div> </div>
-             <div class="control-group"> <label for="eventMediumImpactMultiplierRange" title="Stacking multiplier for medium impact events.">Medium Impact Events:</label> <div class="input-pair"> <input type="range" id="eventMediumImpactMultiplierRange" value="1.25" min="1.0" max="2.0" step="0.05"> <input type="number" id="eventMediumImpactMultiplierNumber" value="1.25" min="1.0" max="2.0" step="0.05"> </div> </div>
-             <div class="control-group"> <label for="eventHighImpactMultiplierRange" title="Stacking multiplier for high impact events.">High Impact Events:</label> <div class="input-pair"> <input type="range" id="eventHighImpactMultiplierRange" value="1.4" min="1.1" max="2.2" step="0.05"> <input type="number" id="eventHighImpactMultiplierNumber" value="1.4" min="1.1" max="2.2" step="0.05"> </div> </div>
-             <div class="control-group"> <label for="eventPeakImpactMultiplierRange" title="Stacking multiplier for peak impact events.">Peak Impact Events:</label> <div class="input-pair"> <input type="range" id="eventPeakImpactMultiplierRange" value="1.7" min="1.2" max="2.8" step="0.05"> <input type="number" id="eventPeakImpactMultiplierNumber" value="1.7" min="1.2" max="2.8" step="0.05"> </div> </div>
-         </fieldset>
+    <div id="controls">
+         <h2><i class="fas fa-sliders-h"></i> Pricing Factors</h2>
+         <fieldset> <legend>Base Pricing</legend> <!-- ... Fields remain the same structure ... --> </fieldset>
+         <fieldset> <legend>Weekend & Holiday Adjustments</legend> <!-- ... Fields remain the same structure ... --> </fieldset>
+         <fieldset> <legend>Seasonal Multipliers</legend> <!-- ... Fields remain the same structure ... --> </fieldset>
+         <fieldset> <legend>Event Impact Multipliers</legend> <!-- ... Fields remain the same structure ... --> </fieldset>
+         <!-- HTML for controls section - Content is identical to the previous version -->
+          <fieldset>
+             <legend><i class="fas fa-calendar-alt"></i> Base Pricing</legend>
+              <div class="control-group"> <label for="basePrice">Base Nightly Price (£):</label> <input type="number" id="basePrice" value="90" min="50" step="5" oninput="updateAll()"> </div>
+              <div class="control-group"> <label for="maxPrice" title="Sets a ceiling for calculated & manually overridden prices.">Maximum Nightly Price (£):</label> <input type="number" id="maxPrice" value="300" min="100" step="10" oninput="updateAll()"> </div>
+              <div class="control-group"> <label for="occupancyRateRange" title="Used for Annual Revenue Estimate only.">Est. Occupancy (%):</label> <div class="input-pair"> <input type="range" id="occupancyRateRange" value="65" min="0" max="100" step="1"> <input type="number" id="occupancyRateNumber" value="65" min="0" max="100" step="1"> </div> </div>
+          </fieldset>
+          <fieldset>
+              <legend><i class="fas fa-calendar-week"></i> Weekend & Holiday Adjustments</legend>
+              <div class="control-group"> <label for="weekendMultiplierRange" title="Multiplier applied to Friday & Saturday nights.">Weekend Multiplier (Fri/Sat):</label> <div class="input-pair"> <input type="range" id="weekendMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="weekendMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div>
+              <div class="control-group"> <label for="schoolHolidayMultiplierRange" title="Stacking multiplier for non-summer school breaks (Feb, Easter, May, Oct, Xmas).">School Holiday Multiplier:</label> <div class="input-pair"> <input type="range" id="schoolHolidayMultiplierRange" value="1.2" min="1.0" max="1.8" step="0.05"> <input type="number" id="schoolHolidayMultiplierNumber" value="1.2" min="1.0" max="1.8" step="0.05"> </div> </div>
+          </fieldset>
+          <fieldset>
+             <legend><i class="fas fa-cloud-sun-rain"></i> Seasonal Multipliers</legend>
+              <div class="control-group"> <label for="lowSeasonMultiplierRange" title="Multiplier for Nov, Jan, Feb (excl. holidays).">Low Season (Nov, Jan, Feb):</label> <div class="input-pair"> <input type="range" id="lowSeasonMultiplierRange" value="0.85" min="0.5" max="1.2" step="0.01"> <input type="number" id="lowSeasonMultiplierNumber" value="0.85" min="0.5" max="1.2" step="0.01"> </div> </div>
+              <div class="control-group"> <label for="shoulderSeasonMultiplierRange" title="Multiplier for Mar, Apr, May, Sep, Oct (excl. holidays).">Shoulder Season (Spring, Autumn):</label> <div class="input-pair"> <input type="range" id="shoulderSeasonMultiplierRange" value="1.0" min="0.7" max="1.5" step="0.01"> <input type="number" id="shoulderSeasonMultiplierNumber" value="1.0" min="0.7" max="1.5" step="0.01"> </div> </div>
+              <div class="control-group"> <label for="highSeasonMultiplierRange" title="Multiplier for June & early July.">High Season (Jun, early Jul):</label> <div class="input-pair"> <input type="range" id="highSeasonMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="highSeasonMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div>
+              <div class="control-group"> <label for="peakSeasonMultiplierRange" title="Multiplier for late July & August.">Peak Season (Late Jul, Aug):</label> <div class="input-pair"> <input type="range" id="peakSeasonMultiplierRange" value="1.6" min="1.2" max="2.5" step="0.05"> <input type="number" id="peakSeasonMultiplierNumber" value="1.6" min="1.2" max="2.5" step="0.05"> </div> </div>
+          </fieldset>
+          <fieldset>
+             <legend><i class="fas fa-star"></i> Event Impact Multipliers</legend>
+              <div class="control-group"> <label for="eventLowImpactMultiplierRange" title="Stacking multiplier for low impact events.">Low Impact Events:</label> <div class="input-pair"> <input type="range" id="eventLowImpactMultiplierRange" value="1.1" min="1.0" max="1.5" step="0.01"> <input type="number" id="eventLowImpactMultiplierNumber" value="1.1" min="1.0" max="1.5" step="0.01"> </div> </div>
+              <div class="control-group"> <label for="eventMediumImpactMultiplierRange" title="Stacking multiplier for medium impact events.">Medium Impact Events:</label> <div class="input-pair"> <input type="range" id="eventMediumImpactMultiplierRange" value="1.25" min="1.0" max="2.0" step="0.05"> <input type="number" id="eventMediumImpactMultiplierNumber" value="1.25" min="1.0" max="2.0" step="0.05"> </div> </div>
+              <div class="control-group"> <label for="eventHighImpactMultiplierRange" title="Stacking multiplier for high impact events.">High Impact Events:</label> <div class="input-pair"> <input type="range" id="eventHighImpactMultiplierRange" value="1.4" min="1.1" max="2.2" step="0.05"> <input type="number" id="eventHighImpactMultiplierNumber" value="1.4" min="1.1" max="2.2" step="0.05"> </div> </div>
+              <div class="control-group"> <label for="eventPeakImpactMultiplierRange" title="Stacking multiplier for peak impact events.">Peak Impact Events:</label> <div class="input-pair"> <input type="range" id="eventPeakImpactMultiplierRange" value="1.7" min="1.2" max="2.8" step="0.05"> <input type="number" id="eventPeakImpactMultiplierNumber" value="1.7" min="1.2" max="2.8" step="0.05"> </div> </div>
+          </fieldset>
      </div>
 
-    <div id="statistics" class="card">
-         <h2>Key Statistics</h2>
+    <div id="statistics">
+         <h2><i class="fas fa-chart-bar"></i> Key Statistics</h2>
          <ul>
-             <li><strong>Overall Average Rate:</strong> <span id="statAvgRate">---</span></li>
-             <li><strong>Avg Weekday Rate (Sun-Thu):</strong> <span id="statAvgWeekday">---</span></li>
-             <li><strong>Avg Weekend Rate (Fri-Sat):</strong> <span id="statAvgWeekend">---</span></li>
-             <li><strong>Minimum Nightly Rate:</strong> <span id="statMinRate">---</span></li>
-             <li><strong>Maximum Nightly Rate:</strong> <span id="statMaxRate">---</span></li>
-             <li><strong>Average Low Season Rate:</strong> <span id="statAvgLow">---</span></li>
-             <li><strong>Average Shoulder Season Rate:</strong> <span id="statAvgShoulder">---</span></li>
-             <li><strong>Average High Season Rate:</strong> <span id="statAvgHigh">---</span></li>
-             <li><strong>Average Peak Season Rate:</strong> <span id="statAvgPeak">---</span></li>
-             <li><strong>Manually Overridden Prices:</strong> <span id="statPriceOverrideCount">---</span></li>
-             <li><strong>Manually Overridden Min Stays:</strong> <span id="statMinStayOverrideCount">---</span></li>
-             <li><strong>Est. Annual Revenue (@ <span id="statOccupancyRate">---</span>% Occ.):</strong> <span id="statEstRevenue">---</span></li>
+              <li><strong>Overall Average Rate:</strong> <span id="statAvgRate">---</span></li>
+              <li><strong>Avg Weekday Rate (Sun-Thu):</strong> <span id="statAvgWeekday">---</span></li>
+              <li><strong>Avg Weekend Rate (Fri-Sat):</strong> <span id="statAvgWeekend">---</span></li>
+              <li><strong>Minimum Nightly Rate:</strong> <span id="statMinRate">---</span></li>
+              <li><strong>Maximum Nightly Rate:</strong> <span id="statMaxRate">---</span></li>
+              <li><strong>Avg Low Season Rate:</strong> <span id="statAvgLow">---</span></li>
+              <li><strong>Avg Shoulder Season Rate:</strong> <span id="statAvgShoulder">---</span></li>
+              <li><strong>Avg High Season Rate:</strong> <span id="statAvgHigh">---</span></li>
+              <li><strong>Avg Peak Season Rate:</strong> <span id="statAvgPeak">---</span></li>
+               <li><strong>Price Overridden Days:</strong> <span id="statPriceOverrideCount">---</span></li> <!-- Renamed -->
+               <li><strong>Min Stay Overridden Days:</strong> <span id="statMinStayOverrideCount">---</span></li> <!-- NEW -->
+              <li><strong>Est. Annual Revenue (@ <span id="statOccupancyRate">---</span>% Occ.):</strong> <span id="statEstRevenue">---</span></li>
          </ul>
      </div>
 
-    <div id="event-management" class="card">
-         <h2>Manage Event Rules</h2>
+    <div id="event-management">
+         <h2><i class="fas fa-calendar-star"></i> Manage Event Rules</h2>
          <h3>Current Event Rules</h3>
          <ul id="event-list" class="rule-list"></ul>
          <h3>Add New Event Rule</h3>
          <form id="add-event-form" class="add-rule-form" onsubmit="handleAddEvent(event)">
-             <div class="form-group"> <label>Date Type:</label> <div> <input type="radio" id="eventTypeSingle" name="eventType" value="single" checked onchange="toggleDateInputs('event')"> <label for="eventTypeSingle">Single Date</label> <input type="radio" id="eventTypeRange" name="eventType" value="range" onchange="toggleDateInputs('event')"> <label for="eventTypeRange">Date Range</label> </div> </div>
-             <div class="form-group" id="event-single-date-input"> <label for="addEventDate">Date:</label> <input type="date" id="addEventDate"> </div>
-             <div class="form-group date-range-inputs" id="event-date-range-inputs"> <label for="addEventStartDate">Start Date:</label> <input type="date" id="addEventStartDate"> <label for="addEventEndDate">End Date:</label> <input type="date" id="addEventEndDate"> </div>
-             <div class="form-group"> <label for="addEventImpact">Impact Level:</label> <select id="addEventImpact"> <option value="Low">Low</option> <option value="Medium" selected>Medium</option> <option value="High">High</option> <option value="Peak">Peak</option> </select> </div>
-             <div class="form-group"> <label for="addEventName">Event Name:</label> <input type="text" id="addEventName" required> </div>
-             <button type="submit">Add Event Rule</button>
+              <!-- Form structure identical to previous version -->
+              <div class="form-group"> <label>Date Type:</label> <div> <input type="radio" id="eventTypeSingle" name="eventType" value="single" checked onchange="toggleDateInputs('event')"> <label for="eventTypeSingle">Single Date</label> <input type="radio" id="eventTypeRange" name="eventType" value="range" onchange="toggleDateInputs('event')"> <label for="eventTypeRange">Date Range</label> </div> </div>
+              <div class="form-group" id="event-single-date-input"> <label for="addEventDate">Date:</label> <input type="date" id="addEventDate"> </div>
+              <div class="form-group date-range-inputs" id="event-date-range-inputs"> <label for="addEventStartDate">Start Date:</label> <input type="date" id="addEventStartDate"> <label for="addEventEndDate">End Date:</label> <input type="date" id="addEventEndDate"> </div>
+              <div class="form-group"> <label for="addEventImpact">Impact Level:</label> <select id="addEventImpact"> <option value="Low">Low</option> <option value="Medium" selected>Medium</option> <option value="High">High</option> <option value="Peak">Peak</option> </select> </div>
+              <div class="form-group"> <label for="addEventName">Event Name:</label> <input type="text" id="addEventName" required> </div>
+              <button type="submit"><i class="fas fa-plus-circle"></i> Add Event Rule</button>
          </form>
      </div>
 
-    <div id="min-stay-management" class="card">
-         <h2>Manage Minimum Stays</h2>
+    <div id="min-stay-management">
+         <h2><i class="fas fa-bed"></i> Manage Minimum Stays</h2>
          <div class="control-group">
               <label for="defaultMinStay">Default Minimum Stay (Nights):</label>
               <input type="number" id="defaultMinStay" value="2" min="1" step="1" oninput="updateAll()">
@@ -312,32 +244,39 @@
           <ul id="min-stay-list" class="rule-list"></ul>
           <h3>Add New Minimum Stay Rule</h3>
           <form id="add-min-stay-form" class="add-rule-form" onsubmit="handleAddMinStayRule(event)">
+               <!-- Form structure identical to previous version -->
                <div class="form-group"> <label>Date Type:</label> <div> <input type="radio" id="minStayTypeSingle" name="minStayType" value="single" checked onchange="toggleDateInputs('minStay')"> <label for="minStayTypeSingle">Single Date</label> <input type="radio" id="minStayTypeRange" name="minStayType" value="range" onchange="toggleDateInputs('minStay')"> <label for="minStayTypeRange">Date Range</label> </div> </div>
                <div class="form-group" id="minStay-single-date-input"> <label for="addMinStayDate">Date:</label> <input type="date" id="addMinStayDate"> </div>
                <div class="form-group date-range-inputs" id="minStay-date-range-inputs"> <label for="addMinStayStartDate">Start Date:</label> <input type="date" id="addMinStayStartDate"> <label for="addMinStayEndDate">End Date:</label> <input type="date" id="addMinStayEndDate"> </div>
-              <div class="form-group"> <label for="addMinStayNights">Min. Stay (Nights):</label> <input type="number" id="addMinStayNights" min="1" step="1" value="3" required> </div>
+               <div class="form-group"> <label for="addMinStayNights">Min. Stay (Nights):</label> <input type="number" id="addMinStayNights" min="1" step="1" value="3" required> </div>
                <div class="form-group"> <label for="addMinStayName">Rule Name (Optional):</label> <input type="text" id="addMinStayName" placeholder="e.g., Bank Holiday Weekend"> </div>
-              <button type="submit">Add Minimum Stay Rule</button>
+               <button type="submit"><i class="fas fa-plus-circle"></i> Add Minimum Stay Rule</button>
           </form>
      </div>
 
-    <div id="chart-container" class="card">
-         <h2>Annual Price Fluctuation</h2>
+    <div id="chart-container">
+         <h2><i class="fas fa-chart-line"></i> Annual Price Fluctuation</h2>
          <canvas id="priceChart"></canvas>
      </div>
 
-    <div id="pricing-table-container" class="card">
-         <h2>Daily Pricing Detail (2025)</h2>
+    <div id="pricing-table-container">
+         <h2><i class="fas fa-calendar-day"></i> Daily Pricing Detail (2025)</h2>
          <table id="pricingTable">
-             <thead> <tr> <th>Date</th> <th>Day</th> <th>Min Stay</th> <th>Price (£)</th> <th class="notes">Notes</th> </tr> </thead>
+             <thead>
+                 <tr>
+                     <th>Date</th>
+                     <th>Day</th>
+                     <th>Min Stay</th>
+                     <th>Price (£)</th>
+                     <th class="notes">Notes</th>
+                 </tr>
+             </thead>
              <tbody id="pricingTableBody"></tbody>
          </table>
          <div class="table-actions">
-              <button id="exportCsvButton" onclick="exportToCsv()">Export Table as CSV</button>
-              <div class="clear-button-group">
-                  <button id="clearPriceOverridesButton" onclick="clearAllPriceOverrides()">Clear Price Overrides</button>
-                  <button id="clearMinStayOverridesButton" onclick="clearAllMinStayOverrides()">Clear Min Stay Overrides</button>
-              </div>
+               <button id="clearOverridesButton" title="Reset all manually entered prices to calculated values" onclick="clearAllOverrides('price')"><i class="fas fa-undo"></i> Clear Price Overrides</button>
+               <button id="clearMinStayOverridesButton" title="Reset all manually entered minimum stays to rule-based values" onclick="clearAllOverrides('minStay')"><i class="fas fa-undo"></i> Clear Min Stay Overrides</button>
+               <button id="exportCsvButton" onclick="exportToCsv()"><i class="fas fa-file-csv"></i> Export Table as CSV</button>
           </div>
      </div>
 
@@ -349,13 +288,11 @@
     let priceDataCache = [];
     let priceOverrides = {};
     let minStayOverrides = {}; // NEW for min stay overrides
-    let eventData = [ /* ... events ... */
+    let eventData = [ /* ... initial events ... */
         { date: "2025-01-01", impact: "Medium", name: "New Year's Day" }, { dateRange: ["2025-04-12", "2025-04-13"], impact: "Medium", name: "Food & Drink Festival" }, { dateRange: ["2025-04-18", "2025-04-21"], impact: "High", name: "Easter Bank Holiday Weekend" }, { dateRange: ["2025-05-03", "2025-05-05"], impact: "High", name: "Early May Bank Holiday Weekend" }, { dateRange: ["2025-05-24", "2025-05-26"], impact: "High", name: "Spring Bank Holiday Weekend" }, { dateRange: ["2025-05-30", "2025-06-02"], impact: "Medium", name: "Scarborough Streets Festival" }, { date: "2025-06-11", impact: "Medium", name: "OAT Concert (The Corrs)" }, { date: "2025-06-13", impact: "High", name: "OAT Concert (Gary Barlow)" }, { date: "2025-06-14", impact: "Medium", name: "OAT Concert (Basement Jaxx)" }, { dateRange: ["2025-06-13", "2025-06-22"], impact: "Low", name: "Fringe Festival Period" }, { date: "2025-06-20", impact: "Medium", name: "OAT Concert (Simple Minds)" }, { date: "2025-06-21", impact: "Medium", name: "OAT Concert (Anne-Marie)" }, { dateRange: ["2025-06-27", "2025-06-29"], impact: "High", name: "Armed Forces Day Weekend" }, { date: "2025-06-28", impact: "High", name: "OAT Concert (Travis)" }, { dateRange: ["2025-07-05", "2025-08-03"], impact: "Low", name: "Scarborough Fair Period" }, { date: "2025-07-05", impact: "Medium", name: "OAT Concert (James Arthur)" }, { date: "2025-07-06", impact: "Medium", name: "OAT Concert (Olly Murs)" }, { date: "2025-07-10", impact: "High", name: "OAT Concert (The Script)" }, { date: "2025-07-11", impact: "Medium", name: "OAT Concert (UB40)" }, { dateRange: ["2025-07-12", "2025-07-14"], impact: "Low", name: "Scarborough Extreme Festival" }, { date: "2025-07-12", impact: "Medium", name: "OAT Concert (Blossoms)" }, { date: "2025-07-19", impact: "Medium", name: "OAT Concert (Rag'n'Bone Man)" }, { dateRange: ["2025-07-18", "2025-07-20"], impact: "Medium", name: "Staxtonbury Festival Weekend" }, { date: "2025-07-23", impact: "Medium", name: "OAT Concert (McFly)" }, { date: "2025-07-26", impact: "Medium", name: "OAT Concert (Craig David)" }, { date: "2025-08-02", impact: "Medium", name: "OAT Concert (Faithless)" }, { date: "2025-08-13", impact: "Medium", name: "OAT Concert (Texas)" }, { dateRange: ["2025-08-23", "2025-08-25"], impact: "Peak", name: "August Bank Holiday Weekend" }, { date: "2025-08-24", impact: "Peak", name: "OAT Concert (Will Smith)" }, { dateRange: ["2025-09-06", "2025-09-07"], impact: "Medium", name: "Goldwing Light Parade Weekend" }, { dateRange: ["2025-09-26", "2025-09-28"], impact: "Medium", name: "Jazz Festival Weekend" }, { date: "2025-09-27", impact: "Low", name: "Surf Festival" }, { dateRange: ["2025-10-10", "2025-10-12"], impact: "Medium", name: "Northern Soul Weekender" }, { dateRange: ["2025-11-28", "2025-11-30"], impact: "Medium", name: "Scarborough Sparkle Weekend" }
     ];
-    let minStayRules = [
-        { dateRange: ["2025-04-18", "2025-04-21"], nights: 3, name: "Easter Weekend" },
-        { dateRange: ["2025-08-23", "2025-08-25"], nights: 3, name: "Aug Bank Hol" },
-        { dateRange: ["2025-07-20", "2025-08-22"], nights: 7, name: "Peak Summer Weeks" } // Added example weekly stay
+    let minStayRules = [ /* ... initial min stay rules ... */
+         { dateRange: ["2025-04-18", "2025-04-21"], nights: 3, name: "Easter Weekend" }, { dateRange: ["2025-08-23", "2025-08-25"], nights: 3, name: "Aug Bank Hol" }, { dateRange: ["2025-07-19", "2025-08-31"], nights: 4, name: "Peak Summer Weeks" }
     ];
 
     // --- Data Definitions ---
@@ -368,35 +305,32 @@
     function formatCurrency(value) { return `£${Math.round(value).toLocaleString()}`; }
     function getEventInfoForDate(dateStr) { /* ... same ... */
          let highestImpact = null; let impactLevelValue = 0; for (const event of eventData) { let currentImpactValue = 0; if (event.impact === 'Low') currentImpactValue = 1; else if (event.impact === 'Medium') currentImpactValue = 2; else if (event.impact === 'High') currentImpactValue = 3; else if (event.impact === 'Peak') currentImpactValue = 4; let isEventDay = false; if (event.date && event.date === dateStr) { isEventDay = true; } else if (event.dateRange) { const start = new Date(event.dateRange[0] + 'T00:00:00Z'); const end = new Date(event.dateRange[1] + 'T00:00:00Z'); const current = new Date(dateStr + 'T00:00:00Z'); end.setUTCDate(end.getUTCDate() + 1); if (current >= start && current < end) { isEventDay = true; } } if (isEventDay && currentImpactValue > impactLevelValue) { impactLevelValue = currentImpactValue; highestImpact = { impact: event.impact, name: event.name }; } } return highestImpact;
-    }
+     }
     function isSchoolHoliday(dateStr) { /* ... same ... */
-        const currentDate = new Date(dateStr + 'T00:00:00Z'); for (const holiday of schoolHolidayData) { const start = new Date(holiday.start + 'T00:00:00Z'); const end = new Date(holiday.end + 'T00:00:00Z'); end.setUTCDate(end.getUTCDate() + 1); if (currentDate >= start && currentDate < end) { return holiday.name; } } return null;
-    }
+         const currentDate = new Date(dateStr + 'T00:00:00Z'); for (const holiday of schoolHolidayData) { const start = new Date(holiday.start + 'T00:00:00Z'); const end = new Date(holiday.end + 'T00:00:00Z'); end.setUTCDate(end.getUTCDate() + 1); if (currentDate >= start && currentDate < end) { return holiday.name; } } return null;
+     }
     function formatDateForDisplay(dateStr) { /* ... same ... */
-        if (!dateStr) return ''; const [year, month, day] = dateStr.split('-'); return `${day}/${month}/${year}`;
-    }
+         if (!dateStr) return ''; const [year, month, day] = dateStr.split('-'); return `${day}/${month}/${year}`;
+     }
     // UPDATED getMinStayForDate to check overrides first
     function getMinStayForDate(dateStr, defaultMinStay) {
-        // 1. Check specific date overrides
+        // 1. Check manual overrides
         if (minStayOverrides.hasOwnProperty(dateStr)) {
             return { nights: minStayOverrides[dateStr], source: 'Override' };
         }
 
-        // 2. Check rules (later rules override earlier)
+        // 2. Check specific rules (later rules override earlier ones)
         let applicableRuleNights = defaultMinStay;
         let applicableRuleSource = 'Default';
-        for (const rule of minStayRules) { // Assumes rules are sorted or processed consistently
+        for (const rule of minStayRules) {
             let isRuleDay = false;
-            if (rule.date && rule.date === dateStr) {
-                isRuleDay = true;
-            } else if (rule.dateRange) {
+            if (rule.date && rule.date === dateStr) { isRuleDay = true; }
+            else if (rule.dateRange) {
                 const start = new Date(rule.dateRange[0] + 'T00:00:00Z');
                 const end = new Date(rule.dateRange[1] + 'T00:00:00Z');
                 const current = new Date(dateStr + 'T00:00:00Z');
                 end.setUTCDate(end.getUTCDate() + 1);
-                if (current >= start && current < end) {
-                    isRuleDay = true;
-                }
+                if (current >= start && current < end) { isRuleDay = true; }
             }
             if (isRuleDay) {
                 applicableRuleNights = rule.nights;
@@ -406,17 +340,20 @@
         return { nights: applicableRuleNights, source: applicableRuleSource };
     }
 
-    // --- Calculation Functions ---
-    function getInputs() { /* ... same (includes defaultMinStay) ... */
-         const maxPriceInput = document.getElementById('maxPrice').value; return { basePrice: parseFloat(document.getElementById('basePrice').value) || 90, maxPrice: parseFloat(maxPriceInput) > 0 ? parseFloat(maxPriceInput) : 99999, defaultMinStay: parseInt(document.getElementById('defaultMinStay').value, 10) || 1, occupancyRate: parseFloat(document.getElementById('occupancyRateNumber').value) / 100 || 0.65, weekendMultiplier: parseFloat(document.getElementById('weekendMultiplierNumber').value) || 1.0, lowSeasonMultiplier: parseFloat(document.getElementById('lowSeasonMultiplierNumber').value) || 1.0, shoulderSeasonMultiplier: parseFloat(document.getElementById('shoulderSeasonMultiplierNumber').value) || 1.0, highSeasonMultiplier: parseFloat(document.getElementById('highSeasonMultiplierNumber').value) || 1.0, peakSeasonMultiplier: parseFloat(document.getElementById('peakSeasonMultiplierNumber').value) || 1.0, schoolHolidayMultiplier: parseFloat(document.getElementById('schoolHolidayMultiplierNumber').value) || 1.0, eventMultipliers: { Low: parseFloat(document.getElementById('eventLowImpactMultiplierNumber').value) || 1.0, Medium: parseFloat(document.getElementById('eventMediumImpactMultiplierNumber').value) || 1.0, High: parseFloat(document.getElementById('eventHighImpactMultiplierNumber').value) || 1.0, Peak: parseFloat(document.getElementById('eventPeakImpactMultiplierNumber').value) || 1.0 } };
-     }
-    // UPDATED to use new getMinStayForDate structure
-    function calculateSingleDayPrice(date, inputs) {
-        const month = date.getUTCMonth(); const dayOfWeek = date.getUTCDay(); const dateStr = date.toISOString().split('T')[0];
-        let finalPrice; let notes = []; let seasonName = "Shoulder"; let isPriceOverridden = false;
-        const { nights: minStay, source: minStaySource } = getMinStayForDate(dateStr, inputs.defaultMinStay); // Get min stay details
-        const isMinStayOverridden = minStaySource === 'Override';
 
+    // --- Calculation Functions ---
+    function getInputs() { /* ... same ... */
+        const maxPriceInput = document.getElementById('maxPrice').value; return { basePrice: parseFloat(document.getElementById('basePrice').value) || 90, maxPrice: parseFloat(maxPriceInput) > 0 ? parseFloat(maxPriceInput) : 99999, defaultMinStay: parseInt(document.getElementById('defaultMinStay').value, 10) || 1, occupancyRate: parseFloat(document.getElementById('occupancyRateNumber').value) / 100 || 0.65, weekendMultiplier: parseFloat(document.getElementById('weekendMultiplierNumber').value) || 1.0, lowSeasonMultiplier: parseFloat(document.getElementById('lowSeasonMultiplierNumber').value) || 1.0, shoulderSeasonMultiplier: parseFloat(document.getElementById('shoulderSeasonMultiplierNumber').value) || 1.0, highSeasonMultiplier: parseFloat(document.getElementById('highSeasonMultiplierNumber').value) || 1.0, peakSeasonMultiplier: parseFloat(document.getElementById('peakSeasonMultiplierNumber').value) || 1.0, schoolHolidayMultiplier: parseFloat(document.getElementById('schoolHolidayMultiplierNumber').value) || 1.0, eventMultipliers: { Low: parseFloat(document.getElementById('eventLowImpactMultiplierNumber').value) || 1.0, Medium: parseFloat(document.getElementById('eventMediumImpactMultiplierNumber').value) || 1.0, High: parseFloat(document.getElementById('eventHighImpactMultiplierNumber').value) || 1.0, Peak: parseFloat(document.getElementById('eventPeakImpactMultiplierNumber').value) || 1.0 } };
+     }
+
+    function calculateSingleDayPrice(date, inputs) { // UPDATED
+        const month = date.getUTCMonth(); const dayOfWeek = date.getUTCDay(); const dateStr = date.toISOString().split('T')[0];
+        let finalPrice; let notes = []; let seasonName = "Shoulder";
+        let isPriceOverridden = false;
+        const { nights: minStay, source: minStaySource } = getMinStayForDate(dateStr, inputs.defaultMinStay); // Get min stay details
+        let isMinStayOverridden = (minStaySource === 'Override'); // Check if min stay came from an override
+
+        // Check PRICE override FIRST
         if (priceOverrides.hasOwnProperty(dateStr)) { finalPrice = priceOverrides[dateStr]; isPriceOverridden = true; notes.push("Manual Price"); if (seasonMonths.Low.includes(month)) seasonName = "Low"; else if (seasonMonths.Shoulder.includes(month)) seasonName = "Shoulder"; else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15)) seasonName = "High"; else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) seasonName = "Peak"; }
         else { let calculatedPrice; let seasonMultiplier = 1.0, weekendMultiplier = 1.0, holidayMultiplier = 1.0, eventMultiplier = 1.0; let baseSeasonNote = "";
             if (seasonMonths.Low.includes(month)) { seasonMultiplier = inputs.lowSeasonMultiplier; seasonName = "Low"; baseSeasonNote = "Low Season"; } else if (seasonMonths.Shoulder.includes(month)) { seasonMultiplier = inputs.shoulderSeasonMultiplier; seasonName = "Shoulder"; baseSeasonNote = "Shoulder Season"; } else if (seasonMonths.High.includes(month) || (month === 6 && date.getUTCDate() <= 15)) { seasonMultiplier = inputs.highSeasonMultiplier; seasonName = "High"; baseSeasonNote = "High Season"; } else if (seasonMonths.Peak.includes(month) || (month === 6 && date.getUTCDate() > 15)) { seasonMultiplier = inputs.peakSeasonMultiplier; seasonName = "Peak"; baseSeasonNote = "Peak Season"; } notes.push(baseSeasonNote);
@@ -428,362 +365,319 @@
             if (notes.length > 1 && notes[0] === baseSeasonNote && (weekendMultiplier !== 1.0 || holidayMultiplier !== 1.0 || eventMultiplier !== 1.0)) { notes.shift(); } if (notes.length === 0 && baseSeasonNote) { notes.push(baseSeasonNote); }
             const maxPriceNoteIndex = notes.findIndex(note => note.startsWith('(Max Price Cap')); if (maxPriceNoteIndex > -1 && maxPriceNoteIndex < notes.length -1) { const maxNote = notes.splice(maxPriceNoteIndex, 1)[0]; notes.push(maxNote); }
         }
-        // Add min stay source note if not default or override
-        if (minStaySource !== 'Default' && minStaySource !== 'Override') {
-             notes.push(`Min Stay Rule: ${minStaySource}`);
-        }
-        if(isMinStayOverridden) {
-             notes.push("Manual Min Stay");
-        }
+         if (isMinStayOverridden) notes.push("Manual Min Stay"); // Add note for min stay override
 
-        return { date: date, dateStr: dateStr, day: dayOfWeek, season: seasonName, price: finalPrice,
-                 minStay: minStay,
-                 isPriceOverridden: isPriceOverridden,
-                 isMinStayOverridden: isMinStayOverridden, // Add flag
-                 notes: notes.join(', ') };
+        return { date: date, dateStr: dateStr, day: dayOfWeek, season: seasonName, price: finalPrice, minStay: minStay, isPriceOverridden: isPriceOverridden, isMinStayOverridden: isMinStayOverridden, notes: notes.join(', ') };
     }
     function calculateAllPrices(inputs) { /* ... same ... */
          const results = []; const startDate = new Date(Date.UTC(2025, 0, 1)); const endDate = new Date(Date.UTC(2025, 11, 31)); for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) { results.push(calculateSingleDayPrice(new Date(d), inputs)); } priceDataCache = results; return results;
     }
 
     // --- Statistics Function ---
-    // UPDATED to include min stay override count
-    function updateStatistics(priceData, inputs) {
+    function updateStatistics(priceData, inputs) { // UPDATED
         if (!priceData || priceData.length === 0) return;
         const prices = priceData.map(d => d.price); const totalPotentialRevenue = prices.reduce((sum, price) => sum + price, 0); const avgRate = totalPotentialRevenue / prices.length; const minRate = Math.min(...prices); const maxRate = Math.max(...prices); const estAnnualRevenue = totalPotentialRevenue * inputs.occupancyRate;
-        const priceOverrideCount = Object.keys(priceOverrides).length;
-        const minStayOverrideCount = Object.keys(minStayOverrides).length; // NEW count
+        const priceOverrideCount = Object.keys(priceOverrides).length; // Count price overrides
+        const minStayOverrideCount = Object.keys(minStayOverrides).length; // Count min stay overrides
         const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] }; const weekdayPrices = []; const weekendPrices = [];
         priceData.forEach(d => { if (seasonalPrices[d.season]) { seasonalPrices[d.season].push(d.price); } if (d.day === 5 || d.day === 6) { weekendPrices.push(d.price); } else { weekdayPrices.push(d.price); } });
         const calculateAverage = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-        document.getElementById('statAvgRate').textContent = formatCurrency(avgRate);
-        document.getElementById('statAvgWeekday').textContent = formatCurrency(calculateAverage(weekdayPrices));
-        document.getElementById('statAvgWeekend').textContent = formatCurrency(calculateAverage(weekendPrices));
-        document.getElementById('statMinRate').textContent = formatCurrency(minRate);
-        document.getElementById('statMaxRate').textContent = formatCurrency(maxRate);
-        document.getElementById('statAvgLow').textContent = formatCurrency(calculateAverage(seasonalPrices.Low));
-        document.getElementById('statAvgShoulder').textContent = formatCurrency(calculateAverage(seasonalPrices.Shoulder));
-        document.getElementById('statAvgHigh').textContent = formatCurrency(calculateAverage(seasonalPrices.High));
-        document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak));
-        document.getElementById('statPriceOverrideCount').textContent = priceOverrideCount.toString(); // Corrected ID
+        document.getElementById('statAvgRate').textContent = formatCurrency(avgRate); document.getElementById('statAvgWeekday').textContent = formatCurrency(calculateAverage(weekdayPrices)); document.getElementById('statAvgWeekend').textContent = formatCurrency(calculateAverage(weekendPrices)); document.getElementById('statMinRate').textContent = formatCurrency(minRate); document.getElementById('statMaxRate').textContent = formatCurrency(maxRate); document.getElementById('statAvgLow').textContent = formatCurrency(calculateAverage(seasonalPrices.Low)); document.getElementById('statAvgShoulder').textContent = formatCurrency(calculateAverage(seasonalPrices.Shoulder)); document.getElementById('statAvgHigh').textContent = formatCurrency(calculateAverage(seasonalPrices.High)); document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak));
+        document.getElementById('statPriceOverrideCount').textContent = priceOverrideCount.toString(); // Updated ID
         document.getElementById('statMinStayOverrideCount').textContent = minStayOverrideCount.toString(); // NEW
-        document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0);
-        document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue);
+        document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0); document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue);
      }
 
     // --- Chart Function ---
     function renderOrUpdateChart(priceData) { /* ... same ... */
-         const ctx = document.getElementById('priceChart').getContext('2d'); const labels = priceData.map(d => d.dateStr); const dataPoints = priceData.map(d => Math.round(d.price)); if (priceChart) { priceChart.data.labels = labels; priceChart.data.datasets[0].data = dataPoints; priceChart.update(); } else { priceChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: var(--secondary-color), borderWidth: 2, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yy' } }, title: { display: true, text: 'Date (2025)', font: { weight: '500' } }, ticks: { autoSkip: true, maxTicksLimit: 12, font: { size: 11 } } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)', font: { weight: '500' } }, ticks: { callback: function(value) { return '£' + value; }, font: { size: 11 } } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData) { label += ` | Min Stay: ${dayData.minStay}`; if(dayData.notes) { const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note.trim()}`; }); } } return label; } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false } } }); }
+         const ctx = document.getElementById('priceChart').getContext('2d'); const labels = priceData.map(d => d.dateStr); const dataPoints = priceData.map(d => Math.round(d.price)); if (priceChart) { priceChart.data.labels = labels; priceChart.data.datasets[0].data = dataPoints; priceChart.update(); } else { priceChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: var(--secondary-color), borderWidth: 2, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yy' } }, grid: { display: false } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)' }, ticks: { callback: function(value) { return '£' + value; } } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = ' Price: '; label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData) { label += ` | Min Stay: ${dayData.minStay}`; if(dayData.notes) { const notesArray = dayData.notes.split(', '); label += `\nNotes: ${notesArray.join(', ')}`; } } return label; } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false } } }); }
      }
 
     // --- Table Function ---
-    // UPDATED to add min stay cell class, data-date, override class
-    function populateTable(priceData) {
-         const tableBody = document.getElementById('pricingTableBody');
-         tableBody.innerHTML = '';
+    function populateTable(priceData) { // UPDATED
+         const tableBody = document.getElementById('pricingTableBody'); tableBody.innerHTML = '';
          priceData.forEach(data => {
              const row = tableBody.insertRow();
-             row.className = ''; // Reset classes
+             row.className = ''; // Clear previous classes
              if (data.day === 5 || data.day === 6) row.classList.add('weekend');
              if (isSchoolHoliday(data.dateStr)) row.classList.add('holiday');
              if (getEventInfoForDate(data.dateStr)) row.classList.add('event');
+             if (data.isPriceOverridden || data.isMinStayOverridden) row.classList.add('override-row'); // General override indicator
 
-             row.insertCell().textContent = dateFormatter.format(data.date); // Date
-             row.insertCell().textContent = dayFormatter.format(data.date); // Day
+             row.insertCell().textContent = dateFormatter.format(data.date);
+             row.insertCell().textContent = dayFormatter.format(data.date);
 
              // Min Stay Cell
              const minStayCell = row.insertCell();
              minStayCell.textContent = data.minStay;
-             minStayCell.classList.add('min-stay-cell'); // Class for listener/styling
-             minStayCell.dataset.date = data.dateStr; // Store date
-             if (data.isMinStayOverridden) {
-                 minStayCell.classList.add('min-stay-override');
-             }
+             minStayCell.classList.add('min-stay-cell');
+             minStayCell.dataset.date = data.dateStr; // Add date for editing
+             if (data.isMinStayOverridden) minStayCell.classList.add('min-stay-override');
 
              // Price Cell
              const priceCell = row.insertCell();
              priceCell.textContent = Math.round(data.price);
              priceCell.classList.add('price-cell');
              priceCell.dataset.date = data.dateStr;
-             if (data.isPriceOverridden) {
-                 priceCell.classList.add('price-override');
-             }
+             if (data.isPriceOverridden) priceCell.classList.add('price-override');
 
-             // Notes Cell
              row.insertCell().innerHTML = `<span class="notes">${data.notes || ''}</span>`;
          });
       }
 
-    // --- Event Management Functions ---
-    function renderEventList() { /* ... same logic, updated button style ... */
-         const listElement = document.getElementById('event-list'); listElement.innerHTML = ''; eventData.sort((a, b) => { const dateA = a.date || (a.dateRange ? a.dateRange[0] : ''); const dateB = b.date || (b.dateRange ? b.dateRange[0] : ''); if (dateA < dateB) return -1; if (dateA > dateB) return 1; return 0; }); eventData.forEach((event, index) => { const li = document.createElement('li'); let dateText = event.date ? formatDateForDisplay(event.date) : `${formatDateForDisplay(event.dateRange[0])} - ${formatDateForDisplay(event.dateRange[1])}`; const descSpan = document.createElement('span'); descSpan.textContent = `${dateText}: ${event.name}`; li.appendChild(descSpan); const controlsDiv = document.createElement('div'); controlsDiv.className = 'rule-controls'; const impactSelect = document.createElement('select'); impactSelect.innerHTML = `<option value="Low" ${event.impact === 'Low' ? 'selected' : ''}>Low</option><option value="Medium" ${event.impact === 'Medium' ? 'selected' : ''}>Medium</option><option value="High" ${event.impact === 'High' ? 'selected' : ''}>High</option><option value="Peak" ${event.impact === 'Peak' ? 'selected' : ''}>Peak</option>`; impactSelect.dataset.index = index; impactSelect.addEventListener('change', handleUpdateEventImpact); controlsDiv.appendChild(impactSelect); const deleteButton = document.createElement('button'); deleteButton.innerHTML = '×'; deleteButton.title = 'Delete Event Rule'; deleteButton.classList.add('delete-btn'); deleteButton.dataset.index = index; deleteButton.addEventListener('click', handleDeleteEvent); controlsDiv.appendChild(deleteButton); li.appendChild(controlsDiv); listElement.appendChild(li); });
-    }
-    function handleUpdateEventImpact(e) { /* ... same ... */
-        const index = parseInt(e.target.dataset.index, 10); const newImpact = e.target.value; if (index >= 0 && index < eventData.length) { eventData[index].impact = newImpact; updateAll(); }
-    }
-    function handleDeleteEvent(e) { /* ... same ... */
-        const index = parseInt(e.target.closest('li').querySelector('.delete-btn').dataset.index, 10); // More robust index finding
-        if (index >= 0 && index < eventData.length) { eventData.splice(index, 1); renderEventList(); updateAll(); }
-    }
-    function toggleDateInputs(prefix) { /* ... same ... */
-        const type = document.querySelector(`input[name="${prefix}Type"]:checked`).value; document.getElementById(`${prefix}-single-date-input`).style.display = (type === 'single') ? 'flex' : 'none'; document.getElementById(`${prefix}-date-range-inputs`).style.display = (type === 'range') ? 'flex' : 'none';
-    }
-    function handleAddEvent(event) { /* ... same ... */
-         event.preventDefault(); const type = document.querySelector('input[name="eventType"]:checked').value; const impact = document.getElementById('addEventImpact').value; const name = document.getElementById('addEventName').value.trim(); let newEvent = null; if (!name) { alert("Please enter an event name."); return; } if (type === 'single') { const date = document.getElementById('addEventDate').value; if (!date) { alert("Please select a date."); return; } newEvent = { date: date, impact: impact, name: name }; } else { const startDate = document.getElementById('addEventStartDate').value; const endDate = document.getElementById('addEventEndDate').value; if (!startDate || !endDate) { alert("Please select dates."); return; } if (endDate < startDate) { alert("End date cannot be before start."); return; } newEvent = { dateRange: [startDate, endDate], impact: impact, name: name }; } if (newEvent) { eventData.push(newEvent); document.getElementById('add-event-form').reset(); toggleDateInputs('event'); renderEventList(); updateAll(); }
-    }
-
-    // --- Minimum Stay Functions ---
-    function renderMinStayRules() { // NEW - Adapted from renderEventList
-        const listElement = document.getElementById('min-stay-list'); listElement.innerHTML = '';
-        minStayRules.sort((a, b) => { const dateA = a.date || (a.dateRange ? a.dateRange[0] : ''); const dateB = b.date || (b.dateRange ? b.dateRange[0] : ''); if (dateA < dateB) return -1; if (dateA > dateB) return 1; return 0; });
-        minStayRules.forEach((rule, index) => { const li = document.createElement('li'); let dateText = rule.date ? formatDateForDisplay(rule.date) : `${formatDateForDisplay(rule.dateRange[0])} - ${formatDateForDisplay(rule.dateRange[1])}`; const descSpan = document.createElement('span'); descSpan.textContent = `${dateText}: ${rule.nights} nights ${rule.name ? `(${rule.name})` : ''}`; li.appendChild(descSpan); const controlsDiv = document.createElement('div'); controlsDiv.className = 'rule-controls'; const deleteButton = document.createElement('button'); deleteButton.innerHTML = '×'; deleteButton.title = 'Delete Min Stay Rule'; deleteButton.classList.add('delete-btn'); deleteButton.dataset.index = index; deleteButton.addEventListener('click', handleDeleteMinStayRule); controlsDiv.appendChild(deleteButton); li.appendChild(controlsDiv); listElement.appendChild(li); });
-    }
-    function handleDeleteMinStayRule(e) { // NEW
-        const index = parseInt(e.target.closest('li').querySelector('.delete-btn').dataset.index, 10);
-        if (index >= 0 && index < minStayRules.length) { minStayRules.splice(index, 1); renderMinStayRules(); updateAll(); }
-    }
-    function handleAddMinStayRule(event) { // NEW
-        event.preventDefault(); const type = document.querySelector('input[name="minStayType"]:checked').value; const nights = parseInt(document.getElementById('addMinStayNights').value, 10); const name = document.getElementById('addMinStayName').value.trim(); let newRule = null;
-        if (isNaN(nights) || nights < 1) { alert("Valid minimum stay (>= 1 night) required."); return; }
-        if (type === 'single') { const date = document.getElementById('addMinStayDate').value; if (!date) { alert("Select a date."); return; } newRule = { date: date, nights: nights, name: name }; }
-        else { const startDate = document.getElementById('addMinStayStartDate').value; const endDate = document.getElementById('addMinStayEndDate').value; if (!startDate || !endDate) { alert("Select dates."); return; } if (endDate < startDate) { alert("End date cannot be before start."); return; } newRule = { dateRange: [startDate, endDate], nights: nights, name: name }; }
-        if (newRule) { minStayRules.push(newRule); document.getElementById('add-min-stay-form').reset(); toggleDateInputs('minStay'); renderMinStayRules(); updateAll(); }
-    }
+    // --- Event & Min Stay Rule Management Functions ---
+    // (renderEventList, handleUpdateEventImpact, handleDeleteEvent, handleAddEvent - same structure)
+    // (renderMinStayRules, handleDeleteMinStayRule, handleAddMinStayRule - same structure)
+    // Updated delete button text/icon in render functions
+     function renderEventList() {
+         const listElement = document.getElementById('event-list'); listElement.innerHTML = ''; eventData.sort((a, b) => { const dateA = a.date || (a.dateRange ? a.dateRange[0] : ''); const dateB = b.date || (b.dateRange ? b.dateRange[0] : ''); if (dateA < dateB) return -1; if (dateA > dateB) return 1; return 0; }); eventData.forEach((event, index) => { const li = document.createElement('li'); let dateText = event.date ? formatDateForDisplay(event.date) : `${formatDateForDisplay(event.dateRange[0])} - ${formatDateForDisplay(event.dateRange[1])}`; const descSpan = document.createElement('span'); descSpan.textContent = `${dateText}: ${event.name}`; li.appendChild(descSpan); const controlsDiv = document.createElement('div'); controlsDiv.className = 'rule-controls'; const impactSelect = document.createElement('select'); impactSelect.innerHTML = `<option value="Low" ${event.impact === 'Low' ? 'selected' : ''}>Low</option><option value="Medium" ${event.impact === 'Medium' ? 'selected' : ''}>Medium</option><option value="High" ${event.impact === 'High' ? 'selected' : ''}>High</option><option value="Peak" ${event.impact === 'Peak' ? 'selected' : ''}>Peak</option>`; impactSelect.dataset.index = index; impactSelect.addEventListener('change', handleUpdateEventImpact); controlsDiv.appendChild(impactSelect); const deleteButton = document.createElement('button'); deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteButton.title = 'Delete Event Rule'; deleteButton.classList.add('delete-btn'); deleteButton.dataset.index = index; deleteButton.addEventListener('click', handleDeleteEvent); controlsDiv.appendChild(deleteButton); li.appendChild(controlsDiv); listElement.appendChild(li); });
+     }
+     function handleUpdateEventImpact(e) { const index = parseInt(e.target.dataset.index, 10); const newImpact = e.target.value; if (index >= 0 && index < eventData.length) { eventData[index].impact = newImpact; updateAll(); } }
+     function handleDeleteEvent(e) { const button = e.target.closest('button'); const index = parseInt(button.dataset.index, 10); if (!isNaN(index) && index >= 0 && index < eventData.length) { eventData.splice(index, 1); renderEventList(); updateAll(); } }
+     function toggleDateInputs(prefix) { const type = document.querySelector(`input[name="${prefix}Type"]:checked`).value; document.getElementById(`${prefix}-single-date-input`).style.display = (type === 'single') ? 'flex' : 'none'; document.getElementById(`${prefix}-date-range-inputs`).style.display = (type === 'range') ? 'flex' : 'none'; }
+     function handleAddEvent(event) { event.preventDefault(); const type = document.querySelector('input[name="eventType"]:checked').value; const impact = document.getElementById('addEventImpact').value; const name = document.getElementById('addEventName').value.trim(); let newEvent = null; if (!name) { alert("Please enter an event name."); return; } if (type === 'single') { const date = document.getElementById('addEventDate').value; if (!date) { alert("Please select a date."); return; } newEvent = { date: date, impact: impact, name: name }; } else { const startDate = document.getElementById('addEventStartDate').value; const endDate = document.getElementById('addEventEndDate').value; if (!startDate || !endDate) { alert("Please select dates."); return; } if (endDate < startDate) { alert("End date cannot be before start."); return; } newEvent = { dateRange: [startDate, endDate], impact: impact, name: name }; } if (newEvent) { eventData.push(newEvent); document.getElementById('add-event-form').reset(); toggleDateInputs('event'); renderEventList(); updateAll(); } }
+     function renderMinStayRules() {
+         const listElement = document.getElementById('min-stay-list'); listElement.innerHTML = ''; minStayRules.sort((a, b) => { const dateA = a.date || (a.dateRange ? a.dateRange[0] : ''); const dateB = b.date || (b.dateRange ? b.dateRange[0] : ''); if (dateA < dateB) return -1; if (dateA > dateB) return 1; return 0; }); minStayRules.forEach((rule, index) => { const li = document.createElement('li'); let dateText = rule.date ? formatDateForDisplay(rule.date) : `${formatDateForDisplay(rule.dateRange[0])} - ${formatDateForDisplay(rule.dateRange[1])}`; const descSpan = document.createElement('span'); descSpan.textContent = `${dateText}: ${rule.nights} nights ${rule.name ? `(${rule.name})` : ''}`; li.appendChild(descSpan); const controlsDiv = document.createElement('div'); controlsDiv.className = 'rule-controls'; const deleteButton = document.createElement('button'); deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteButton.title = 'Delete Min Stay Rule'; deleteButton.classList.add('delete-btn'); deleteButton.dataset.index = index; deleteButton.addEventListener('click', handleDeleteMinStayRule); controlsDiv.appendChild(deleteButton); li.appendChild(controlsDiv); listElement.appendChild(li); });
+     }
+     function handleDeleteMinStayRule(e) { const button = e.target.closest('button'); const index = parseInt(button.dataset.index, 10); if (!isNaN(index) && index >= 0 && index < minStayRules.length) { minStayRules.splice(index, 1); renderMinStayRules(); updateAll(); } }
+     function handleAddMinStayRule(event) { event.preventDefault(); const type = document.querySelector('input[name="minStayType"]:checked').value; const nights = parseInt(document.getElementById('addMinStayNights').value, 10); const name = document.getElementById('addMinStayName').value.trim(); let newRule = null; if (isNaN(nights) || nights < 1) { alert("Valid min stay needed (>= 1)."); return; } if (type === 'single') { const date = document.getElementById('addMinStayDate').value; if (!date) { alert("Select date."); return; } newRule = { date: date, nights: nights, name: name }; } else { const startDate = document.getElementById('addMinStayStartDate').value; const endDate = document.getElementById('addMinStayEndDate').value; if (!startDate || !endDate) { alert("Select dates."); return; } if (endDate < startDate) { alert("End date before start."); return; } newRule = { dateRange: [startDate, endDate], nights: nights, name: name }; } if (newRule) { minStayRules.push(newRule); document.getElementById('add-min-stay-form').reset(); toggleDateInputs('minStay'); renderMinStayRules(); updateAll(); } }
 
     // --- Export Function ---
-    function escapeCsvCell(cellData) { /* ... same ... */
-        if (cellData === null || cellData === undefined) return ''; const stringData = String(cellData); if (stringData.includes(',') || stringData.includes('"') || stringData.includes('\n')) { const escapedData = stringData.replace(/"/g, '""'); return `"${escapedData}"`; } return stringData;
-    }
-     // UPDATED exportToCsv to include MinStayOverride status
-    function exportToCsv() {
+    function escapeCsvCell(cellData) { /* ... same ... */ if (cellData === null || cellData === undefined) return ''; const stringData = String(cellData); if (stringData.includes(',') || stringData.includes('"') || stringData.includes('\n')) { const escapedData = stringData.replace(/"/g, '""'); return `"${escapedData}"`; } return stringData; }
+    function exportToCsv() { // UPDATED headers
          if (!priceDataCache || priceDataCache.length === 0) { alert("No data."); return; }
-         const headers = ["Date", "DayOfWeek", "MinStay", "IsMinStayOverridden", "Price", "IsPriceOverridden", "Notes"];
-         const csvRows = [headers.join(",")];
-         priceDataCache.forEach(data => {
-             const dateFormatted = dateFormatter.format(data.date); const dayFormatted = dayFormatter.format(data.date); const minStayFormatted = data.minStay; const isMinStayOverriddenFormatted = data.isMinStayOverridden ? 'Yes' : 'No'; const priceFormatted = Math.round(data.price); const isPriceOverriddenFormatted = data.isPriceOverridden ? 'Yes' : 'No'; const notesFormatted = escapeCsvCell(data.notes);
-             csvRows.push([dateFormatted, dayFormatted, minStayFormatted, isMinStayOverriddenFormatted, priceFormatted, isPriceOverriddenFormatted, notesFormatted].join(","));
-         });
-         const csvString = csvRows.join("\n"); const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); if (link.download !== undefined) { const url = URL.createObjectURL(blob); link.setAttribute("href", url); link.setAttribute("download", "captain_cottage_pricing_2025.csv"); link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); } else { alert("CSV export not fully supported."); }
+         const headers = ["Date", "DayOfWeek", "MinStay", "Price", "IsPriceOverridden", "IsMinStayOverridden", "Notes"];
+         const csvRows = [headers.join(",")]; priceDataCache.forEach(data => { const dateFormatted = dateFormatter.format(data.date); const dayFormatted = dayFormatter.format(data.date); const minStayFormatted = data.minStay; const priceFormatted = Math.round(data.price); const priceOverrideFormatted = data.isPriceOverridden ? 'Yes' : 'No'; const minStayOverrideFormatted = data.isMinStayOverridden ? 'Yes' : 'No'; const notesFormatted = escapeCsvCell(data.notes); csvRows.push([dateFormatted, dayFormatted, minStayFormatted, priceFormatted, priceOverrideFormatted, minStayOverrideFormatted, notesFormatted].join(",")); }); const csvString = csvRows.join("\n"); const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); if (link.download !== undefined) { const url = URL.createObjectURL(blob); link.setAttribute("href", url); link.setAttribute("download", "captain_cottage_pricing_2025.csv"); link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); } else { alert("CSV export not supported."); }
      }
 
-    // --- In-Table Editing Functions (Price & Min Stay) ---
-    function handleTableCellDoubleClick(event) {
-        const target = event.target;
-        let editType = null; // 'price' or 'minStay'
+    // --- In-Table Editing Functions ---
+     // Combined handler for double clicks on the table body
+     function handleTableBodyDoubleClick(event) {
+         const target = event.target.closest('td'); // Get the cell itself
+         if (!target) return; // Click wasn't inside a cell
 
-        if (target.tagName === 'TD' && target.classList.contains('price-cell') && target.dataset.date && !target.classList.contains('editing')) {
-            editType = 'price';
-        } else if (target.tagName === 'TD' && target.classList.contains('min-stay-cell') && target.dataset.date && !target.classList.contains('editing')) {
-            editType = 'minStay';
-        } else {
-            return; // Not an editable cell or already editing
-        }
+         // Prevent editing if already editing this cell or another cell
+         if (target.classList.contains('editing') || document.querySelector('.editing')) {
+             return;
+         }
 
-        const currentDateStr = target.dataset.date;
-        const currentValue = target.textContent;
-        target.classList.add('editing');
+         if (target.classList.contains('price-cell') && target.dataset.date) {
+             editPriceCell(target);
+         } else if (target.classList.contains('min-stay-cell') && target.dataset.date) {
+             editMinStayCell(target);
+         }
+     }
 
-        // Create input field
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.className = editType === 'price' ? 'price-input' : 'min-stay-input';
-        input.value = currentValue;
-        input.min = editType === 'minStay' ? '1' : '0'; // Min stay must be >= 1
-        input.step = '1'; // Whole numbers
-        input.dataset.date = currentDateStr;
-        input.dataset.originalValue = currentValue;
-        input.dataset.editType = editType; // Store type
+     // Create input field and controls for editing
+     function createEditInput(cell, currentValue, inputType = 'number') {
+         cell.classList.add('editing'); // Mark as editing
 
-        // Create Revert button
-        const revertBtn = document.createElement('button');
-        revertBtn.innerHTML = '↩'; // Undo arrow
-        revertBtn.title = `Revert to Calculated ${editType === 'price' ? 'Price' : 'Min Stay'}`;
-        revertBtn.className = 'revert-btn edit-control-btn';
-        revertBtn.type = 'button';
-        revertBtn.addEventListener('click', handleRevertOverride);
+         const input = document.createElement('input');
+         input.type = inputType;
+         input.className = 'editable-input'; // Generic class
+         input.value = currentValue;
+         input.dataset.date = cell.dataset.date;
+         input.dataset.originalValue = currentValue;
+         if (inputType === 'number') {
+             input.min = (cell.classList.contains('min-stay-cell') ? '1' : '0'); // Min stay >= 1
+             input.step = '1';
+         }
 
-        // Create Cancel button
-        const cancelBtn = document.createElement('button');
-        cancelBtn.innerHTML = '×'; // Cross
-        cancelBtn.title = 'Cancel Edit';
-        cancelBtn.className = 'cancel-btn edit-control-btn';
-        cancelBtn.type = 'button';
-        cancelBtn.addEventListener('click', handleCancelEdit);
+         const revertBtn = document.createElement('button');
+         revertBtn.innerHTML = '<i class="fas fa-undo"></i>';
+         revertBtn.title = `Revert to ${cell.classList.contains('price-cell') ? 'Calculated Price' : 'Rule-Based Min Stay'}`;
+         revertBtn.className = 'revert-btn edit-control-btn';
+         revertBtn.type = 'button';
+         revertBtn.dataset.date = cell.dataset.date;
+         revertBtn.dataset.type = cell.classList.contains('price-cell') ? 'price' : 'minStay';
+         revertBtn.addEventListener('click', handleRevertOverride);
 
-        // Controls container
-        const controls = document.createElement('div');
-        controls.className = 'edit-controls';
-        controls.appendChild(revertBtn);
-        controls.appendChild(cancelBtn);
-
-        // Clear cell and add input/controls
-        target.innerHTML = '';
-        target.appendChild(input);
-        target.appendChild(controls);
-        input.focus();
-        input.select();
-
-        // Add listeners
-        input.addEventListener('blur', saveTableCellEdit);
-        input.addEventListener('keydown', handleTableCellEditKeydown);
-    }
-
-    function saveTableCellEdit(event) { // Handles both price and min stay
-        setTimeout(() => {
-            const input = event.target;
-            if (!document.body.contains(input)) return;
-            const cell = input.closest('td');
-            if (!cell) return;
-
-            const dateStr = input.dataset.date;
-            const originalValue = input.dataset.originalValue;
-            const editType = input.dataset.editType;
-            const newValue = input.value.trim();
-            const inputs = getInputs(); // For maxPrice check
-
-            let needsUpdate = false;
-            let isValid = true; // Assume valid initially
-
-            if (newValue === '' || newValue === null) {
-                // Remove respective override
-                if (editType === 'price' && priceOverrides.hasOwnProperty(dateStr)) {
-                    delete priceOverrides[dateStr]; needsUpdate = true;
-                } else if (editType === 'minStay' && minStayOverrides.hasOwnProperty(dateStr)) {
-                    delete minStayOverrides[dateStr]; needsUpdate = true;
-                }
-            } else {
-                const newNumValue = parseInt(newValue, 10); // Use parseInt for min stay
-                // Validation
-                if (isNaN(newNumValue) || newNumValue < (editType === 'minStay' ? 1 : 0)) {
-                    alert(`Invalid ${editType}. Please enter a positive whole number${editType === 'minStay' ? ' (min 1)' : ''}.`);
-                    isValid = false;
-                } else if (editType === 'price' && newNumValue > inputs.maxPrice) {
-                    alert(`Price (£${newNumValue}) exceeds maximum (£${inputs.maxPrice}).`);
-                    isValid = false;
-                }
-
-                if (isValid) {
-                    // Update appropriate override object
-                    if (editType === 'price') {
-                        if (!priceOverrides.hasOwnProperty(dateStr) || priceOverrides[dateStr] !== newNumValue) {
-                            priceOverrides[dateStr] = newNumValue; needsUpdate = true;
-                        }
-                    } else { // minStay
-                         if (!minStayOverrides.hasOwnProperty(dateStr) || minStayOverrides[dateStr] !== newNumValue) {
-                            minStayOverrides[dateStr] = newNumValue; needsUpdate = true;
-                        }
-                    }
-                }
-            }
-
-            if (needsUpdate) {
-                 console.log(`${editType} override updated for ${dateStr}`);
-                 updateAll(); // This handles re-rendering the cell correctly
-            } else {
-                 // Restore visual state if no update occurred or validation failed
-                 cell.innerHTML = originalValue; // Restore original text content
+         const cancelBtn = document.createElement('button');
+         cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
+         cancelBtn.title = 'Cancel Edit';
+         cancelBtn.className = 'cancel-btn edit-control-btn';
+         cancelBtn.type = 'button';
+          cancelBtn.addEventListener('click', (e) => {
+             const cell = e.target.closest('td');
+             if (cell) {
+                 const inputEl = cell.querySelector('.editable-input');
+                 const originalVal = inputEl ? inputEl.dataset.originalValue : '';
+                 cell.innerHTML = originalVal; // Restore original text
                  cell.classList.remove('editing');
-                 // Optionally add back override class if it was originally overridden but value didn't change
-                 if(editType === 'price' && priceOverrides.hasOwnProperty(dateStr)) cell.classList.add('price-override');
-                 if(editType === 'minStay' && minStayOverrides.hasOwnProperty(dateStr)) cell.classList.add('min-stay-override');
-            }
+             }
+         });
 
-        }, 150); // Increased delay slightly
-    }
+         const controls = document.createElement('div');
+         controls.className = 'edit-controls';
+         controls.appendChild(revertBtn);
+         controls.appendChild(cancelBtn);
 
-     function handleRevertOverride(event) { // Handles both price and min stay
+         cell.innerHTML = ''; // Clear cell
+         cell.appendChild(input);
+         cell.appendChild(controls);
+         input.focus();
+         input.select();
+
+         return input; // Return the created input element
+     }
+
+     function editPriceCell(cell) {
+         const input = createEditInput(cell, cell.textContent);
+         input.addEventListener('blur', savePriceEdit);
+         input.addEventListener('keydown', handlePriceEditKeydown);
+     }
+
+      function editMinStayCell(cell) {
+          const input = createEditInput(cell, cell.textContent);
+          input.addEventListener('blur', saveMinStayEdit);
+          input.addEventListener('keydown', handleMinStayEditKeydown);
+      }
+
+
+     function savePriceEdit(event) { /* ... same logic ... */
+          // Use setTimeout to allow revert/cancel click
+         setTimeout(() => {
+             const input = event.target; if (!document.body.contains(input)) return; const cell = input.closest('td'); if (!cell) return;
+             const dateStr = input.dataset.date; const originalValue = input.dataset.originalValue; const newValue = input.value.trim(); const inputs = getInputs();
+             let needsUpdate = false;
+             if (newValue === '' || newValue === null) { if (priceOverrides.hasOwnProperty(dateStr)) { delete priceOverrides[dateStr]; needsUpdate = true; } }
+             else { const newPrice = parseFloat(newValue); if (!isNaN(newPrice) && newPrice >= 0) { if (newPrice > inputs.maxPrice) { alert(`Price (£${newPrice}) exceeds max (£${inputs.maxPrice}).`); cell.innerHTML = originalValue; cell.classList.remove('editing'); return; } if (!priceOverrides.hasOwnProperty(dateStr) || priceOverrides[dateStr] !== newPrice) { priceOverrides[dateStr] = newPrice; needsUpdate = true; } } else { alert("Invalid price. Reverting."); } }
+             if (needsUpdate) { console.log(`Price override updated for ${dateStr}`); updateAll(); } else { cell.classList.remove('editing'); cell.innerHTML = originalValue; } // Restore if no update needed
+         }, 100);
+     }
+
+    // NEW function to save min stay edits
+     function saveMinStayEdit(event) {
+         setTimeout(() => {
+             const input = event.target; if (!document.body.contains(input)) return; const cell = input.closest('td'); if (!cell) return;
+             const dateStr = input.dataset.date; const originalValue = input.dataset.originalValue; const newValue = input.value.trim();
+             let needsUpdate = false;
+
+             if (newValue === '' || newValue === null) {
+                 // Remove override if it exists
+                 if (minStayOverrides.hasOwnProperty(dateStr)) {
+                     delete minStayOverrides[dateStr];
+                     needsUpdate = true;
+                 }
+             } else {
+                 const newMinStay = parseInt(newValue, 10);
+                 // Validate: must be a positive integer
+                 if (!isNaN(newMinStay) && newMinStay >= 1 && Number.isInteger(newMinStay)) {
+                      if (!minStayOverrides.hasOwnProperty(dateStr) || minStayOverrides[dateStr] !== newMinStay) {
+                           minStayOverrides[dateStr] = newMinStay;
+                           needsUpdate = true;
+                      }
+                 } else {
+                     alert("Minimum stay must be a whole number of 1 or more. Reverting.");
+                 }
+             }
+
+             if (needsUpdate) {
+                  console.log(`Min stay override updated for ${dateStr}`);
+                  updateAll();
+             } else {
+                  cell.classList.remove('editing');
+                  cell.innerHTML = originalValue; // Restore if no update needed
+             }
+         }, 100);
+     }
+
+
+     function handlePriceEditKeydown(event) { /* ... same ... */
+         const input = event.target; if (event.key === 'Enter') { event.preventDefault(); input.blur(); } else if (event.key === 'Escape') { const cell = input.closest('td'); const originalValue = input.dataset.originalValue; cell.innerHTML = originalValue; cell.classList.remove('editing'); }
+     }
+     // NEW keydown handler for min stay
+     function handleMinStayEditKeydown(event) {
+         const input = event.target;
+         if (event.key === 'Enter') {
+             event.preventDefault();
+             input.blur(); // Trigger save
+         } else if (event.key === 'Escape') {
+             const cell = input.closest('td');
+             const originalValue = input.dataset.originalValue;
+             cell.innerHTML = originalValue; // Revert display
+             cell.classList.remove('editing');
+         }
+     }
+
+     // UPDATED to handle both override types
+     function handleRevertOverride(event) {
          const button = event.target.closest('button');
+         const dateStr = button.dataset.date;
+         const type = button.dataset.type; // 'price' or 'minStay'
          const cell = button.closest('td');
-         if (!cell) return;
 
-         const input = cell.querySelector('input[type=number]');
-         if (!input) return; // Should not happen if button is visible
-
-         const dateStr = input.dataset.date;
-         const editType = input.dataset.editType;
-
-         let overrideRemoved = false;
-         if (editType === 'price' && priceOverrides.hasOwnProperty(dateStr)) {
-             delete priceOverrides[dateStr]; overrideRemoved = true;
+         if (type === 'price' && priceOverrides.hasOwnProperty(dateStr)) {
+             delete priceOverrides[dateStr];
              console.log(`Price override reverted for ${dateStr}`);
-         } else if (editType === 'minStay' && minStayOverrides.hasOwnProperty(dateStr)) {
-             delete minStayOverrides[dateStr]; overrideRemoved = true;
+             updateAll();
+         } else if (type === 'minStay' && minStayOverrides.hasOwnProperty(dateStr)) {
+              delete minStayOverrides[dateStr];
               console.log(`Min stay override reverted for ${dateStr}`);
-         }
-
-         if (overrideRemoved) {
-              updateAll(); // Recalculate and update display
+              updateAll();
          } else {
-             // If no override existed, just cancel the edit visually
-             handleCancelEdit(event); // Use cancel logic
+              // If no override existed, just remove editing UI
+             if(cell && cell.classList.contains('editing')){
+                  const input = cell.querySelector('.editable-input');
+                  const originalValue = input ? input.dataset.originalValue : cell.textContent;
+                  cell.innerHTML = originalValue;
+                  cell.classList.remove('editing');
+             }
          }
          event.stopPropagation();
      }
 
-    function handleCancelEdit(event) { // Handles both price and min stay
-         const button = event.target.closest('button');
-         const cell = button.closest('td');
-         if (!cell) return;
-         const input = cell.querySelector('input[type=number]');
-         const originalValue = input ? input.dataset.originalValue : cell.textContent;
-         cell.innerHTML = originalValue; // Restore original text content
-         cell.classList.remove('editing');
-         // Re-add override class if needed (check original state if possible or check current override status)
-         const dateStr = input ? input.dataset.date : cell.dataset.date;
-         const editType = input ? input.dataset.editType : (cell.classList.contains('price-cell') ? 'price' : 'minStay');
-         if(editType === 'price' && priceOverrides.hasOwnProperty(dateStr)) cell.classList.add('price-override');
-         if(editType === 'minStay' && minStayOverrides.hasOwnProperty(dateStr)) cell.classList.add('min-stay-override');
 
-         event.stopPropagation();
-     }
+    // UPDATED to handle both types
+    function clearAllOverrides(type) {
+        let message = '';
+        let overrideObject = null;
 
-    function handleTableCellEditKeydown(event) { // Handles both price and min stay
-        const input = event.target;
-        if (event.key === 'Enter') { event.preventDefault(); input.blur(); }
-        else if (event.key === 'Escape') {
-             // Simulate click on cancel button within the same cell
-             const cancelButton = input.closest('td')?.querySelector('.cancel-btn');
-             if(cancelButton) cancelButton.click();
+        if (type === 'price') {
+            message = "Clear ALL manual price overrides?";
+            overrideObject = priceOverrides;
+        } else if (type === 'minStay') {
+            message = "Clear ALL manual minimum stay overrides?";
+            overrideObject = minStayOverrides;
+        } else {
+            return; // Should not happen
         }
-    }
 
-    function clearAllPriceOverrides() {
-         if (confirm("Clear ALL manual price overrides?")) { priceOverrides = {}; updateAll(); }
-    }
-    function clearAllMinStayOverrides() { // NEW
-         if (confirm("Clear ALL manual minimum stay overrides?")) { minStayOverrides = {}; updateAll(); }
+        if (Object.keys(overrideObject).length === 0) {
+            alert(`No manual ${type} overrides to clear.`);
+            return;
+        }
+
+        if (confirm(message)) {
+            if (type === 'price') priceOverrides = {};
+            else if (type === 'minStay') minStayOverrides = {};
+            console.log(`All ${type} overrides cleared.`);
+            updateAll();
+        }
     }
 
      // --- Main Update Trigger ---
      function updateAll() {
-         console.time("updateAll"); // Performance timing start
+         // Add a slight visual cue for processing (optional)
+         // document.body.style.opacity = '0.8';
          const inputs = getInputs();
          const priceData = calculateAllPrices(inputs);
          updateStatistics(priceData, inputs);
          renderOrUpdateChart(priceData);
          populateTable(priceData);
-         console.timeEnd("updateAll"); // Performance timing end
+         // Remove visual cue
+         // setTimeout(() => { document.body.style.opacity = '1'; }, 50);
      }
 
     // --- Input Linking ---
-    function linkSliderAndNumber(rangeInputId, numberInputId) { /* ... same ... */
+     function linkSliderAndNumber(rangeInputId, numberInputId) { /* ... same ... */
          const rangeInput = document.getElementById(rangeInputId); const numberInput = document.getElementById(numberInputId); if (!rangeInput || !numberInput) { console.warn(`Link failed: ${rangeInputId}, ${numberInputId}`); return; } rangeInput.addEventListener('input', () => { numberInput.value = rangeInput.value; updateAll(); }); numberInput.addEventListener('input', () => { const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); let value = parseFloat(numberInput.value); if (isNaN(value)) return; if (value < min) value = min; if (value > max) value = max; rangeInput.value = value; if (parseFloat(numberInput.value) !== value) { numberInput.value = value; } updateAll(); }); numberInput.addEventListener('change', () => { const step = parseFloat(numberInput.step) || 1; let value = parseFloat(numberInput.value); if (!isNaN(value)) { value = Math.round(value / step) * step; const min = parseFloat(numberInput.min); const max = parseFloat(numberInput.max); if (value < min) value = min; if (value > max) value = max; const decimals = step < 1 ? (step.toString().split('.')[1] || '').length : 0; numberInput.value = value.toFixed(decimals); rangeInput.value = value; updateAll(); } });
      }
 
     // --- Initialisation ---
     document.addEventListener('DOMContentLoaded', () => {
         // Link sliders & numbers
-        linkSliderAndNumber('occupancyRateRange', 'occupancyRateNumber');
-        linkSliderAndNumber('weekendMultiplierRange', 'weekendMultiplierNumber');
-        linkSliderAndNumber('schoolHolidayMultiplierRange', 'schoolHolidayMultiplierNumber');
-        linkSliderAndNumber('lowSeasonMultiplierRange', 'lowSeasonMultiplierNumber');
-        linkSliderAndNumber('shoulderSeasonMultiplierRange', 'shoulderSeasonMultiplierNumber');
-        linkSliderAndNumber('highSeasonMultiplierRange', 'highSeasonMultiplierNumber');
-        linkSliderAndNumber('peakSeasonMultiplierRange', 'peakSeasonMultiplierNumber');
-        linkSliderAndNumber('eventLowImpactMultiplierRange', 'eventLowImpactMultiplierNumber');
-        linkSliderAndNumber('eventMediumImpactMultiplierRange', 'eventMediumImpactMultiplierNumber');
-        linkSliderAndNumber('eventHighImpactMultiplierRange', 'eventHighImpactMultiplierNumber');
-        linkSliderAndNumber('eventPeakImpactMultiplierRange', 'eventPeakImpactMultiplierNumber');
+        linkSliderAndNumber('occupancyRateRange', 'occupancyRateNumber'); linkSliderAndNumber('weekendMultiplierRange', 'weekendMultiplierNumber'); linkSliderAndNumber('schoolHolidayMultiplierRange', 'schoolHolidayMultiplierNumber'); linkSliderAndNumber('lowSeasonMultiplierRange', 'lowSeasonMultiplierNumber'); linkSliderAndNumber('shoulderSeasonMultiplierRange', 'shoulderSeasonMultiplierNumber'); linkSliderAndNumber('highSeasonMultiplierRange', 'highSeasonMultiplierNumber'); linkSliderAndNumber('peakSeasonMultiplierRange', 'peakSeasonMultiplierNumber'); linkSliderAndNumber('eventLowImpactMultiplierRange', 'eventLowImpactMultiplierNumber'); linkSliderAndNumber('eventMediumImpactMultiplierRange', 'eventMediumImpactMultiplierNumber'); linkSliderAndNumber('eventHighImpactMultiplierRange', 'eventHighImpactMultiplierNumber'); linkSliderAndNumber('eventPeakImpactMultiplierRange', 'eventPeakImpactMultiplierNumber');
 
         // Initial renders
         renderEventList();
@@ -793,15 +687,15 @@
         toggleDateInputs('event');
         toggleDateInputs('minStay');
 
-        // Table editing listener (single listener for both price and min stay)
+        // Table editing listener
         const tableBody = document.getElementById('pricingTableBody');
-        if(tableBody) { tableBody.addEventListener('dblclick', handleTableCellDoubleClick); }
+        if(tableBody) { tableBody.addEventListener('dblclick', handleTableBodyDoubleClick); }
         else { console.error("Could not find table body with ID pricingTableBody"); }
 
         // Initial calculation and render
         updateAll();
 
-         // Set initial number inputs based on range defaults
+         // Set initial number inputs
         const rangeInputs = document.querySelectorAll('#controls input[type=range]');
          rangeInputs.forEach(range => { const numberInputId = range.id.replace('Range', 'Number'); const numberInput = document.getElementById(numberInputId); if (numberInput) { numberInput.value = range.value; } });
     });
