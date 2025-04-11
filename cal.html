@@ -31,7 +31,7 @@
             margin: auto;
         }
         #controls { grid-area: controls; }
-        #chart-container { grid-area: chart; position: relative; } /* Relative for key */
+        #chart-container { grid-area: chart; position: relative; /* Needed for key */ }
         #statistics { grid-area: stats; background-color: #e9f5f1; }
         #event-management { grid-area: events; }
         #min-stay-management { grid-area: minstay; }
@@ -68,7 +68,7 @@
         #chart-container {
             height: 450px; /* Maintain height */
             padding-bottom: 40px; /* INCREASED padding for X axis label */
-        }
+         }
         #chart-key {
             position: absolute;
             top: 45px;
@@ -230,7 +230,6 @@
         Peak: 'rgba(255, 100, 100, 0.3)'    // Light Red
     };
 
-
     // --- Helper Functions ---
     const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' });
     const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -250,15 +249,16 @@
     function updateStatistics(priceData, inputs) { if (!priceData || priceData.length === 0) return; const prices = priceData.map(d => d.price); const totalPotentialRevenue = prices.reduce((sum, price) => sum + price, 0); const avgRate = totalPotentialRevenue / prices.length; const minRate = Math.min(...prices); const maxRate = Math.max(...prices); const estAnnualRevenue = totalPotentialRevenue * inputs.occupancyRate; const priceOverrideCount = Object.keys(priceOverrides).length; const minStayOverrideCount = Object.keys(minStayOverrides).length; const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] }; const weekdayPrices = []; const weekendPrices = []; priceData.forEach(d => { if (seasonalPrices[d.season]) { seasonalPrices[d.season].push(d.price); } if (d.day === 5 || d.day === 6) { weekendPrices.push(d.price); } else { weekdayPrices.push(d.price); } }); const calculateAverage = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; document.getElementById('statAvgRate').textContent = formatCurrency(avgRate); document.getElementById('statAvgWeekday').textContent = formatCurrency(calculateAverage(weekdayPrices)); document.getElementById('statAvgWeekend').textContent = formatCurrency(calculateAverage(weekendPrices)); document.getElementById('statMinRate').textContent = formatCurrency(minRate); document.getElementById('statMaxRate').textContent = formatCurrency(maxRate); document.getElementById('statAvgLow').textContent = formatCurrency(calculateAverage(seasonalPrices.Low)); document.getElementById('statAvgShoulder').textContent = formatCurrency(calculateAverage(seasonalPrices.Shoulder)); document.getElementById('statAvgHigh').textContent = formatCurrency(calculateAverage(seasonalPrices.High)); document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak)); document.getElementById('statPriceOverrideCount').textContent = priceOverrideCount.toString(); document.getElementById('statMinStayOverrideCount').textContent = minStayOverrideCount.toString(); document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0); document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue); }
 
     // --- Chart Function ---
-    // UPDATED generateAnnotations to use maxYValue
     function generateAnnotations(maxYValue) {
         const annotations = {};
         const colors = annotationColors;
+        // Ensure maxYValue is a sensible positive number, otherwise default
+        const calculatedMaxY = maxYValue > 0 ? maxYValue : 300;
 
         // Add School Holidays
         schoolHolidayData.forEach((holiday, index) => {
             const endDate = new Date(holiday.end + 'T00:00:00Z'); endDate.setUTCDate(endDate.getUTCDate() + 1); const endDateStr = endDate.toISOString().split('T')[0];
-            annotations[`holiday-${index}`] = { type: 'box', xMin: holiday.start, xMax: endDateStr, yMin: 0, yMax: maxYValue, yScaleID: 'y', backgroundColor: colors.Holiday, borderColor: 'rgba(0,0,0,0)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' };
+            annotations[`holiday-${index}`] = { type: 'box', xMin: holiday.start, xMax: endDateStr, yMin: 0, yMax: calculatedMaxY, yScaleID: 'y', backgroundColor: colors.Holiday, borderColor: 'rgba(0,0,0,0)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' };
         });
 
         // Add Events
@@ -269,19 +269,18 @@
                 if (event.date) { startStr = event.date; const endDate = new Date(event.date + 'T00:00:00Z'); endDate.setUTCDate(endDate.getUTCDate() + 1); endStr = endDate.toISOString().split('T')[0]; }
                 else if (event.dateRange) { startStr = event.dateRange[0]; const endDate = new Date(event.dateRange[1] + 'T00:00:00Z'); endDate.setUTCDate(endDate.getUTCDate() + 1); endStr = endDate.toISOString().split('T')[0]; }
                 else { return; }
-                annotations[`event-${impactLevel}-${index}`] = { type: 'box', xMin: startStr, xMax: endStr, yMin: 0, yMax: maxYValue, yScaleID: 'y', backgroundColor: colors[event.impact], borderColor: 'rgba(0,0,0,0)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' };
+                annotations[`event-${impactLevel}-${index}`] = { type: 'box', xMin: startStr, xMax: endStr, yMin: 0, yMax: calculatedMaxY, yScaleID: 'y', backgroundColor: colors[event.impact], borderColor: 'rgba(0,0,0,0)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' };
             });
         });
         return annotations;
     }
 
-    // UPDATED renderOrUpdateChart to pass maxPrice
     function renderOrUpdateChart(priceData) {
          const ctx = document.getElementById('priceChart').getContext('2d');
          const labels = priceData.map(d => d.dateStr);
          const dataPoints = priceData.map(d => Math.round(d.price));
-         const currentInputs = getInputs(); // Get current inputs
-         const annotations = generateAnnotations(currentInputs.maxPrice); // Pass max price to limit annotation height
+         const currentInputs = getInputs();
+         const annotations = generateAnnotations(currentInputs.maxPrice); // Pass max price
 
          if (priceChart) {
              priceChart.data.labels = labels;
@@ -294,12 +293,7 @@
                  data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: '#007f5f', borderWidth: 1.5, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] },
                  options: {
                      responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
-                     // ADD layout padding
-                     layout: {
-                         padding: {
-                             bottom: 10 // Add padding below chart for labels
-                         }
-                     },
+                     layout: { padding: { bottom: 10, left: 5, right: 5 } }, // Added padding
                      scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yyyy' } }, title: { display: true, text: 'Date (2025)' }, ticks: { autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)' }, ticks: { callback: function(value) { return '£' + value; } } } },
                      plugins: {
                          tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData){ label += `\n  Min Stay: ${dayData.minStay}`; if(dayData.notes){ const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note}`; }); } } return label; } } },
