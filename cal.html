@@ -8,18 +8,51 @@
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-    <!-- ADD THIS LINE for Date Adapter -->
+    <!-- Chart.js Date Adapter -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; }
-        .container { display: grid; grid-template-areas: "controls stats" "chart chart" "table table"; grid-template-columns: 1fr 1fr; grid-gap: 20px; max-width: 1400px; margin: auto; }
+        .container {
+            display: grid;
+            /* Updated grid layout */
+            grid-template-areas:
+                "controls stats"
+                "events events" /* Added events area */
+                "chart chart"
+                "table table";
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+            max-width: 1400px;
+            margin: auto;
+        }
         #controls { grid-area: controls; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         #statistics { grid-area: stats; background-color: #e9f5f1; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Event Management Styling */
+        #event-management { grid-area: events; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #event-list { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 4px; }
+        #event-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px dashed #eee; font-size: 0.9em; flex-wrap: wrap; gap: 10px;}
+        #event-list li span { flex-grow: 1; min-width: 200px; }
+        #event-list li .event-controls { display: flex; align-items: center; gap: 8px; }
+        #event-list li select { padding: 3px; font-size: 0.85em; border-radius: 3px; border: 1px solid #ccc; }
+        #event-list li button { padding: 3px 8px; font-size: 0.85em; cursor: pointer; background-color: #e63946; color: white; border: none; border-radius: 3px; }
+        #event-list li button:hover { background-color: #d62828; }
+        #add-event-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; border-top: 2px solid #eee; padding-top: 15px; }
+        #add-event-form .form-group { display: flex; flex-direction: column; }
+        #add-event-form label { font-weight: 600; margin-bottom: 3px; font-size: 0.9em; color: #005f73;}
+        #add-event-form input[type=text], #add-event-form input[type=date], #add-event-form select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
+        #add-event-form button { grid-column: 1 / -1; /* Span full width */ padding: 8px 15px; background-color: #007f5f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        #add-event-form button:hover { background-color: #006d50; }
+        #date-range-inputs { display: none; } /* Initially hidden */
+        #date-range-inputs label { margin-top: 5px; }
+
         #chart-container { grid-area: chart; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 400px; /* Adjust as needed */ }
         #pricing-table-container { grid-area: table; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-height: 500px; overflow-y: auto; }
+        #exportCsvButton { display: block; margin: 15px auto 5px auto; padding: 10px 20px; background-color: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        #exportCsvButton:hover { background-color: #004c5a; }
 
-        #controls h2, #statistics h2, #chart-container h2, #pricing-table-container h2 { margin-top: 0; color: #005f73; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; }
+
+        #controls h2, #statistics h2, #event-management h2, #chart-container h2, #pricing-table-container h2 { margin-top: 0; color: #005f73; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; }
         .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .control-group { display: flex; flex-direction: column; }
         .control-group label { font-weight: 600; margin-bottom: 5px; font-size: 0.9em; color: #005f73; }
@@ -40,7 +73,10 @@
 
         /* Responsive adjustments */
         @media (max-width: 900px) {
-            .container { grid-template-areas: "controls" "stats" "chart" "table"; grid-template-columns: 1fr; }
+            .container {
+                grid-template-areas: "controls" "stats" "events" "chart" "table"; /* Stack all areas */
+                grid-template-columns: 1fr;
+            }
             #chart-container { height: 300px; }
         }
     </style>
@@ -50,6 +86,7 @@
 <div class="container">
 
     <div id="controls">
+        <!-- Pricing Factors Controls (Same as before) -->
         <h2>Pricing Factors</h2>
         <div class="control-grid">
             <div class="control-group">
@@ -148,6 +185,7 @@
     </div>
 
     <div id="statistics">
+        <!-- Key Statistics Display (Same as before) -->
         <h2>Key Statistics</h2>
         <ul>
             <li><strong>Overall Average Rate:</strong> <span id="statAvgRate">---</span></li>
@@ -161,12 +199,57 @@
         </ul>
     </div>
 
+    <!-- NEW Event Management Section -->
+    <div id="event-management">
+        <h2>Manage Events</h2>
+        <h3>Current Events</h3>
+        <ul id="event-list">
+            <!-- Event list will be populated by JavaScript -->
+        </ul>
+        <h3>Add New Event</h3>
+        <form id="add-event-form" onsubmit="handleAddEvent(event)">
+            <div class="form-group">
+                <label>Date Type:</label>
+                <div>
+                    <input type="radio" id="eventTypeSingle" name="eventType" value="single" checked onchange="toggleDateInputs()"> <label for="eventTypeSingle">Single Date</label>
+                    <input type="radio" id="eventTypeRange" name="eventType" value="range" onchange="toggleDateInputs()"> <label for="eventTypeRange">Date Range</label>
+                </div>
+            </div>
+             <div class="form-group" id="single-date-input">
+                <label for="addEventDate">Date:</label>
+                <input type="date" id="addEventDate">
+            </div>
+             <div class="form-group" id="date-range-inputs">
+                 <label for="addEventStartDate">Start Date:</label>
+                 <input type="date" id="addEventStartDate">
+                 <label for="addEventEndDate">End Date:</label>
+                 <input type="date" id="addEventEndDate">
+            </div>
+            <div class="form-group">
+                <label for="addEventImpact">Impact Level:</label>
+                <select id="addEventImpact">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                    <option value="Peak">Peak</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="addEventName">Event Name:</label>
+                <input type="text" id="addEventName" required>
+            </div>
+            <button type="submit">Add Event</button>
+        </form>
+    </div>
+
     <div id="chart-container">
+         <!-- Chart Canvas (Same as before) -->
          <h2>Annual Price Fluctuation</h2>
          <canvas id="priceChart"></canvas>
     </div>
 
     <div id="pricing-table-container">
+        <!-- Pricing Table (Container) -->
         <h2>Daily Pricing Detail (2025)</h2>
         <table id="pricingTable">
             <thead>
@@ -181,6 +264,8 @@
                 <!-- Prices will be populated here by JavaScript -->
             </tbody>
         </table>
+        <!-- NEW Export Button -->
+        <button id="exportCsvButton" onclick="exportToCsv()">Export Table as CSV</button>
     </div>
 
 </div>
@@ -188,11 +273,13 @@
 <script>
     // --- Global Variables ---
     let priceChart = null; // To hold the chart instance
+    let priceDataCache = []; // Cache the calculated price data for export
 
-    // --- Data Definitions (Same as previous version) ---
+    // --- Data Definitions ---
     const seasonMonths = { Low: [0, 1, 10], Shoulder: [2, 3, 4, 8, 9], High: [5], Peak: [6, 7] };
     const schoolHolidayData = [ { name: "Feb Half Term", start: "2025-02-15", end: "2025-02-23" }, { name: "Easter Holidays", start: "2025-04-04", end: "2025-04-21" }, { name: "May Half Term", start: "2025-05-24", end: "2025-06-01" }, { name: "Oct Half Term", start: "2025-10-24", end: "2025-11-02" }, { name: "Christmas Break", start: "2025-12-20", end: "2026-01-04" }];
-    const eventData = [
+    // Use let for eventData so it can be modified
+    let eventData = [
         { date: "2025-01-01", impact: "Medium", name: "New Year's Day" },
         { dateRange: ["2025-04-12", "2025-04-13"], impact: "Medium", name: "Food & Drink Festival" },
         { dateRange: ["2025-04-18", "2025-04-21"], impact: "High", name: "Easter Bank Holiday Weekend" },
@@ -230,14 +317,16 @@
     ];
 
     // --- Helper Functions ---
-     function formatCurrency(value) {
-        return `£${Math.round(value).toLocaleString()}`;
-    }
+    const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' });
+    const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-    function getEventInfoForDate(dateStr) {
+     function formatCurrency(value) { /* ... same ... */
+        return `£${Math.round(value).toLocaleString()}`;
+     }
+     function getEventInfoForDate(dateStr) { /* ... same ... */
          let highestImpact = null;
          let impactLevelValue = 0; // 0:None, 1:Low, 2:Medium, 3:High, 4:Peak
-         for (const event of eventData) {
+         for (const event of eventData) { // Use the modifiable eventData
              let currentImpactValue = 0;
              if (event.impact === 'Low') currentImpactValue = 1;
              else if (event.impact === 'Medium') currentImpactValue = 2;
@@ -261,8 +350,8 @@
              }
          }
          return highestImpact;
-    }
-    function isSchoolHoliday(dateStr) {
+      }
+     function isSchoolHoliday(dateStr) { /* ... same ... */
         const currentDate = new Date(dateStr + 'T00:00:00Z');
         for (const holiday of schoolHolidayData) {
             const start = new Date(holiday.start + 'T00:00:00Z');
@@ -273,16 +362,22 @@
             }
         }
         return null;
-    }
-    function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') {
+     }
+     function updateSliderValue(sliderId, decimalPlaces = 0, suffix = '%') { /* ... same ... */
         const slider = document.getElementById(sliderId);
         const outputSpan = document.getElementById(sliderId + 'Value');
         outputSpan.textContent = parseFloat(slider.value).toFixed(decimalPlaces) + suffix;
-    }
+     }
+     // NEW Helper for Event List
+     function formatDateForDisplay(dateStr) {
+         if (!dateStr) return '';
+         const [year, month, day] = dateStr.split('-');
+         return `${day}/${month}/${year}`;
+     }
+
 
     // --- Calculation Functions ---
-
-    function getInputs() {
+     function getInputs() { /* ... same ... */
         return {
             basePrice: parseFloat(document.getElementById('basePrice').value) || 90,
             occupancyRate: parseFloat(document.getElementById('occupancyRate').value) / 100 || 0.65,
@@ -299,9 +394,8 @@
                 Peak: parseFloat(document.getElementById('eventPeakImpactMultiplier').value) || 1.0
             }
         };
-    }
-
-    function calculateSingleDayPrice(date, inputs) {
+     }
+     function calculateSingleDayPrice(date, inputs) { /* ... same logic ... */
         const month = date.getUTCMonth(); // 0-11
         const dayOfWeek = date.getUTCDay(); // 0=Sun, 6=Sat
         const dateStr = date.toISOString().split('T')[0];
@@ -362,7 +456,7 @@
          if (notes.length > 1 && notes[0] === baseSeasonNote && (weekendMultiplier !== 1.0 || holidayMultiplier !== 1.0 || eventMultiplier !== 1.0)) {
              notes.shift();
          }
-         // Ensure base season is shown if no other factors applied significantly
+          // Ensure base season is shown if no other factors applied significantly
          if (notes.length === 0 && baseSeasonNote) {
              notes.push(baseSeasonNote);
          }
@@ -376,9 +470,8 @@
             price: currentPrice,
             notes: notes.join(', ')
         };
-    }
-
-     function calculateAllPrices(inputs) {
+      }
+     function calculateAllPrices(inputs) { /* ... same ... */
          const results = [];
          const startDate = new Date(Date.UTC(2025, 0, 1));
          const endDate = new Date(Date.UTC(2025, 11, 31));
@@ -386,11 +479,12 @@
          for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
              results.push(calculateSingleDayPrice(new Date(d), inputs));
          }
+         priceDataCache = results; // Store for export
          return results;
-     }
+      }
 
     // --- Statistics Function ---
-     function updateStatistics(priceData, inputs) {
+     function updateStatistics(priceData, inputs) { /* ... same ... */
         if (!priceData || priceData.length === 0) return;
 
         const prices = priceData.map(d => d.price);
@@ -418,50 +512,18 @@
         document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak));
         document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0);
         document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue);
-    }
+     }
 
     // --- Chart Function ---
-    function renderOrUpdateChart(priceData) {
+     function renderOrUpdateChart(priceData) { /* ... same ... */
         const ctx = document.getElementById('priceChart').getContext('2d');
         const labels = priceData.map(d => d.dateStr);
         const dataPoints = priceData.map(d => Math.round(d.price));
-
-        // Define a mapping from notes to point background colors
-        const noteColorMap = {
-            'Low Season': 'rgba(150, 150, 150, 0.6)', // Greyish for low season emphasis if needed
-            'Easter Bank Holiday Weekend': 'rgba(255, 215, 0, 0.8)', // Gold
-            'OAT Concert': 'rgba(255, 100, 100, 0.8)', // Reddish for concerts
-            'Armed Forces Day Weekend': 'rgba(0, 0, 139, 0.8)', // Dark Blue
-            'August Bank Holiday Weekend': 'rgba(255, 0, 0, 1)', // Bright Red for peak event
-            'Default': 'rgba(0, 127, 95, 0.1)' // Default background color
-        };
-
-        // Create point background colors based on notes
-        const pointBackgroundColors = priceData.map(d => {
-            let color = noteColorMap['Default']; // Start with default
-             if (!d.notes) return color; // Handle cases with no notes
-
-             // Prioritize event colors
-             if (d.notes.includes('August Bank Holiday Weekend')) return noteColorMap['August Bank Holiday Weekend'];
-             if (d.notes.includes('OAT Concert')) return noteColorMap['OAT Concert'];
-             if (d.notes.includes('Armed Forces Day Weekend')) return noteColorMap['Armed Forces Day Weekend'];
-             if (d.notes.includes('Easter Bank Holiday Weekend')) return noteColorMap['Easter Bank Holiday Weekend'];
-             // Add more specific event checks if desired
-
-             // If no major event, maybe highlight low season start/end points? (Optional)
-            // if (d.notes.includes('Low Season') && ...) return noteColorMap['Low Season'];
-
-            return color;
-        });
-
 
         if (priceChart) {
             // Update existing chart
             priceChart.data.labels = labels;
             priceChart.data.datasets[0].data = dataPoints;
-            // Update point colors if needed (optional, can impact performance slightly)
-            // priceChart.data.datasets[0].backgroundColor = pointBackgroundColors;
-            // priceChart.data.datasets[0].borderColor = pointBackgroundColors.map(c => c.replace('0.1', '1').replace('0.6','1').replace('0.8','1')); // Make border opaque version of background
             priceChart.update();
         } else {
             // Create new chart
@@ -474,10 +536,9 @@
                         data: dataPoints, // Y-axis data (prices)
                         borderColor: '#007f5f', // Line color
                         borderWidth: 1.5,
-                        // backgroundColor: pointBackgroundColors, // Use dynamic colors for points (optional)
                         backgroundColor: 'rgba(0, 127, 95, 0.1)', // Fill color under line
                         fill: true, // Fill area under the line
-                        pointRadius: 2, // Show small points for events/emphasis
+                        pointRadius: 0, // Hide points by default
                         pointHoverRadius: 5, // Enlarge point on hover
                         tension: 0.1 // Slight curve to the line
                     }]
@@ -517,9 +578,9 @@
                                      label += formatCurrency(context.parsed.y);
                                      // Add notes to tooltip
                                      const dataIndex = context.dataIndex;
-                                     const dayData = priceData[dataIndex];
+                                     // Ensure priceDataCache is used if priceData isn't available in this scope, or pass priceData
+                                     const dayData = priceDataCache[dataIndex]; // Use cache here
                                      if(dayData && dayData.notes) {
-                                          // Split notes for better readability in tooltip if long
                                           const notesArray = dayData.notes.split(', ');
                                           notesArray.forEach(note => { label += `\n  - ${note}`; });
                                      }
@@ -536,14 +597,12 @@
                 }
             });
         }
-    }
+     }
 
     // --- Table Function ---
-     function populateTable(priceData) {
+     function populateTable(priceData) { /* ... same ... */
          const tableBody = document.getElementById('pricingTable').getElementsByTagName('tbody')[0];
          tableBody.innerHTML = ''; // Clear previous results
-         const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' });
-         const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
          priceData.forEach(data => {
              const row = tableBody.insertRow();
@@ -552,15 +611,203 @@
              row.insertCell().textContent = Math.round(data.price).toString();
              row.insertCell().innerHTML = `<span class="notes">${data.notes || ''}</span>`;
          });
-     }
+      }
+
+    // --- NEW Event Management Functions ---
+    function renderEventList() {
+        const listElement = document.getElementById('event-list');
+        listElement.innerHTML = ''; // Clear existing list
+
+        // Sort events by start date (if available) or single date
+        eventData.sort((a, b) => {
+            const dateA = a.date || (a.dateRange ? a.dateRange[0] : '');
+            const dateB = b.date || (b.dateRange ? b.dateRange[0] : '');
+            if (dateA < dateB) return -1;
+            if (dateA > dateB) return 1;
+            return 0;
+        });
+
+
+        eventData.forEach((event, index) => {
+            const li = document.createElement('li');
+
+            let dateText = '';
+            if (event.date) {
+                dateText = formatDateForDisplay(event.date);
+            } else if (event.dateRange) {
+                dateText = `${formatDateForDisplay(event.dateRange[0])} - ${formatDateForDisplay(event.dateRange[1])}`;
+            }
+
+            // Event description span
+            const descSpan = document.createElement('span');
+            descSpan.textContent = `${dateText}: ${event.name}`;
+            li.appendChild(descSpan);
+
+            // Controls div
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'event-controls';
+
+            // Impact dropdown
+            const impactSelect = document.createElement('select');
+            impactSelect.innerHTML = `
+                <option value="Low" ${event.impact === 'Low' ? 'selected' : ''}>Low</option>
+                <option value="Medium" ${event.impact === 'Medium' ? 'selected' : ''}>Medium</option>
+                <option value="High" ${event.impact === 'High' ? 'selected' : ''}>High</option>
+                <option value="Peak" ${event.impact === 'Peak' ? 'selected' : ''}>Peak</option>
+            `;
+            impactSelect.dataset.index = index; // Store index for update handler
+            impactSelect.addEventListener('change', handleUpdateEventImpact);
+            controlsDiv.appendChild(impactSelect);
+
+            // Delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.dataset.index = index; // Store index for delete handler
+            deleteButton.addEventListener('click', handleDeleteEvent);
+            controlsDiv.appendChild(deleteButton);
+
+            li.appendChild(controlsDiv);
+            listElement.appendChild(li);
+        });
+    }
+
+    function handleUpdateEventImpact(e) {
+        const index = parseInt(e.target.dataset.index, 10);
+        const newImpact = e.target.value;
+        if (index >= 0 && index < eventData.length) {
+            eventData[index].impact = newImpact;
+            console.log(`Updated event ${index} impact to ${newImpact}`);
+            updateAll(); // Recalculate everything
+        }
+    }
+
+    function handleDeleteEvent(e) {
+        const index = parseInt(e.target.dataset.index, 10);
+        if (index >= 0 && index < eventData.length) {
+            const removed = eventData.splice(index, 1); // Remove event from array
+            console.log(`Removed event ${index}: ${removed[0]?.name}`);
+            renderEventList(); // Update the displayed list
+            updateAll(); // Recalculate everything
+        }
+    }
+
+     function toggleDateInputs() {
+        const type = document.querySelector('input[name="eventType"]:checked').value;
+        document.getElementById('single-date-input').style.display = (type === 'single') ? 'flex' : 'none';
+        document.getElementById('date-range-inputs').style.display = (type === 'range') ? 'flex' : 'none';
+    }
+
+    function handleAddEvent(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const type = document.querySelector('input[name="eventType"]:checked').value;
+        const impact = document.getElementById('addEventImpact').value;
+        const name = document.getElementById('addEventName').value.trim();
+        let newEvent = null;
+
+        if (!name) {
+            alert("Please enter an event name.");
+            return;
+        }
+
+        if (type === 'single') {
+            const date = document.getElementById('addEventDate').value;
+            if (!date) {
+                alert("Please select a date for the single event.");
+                return;
+            }
+            newEvent = { date: date, impact: impact, name: name };
+        } else { // type === 'range'
+            const startDate = document.getElementById('addEventStartDate').value;
+            const endDate = document.getElementById('addEventEndDate').value;
+            if (!startDate || !endDate) {
+                alert("Please select both start and end dates for the range event.");
+                return;
+            }
+            if (endDate < startDate) {
+                alert("End date cannot be before the start date.");
+                return;
+            }
+            newEvent = { dateRange: [startDate, endDate], impact: impact, name: name };
+        }
+
+        if (newEvent) {
+            eventData.push(newEvent);
+            console.log("Added new event:", newEvent);
+            document.getElementById('add-event-form').reset(); // Clear the form
+             toggleDateInputs(); // Reset date input visibility
+            renderEventList(); // Update the displayed list
+            updateAll(); // Recalculate everything
+        }
+    }
+
+    // --- NEW Export Function ---
+    function escapeCsvCell(cellData) {
+        if (cellData === null || cellData === undefined) {
+            return '';
+        }
+        const stringData = String(cellData);
+        // If the cell contains a comma, double quote, or newline, wrap it in double quotes
+        if (stringData.includes(',') || stringData.includes('"') || stringData.includes('\n')) {
+            // Escape existing double quotes by doubling them
+            const escapedData = stringData.replace(/"/g, '""');
+            return `"${escapedData}"`;
+        }
+        return stringData; // No escaping needed
+    }
+
+    function exportToCsv() {
+        if (!priceDataCache || priceDataCache.length === 0) {
+            alert("No pricing data available to export.");
+            return;
+        }
+
+        const headers = ["Date", "DayOfWeek", "Price", "Notes"];
+        const csvRows = [headers.join(",")]; // Header row
+
+        priceDataCache.forEach(data => {
+            const dateFormatted = dateFormatter.format(data.date);
+            const dayFormatted = dayFormatter.format(data.date);
+            const priceFormatted = Math.round(data.price);
+            const notesFormatted = escapeCsvCell(data.notes);
+
+            csvRows.push([
+                dateFormatted,
+                dayFormatted,
+                priceFormatted,
+                notesFormatted
+            ].join(","));
+        });
+
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+
+        // Create a link element
+        const link = document.createElement("a");
+        if (link.download !== undefined) { // Check if download attribute is supported
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "captain_cottage_pricing_2025.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url); // Clean up
+        } else {
+            alert("CSV export is not fully supported in this browser.");
+            // Fallback or message
+        }
+    }
+
 
      // --- Main Update Trigger ---
      function updateAll() {
          const inputs = getInputs();
-         const priceData = calculateAllPrices(inputs);
+         const priceData = calculateAllPrices(inputs); // Recalculates and updates priceDataCache
          updateStatistics(priceData, inputs);
          renderOrUpdateChart(priceData);
          populateTable(priceData);
+         // Note: renderEventList() is called separately when events are added/deleted
      }
 
 
@@ -574,6 +821,12 @@
             const suffix = isMultiplier ? 'x' : '%';
              updateSliderValue(slider.id, decimalPlaces, suffix);
         });
+
+         // Render initial event list
+         renderEventList();
+
+         // Set initial visibility for date inputs in add event form
+         toggleDateInputs();
 
          // Perform initial calculation and render
          updateAll();
