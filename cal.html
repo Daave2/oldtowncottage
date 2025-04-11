@@ -11,33 +11,31 @@
     <!-- Chart.js Date Adapter -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
+    <!-- NEW: Chart.js Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+
     <style>
         /* --- Base & Layout --- */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f7f6; color: #333; line-height: 1.5; }
         .container {
             display: grid;
-             /* --- UPDATED GRID LAYOUT --- */
             grid-template-areas:
                 "controls controls"
                 "chart chart"
-                "stats events"     /* Stats and Events side-by-side */
-                "minstay minstay"  /* Min Stay full width below */
-                "table table";     /* Table full width at bottom */
-            grid-template-columns: 1fr 1fr; /* Maintain two columns */
+                "stats events"
+                "minstay table";
+            grid-template-columns: 1fr 1fr;
             grid-gap: 20px;
             max-width: 1600px;
             margin: auto;
         }
-        /* Assign grid areas */
         #controls { grid-area: controls; }
         #chart-container { grid-area: chart; }
         #statistics { grid-area: stats; background-color: #e9f5f1; }
         #event-management { grid-area: events; }
-        #min-stay-management { grid-area: minstay; } /* Assign new area */
-        #pricing-table-container {
-            grid-area: table;
-            /* Removed max-height and overflow-y to allow full growth */
-        }
+        #min-stay-management { grid-area: minstay; }
+        #pricing-table-container { grid-area: table; }
 
         /* General container styling */
         #controls, #statistics, #event-management, #min-stay-management, #chart-container, #pricing-table-container {
@@ -49,41 +47,25 @@
         h2 { margin-top: 0; margin-bottom: 15px; color: #005f73; border-bottom: 2px solid #94d2bd; padding-bottom: 10px; font-weight: 600; }
         h3 { margin-top: 15px; margin-bottom: 10px; color: #006d50; font-weight: 500; border-bottom: 1px solid #eee; padding-bottom: 5px;}
 
-        /* --- Controls Styling (Tightened & 3-Col Sliders/Base) --- */
+        /* --- Controls Styling --- */
         #controls { padding-top: 10px; padding-bottom: 10px; }
         #controls fieldset { border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; padding: 10px 15px 10px 15px; }
         #controls legend { font-weight: 600; color: #007f5f; padding: 0 5px; font-size: 1.0em; }
-        .control-group { margin-bottom: 10px; } /* Default spacing if not in grid */
+        .control-group { margin-bottom: 10px; }
         .control-group label { font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9em; color: #005f73; }
         .input-pair { display: flex; align-items: center; gap: 10px; }
         .input-pair input[type=range] { flex-grow: 1; height: 6px; cursor: pointer; margin: 0; padding: 0; accent-color: #007f5f; }
         .input-pair input[type=number] { width: 70px; text-align: right; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; -moz-appearance: textfield; }
         .input-pair input[type=number]::-webkit-outer-spin-button, .input-pair input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .control-group .description { font-size: 0.8em; color: #666; margin-top: 2px; }
-         .control-group input#basePrice, .control-group input#maxPrice {
-             width: 90%;
-             margin-bottom: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;
-         }
-         .control-group input#defaultMinStay {
-              width: 90%;
-              margin-bottom: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;
-         }
+         .control-group input#basePrice, .control-group input#maxPrice { width: 90%; margin-bottom: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
+         .control-group input#defaultMinStay { width: 90%; margin-bottom: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; }
          .control-group input#occupancyRateNumber { width: 70px; }
-
-        /* Grid layout for groups */
-        .control-grid-3col {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px 20px;
-            align-items: end;
-            padding-top: 5px;
-        }
-        .control-grid-3col .control-group {
-             margin-bottom: 0;
-        }
+        .control-grid-3col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px 20px; align-items: end; padding-top: 5px; }
+        .control-grid-3col .control-group { margin-bottom: 0; }
 
         /* --- Chart Container Styling --- */
-        #chart-container { height: 450px; }
+        #chart-container { height: 450px; position: relative; /* Needed for annotation labels if used */ }
 
         /* --- Statistics Styling --- */
         #statistics ul { list-style: none; padding: 0; margin: 0; }
@@ -110,7 +92,6 @@
         .date-range-inputs label { margin-top: 5px; }
 
         /* --- Table Styling --- */
-        /* #pricing-table-container { max-height: none; } */ /* Removed to allow full growth */
         #pricingTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
         #pricingTable th, #pricingTable td { border: 1px solid #ddd; padding: 6px; text-align: left; position: relative; }
         #pricingTable th { background-color: #e9f5f1; color: #005f73; position: sticky; top: 0; z-index: 1;}
@@ -143,24 +124,13 @@
 
         /* --- Responsive adjustments --- */
          @media (max-width: 700px) {
-             .control-grid-3col {
-                 grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-             }
+             .control-grid-3col { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
              #statistics li { flex-basis: 100%; }
              #statistics li strong, #statistics li span { flex-basis: auto; min-width: 0;}
              #statistics li span { text-align: left; margin-left: 10px; }
          }
         @media (max-width: 900px) {
-            .container {
-                 grid-template-areas: /* Stack everything */
-                    "controls"
-                    "chart"
-                    "stats"
-                    "events"
-                    "minstay"
-                    "table";
-                 grid-template-columns: 1fr; /* Single column */
-            }
+            .container { grid-template-areas: "controls" "chart" "stats" "events" "minstay" "table"; grid-template-columns: 1fr; }
             #chart-container { height: 300px; }
             .table-actions { flex-direction: column; gap: 10px; align-items: stretch; }
             .table-actions button { width: 100%; }
@@ -173,60 +143,15 @@
 <div class="container">
 
     <div id="controls">
-         <h2>Pricing Factors</h2>
-         <fieldset>
-            <legend>Base Pricing</legend>
-             <!-- Wrap these three in the grid container -->
-             <div class="control-grid-3col">
-                 <div class="control-group">
-                     <label for="basePrice">Base Nightly Price (£):</label>
-                     <input type="number" id="basePrice" value="90" min="50" step="5" oninput="debouncedUpdateAll()">
-                 </div>
-                 <div class="control-group">
-                     <label for="maxPrice" title="Sets a ceiling for calculated & manually overridden prices.">Maximum Nightly Price (£):</label>
-                     <input type="number" id="maxPrice" value="300" min="100" step="10" oninput="debouncedUpdateAll()">
-                 </div>
-                 <div class="control-group">
-                     <label for="occupancyRateRange" title="Used for Annual Revenue Estimate only.">Est. Occupancy (%):</label>
-                     <div class="input-pair">
-                         <input type="range" id="occupancyRateRange" value="65" min="0" max="100" step="1">
-                         <input type="number" id="occupancyRateNumber" value="65" min="0" max="100" step="1">
-                     </div>
-                 </div>
-             </div>
-         </fieldset>
-
-         <fieldset> <legend>Weekend & Holiday Adjustments</legend>
-             <div class="control-grid-3col"> <!-- Apply grid here -->
-                 <div class="control-group"> <label for="weekendMultiplierRange" title="Multiplier applied to Friday & Saturday nights.">Weekend Multiplier:</label> <div class="input-pair"> <input type="range" id="weekendMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="weekendMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div>
-                 <div class="control-group"> <label for="schoolHolidayMultiplierRange" title="Stacking multiplier for non-summer school breaks (Feb, Easter, May, Oct, Xmas).">School Hol Multiplier:</label> <div class="input-pair"> <input type="range" id="schoolHolidayMultiplierRange" value="1.2" min="1.0" max="1.8" step="0.05"> <input type="number" id="schoolHolidayMultiplierNumber" value="1.2" min="1.0" max="1.8" step="0.05"> </div> </div>
-                 <div></div> <!-- Placeholder -->
-             </div>
-         </fieldset>
-
-         <fieldset> <legend>Seasonal Multipliers</legend>
-             <div class="control-grid-3col"> <!-- Apply grid here -->
-                 <div class="control-group"> <label for="lowSeasonMultiplierRange" title="Multiplier for Nov, Jan, Feb (excl. holidays).">Low Season:</label> <div class="input-pair"> <input type="range" id="lowSeasonMultiplierRange" value="0.85" min="0.5" max="1.2" step="0.01"> <input type="number" id="lowSeasonMultiplierNumber" value="0.85" min="0.5" max="1.2" step="0.01"> </div> </div>
-                 <div class="control-group"> <label for="shoulderSeasonMultiplierRange" title="Multiplier for Mar, Apr, May, Sep, Oct (excl. holidays).">Shoulder Season:</label> <div class="input-pair"> <input type="range" id="shoulderSeasonMultiplierRange" value="1.0" min="0.7" max="1.5" step="0.01"> <input type="number" id="shoulderSeasonMultiplierNumber" value="1.0" min="0.7" max="1.5" step="0.01"> </div> </div>
-                 <div class="control-group"> <label for="highSeasonMultiplierRange" title="Multiplier for June & early July.">High Season:</label> <div class="input-pair"> <input type="range" id="highSeasonMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="highSeasonMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div>
-                 <div class="control-group"> <label for="peakSeasonMultiplierRange" title="Multiplier for late July & August.">Peak Season:</label> <div class="input-pair"> <input type="range" id="peakSeasonMultiplierRange" value="1.6" min="1.2" max="2.5" step="0.05"> <input type="number" id="peakSeasonMultiplierNumber" value="1.6" min="1.2" max="2.5" step="0.05"> </div> </div>
-                 <div></div> <div></div> <!-- Placeholders -->
-             </div>
-         </fieldset>
-
-         <fieldset> <legend>Event Impact Multipliers</legend>
-             <div class="control-grid-3col"> <!-- Apply grid here -->
-                 <div class="control-group"> <label for="eventLowImpactMultiplierRange" title="Stacking multiplier for low impact events.">Low Impact:</label> <div class="input-pair"> <input type="range" id="eventLowImpactMultiplierRange" value="1.1" min="1.0" max="1.5" step="0.01"> <input type="number" id="eventLowImpactMultiplierNumber" value="1.1" min="1.0" max="1.5" step="0.01"> </div> </div>
-                 <div class="control-group"> <label for="eventMediumImpactMultiplierRange" title="Stacking multiplier for medium impact events.">Medium Impact:</label> <div class="input-pair"> <input type="range" id="eventMediumImpactMultiplierRange" value="1.25" min="1.0" max="2.0" step="0.05"> <input type="number" id="eventMediumImpactMultiplierNumber" value="1.25" min="1.0" max="2.0" step="0.05"> </div> </div>
-                 <div class="control-group"> <label for="eventHighImpactMultiplierRange" title="Stacking multiplier for high impact events.">High Impact:</label> <div class="input-pair"> <input type="range" id="eventHighImpactMultiplierRange" value="1.4" min="1.1" max="2.2" step="0.05"> <input type="number" id="eventHighImpactMultiplierNumber" value="1.4" min="1.1" max="2.2" step="0.05"> </div> </div>
-                 <div class="control-group"> <label for="eventPeakImpactMultiplierRange" title="Stacking multiplier for peak impact events.">Peak Impact:</label> <div class="input-pair"> <input type="range" id="eventPeakImpactMultiplierRange" value="1.7" min="1.2" max="2.8" step="0.05"> <input type="number" id="eventPeakImpactMultiplierNumber" value="1.7" min="1.2" max="2.8" step="0.05"> </div> </div>
-                 <div></div> <div></div> <!-- Placeholders -->
-             </div>
-         </fieldset>
+         <!-- Controls (HTML same) -->
+          <h2>Pricing Factors</h2>
+         <fieldset> <legend>Base Pricing</legend> <div class="control-grid-3col"> <div class="control-group"> <label for="basePrice">Base Nightly Price (£):</label> <input type="number" id="basePrice" value="90" min="50" step="5" oninput="debouncedUpdateAll()"> </div> <div class="control-group"> <label for="maxPrice" title="Sets a ceiling for calculated & manually overridden prices.">Maximum Nightly Price (£):</label> <input type="number" id="maxPrice" value="300" min="100" step="10" oninput="debouncedUpdateAll()"> </div> <div class="control-group"> <label for="occupancyRateRange" title="Used for Annual Revenue Estimate only.">Est. Occupancy (%):</label> <div class="input-pair"> <input type="range" id="occupancyRateRange" value="65" min="0" max="100" step="1"> <input type="number" id="occupancyRateNumber" value="65" min="0" max="100" step="1"> </div> </div> </div> </fieldset>
+         <fieldset> <legend>Weekend & Holiday Adjustments</legend> <div class="control-grid-3col"> <div class="control-group"> <label for="weekendMultiplierRange" title="Multiplier applied to Friday & Saturday nights.">Weekend Multiplier:</label> <div class="input-pair"> <input type="range" id="weekendMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="weekendMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div> <div class="control-group"> <label for="schoolHolidayMultiplierRange" title="Stacking multiplier for non-summer school breaks (Feb, Easter, May, Oct, Xmas).">School Hol Multiplier:</label> <div class="input-pair"> <input type="range" id="schoolHolidayMultiplierRange" value="1.2" min="1.0" max="1.8" step="0.05"> <input type="number" id="schoolHolidayMultiplierNumber" value="1.2" min="1.0" max="1.8" step="0.05"> </div> </div> <div></div> </div> </fieldset>
+         <fieldset> <legend>Seasonal Multipliers</legend> <div class="control-grid-3col"> <div class="control-group"> <label for="lowSeasonMultiplierRange" title="Multiplier for Nov, Jan, Feb (excl. holidays).">Low Season:</label> <div class="input-pair"> <input type="range" id="lowSeasonMultiplierRange" value="0.85" min="0.5" max="1.2" step="0.01"> <input type="number" id="lowSeasonMultiplierNumber" value="0.85" min="0.5" max="1.2" step="0.01"> </div> </div> <div class="control-group"> <label for="shoulderSeasonMultiplierRange" title="Multiplier for Mar, Apr, May, Sep, Oct (excl. holidays).">Shoulder Season:</label> <div class="input-pair"> <input type="range" id="shoulderSeasonMultiplierRange" value="1.0" min="0.7" max="1.5" step="0.01"> <input type="number" id="shoulderSeasonMultiplierNumber" value="1.0" min="0.7" max="1.5" step="0.01"> </div> </div> <div class="control-group"> <label for="highSeasonMultiplierRange" title="Multiplier for June & early July.">High Season:</label> <div class="input-pair"> <input type="range" id="highSeasonMultiplierRange" value="1.3" min="1.0" max="2.0" step="0.05"> <input type="number" id="highSeasonMultiplierNumber" value="1.3" min="1.0" max="2.0" step="0.05"> </div> </div> <div class="control-group"> <label for="peakSeasonMultiplierRange" title="Multiplier for late July & August.">Peak Season:</label> <div class="input-pair"> <input type="range" id="peakSeasonMultiplierRange" value="1.6" min="1.2" max="2.5" step="0.05"> <input type="number" id="peakSeasonMultiplierNumber" value="1.6" min="1.2" max="2.5" step="0.05"> </div> </div> <div></div> <div></div> </div> </fieldset>
+         <fieldset> <legend>Event Impact Multipliers</legend> <div class="control-grid-3col"> <div class="control-group"> <label for="eventLowImpactMultiplierRange" title="Stacking multiplier for low impact events.">Low Impact:</label> <div class="input-pair"> <input type="range" id="eventLowImpactMultiplierRange" value="1.1" min="1.0" max="1.5" step="0.01"> <input type="number" id="eventLowImpactMultiplierNumber" value="1.1" min="1.0" max="1.5" step="0.01"> </div> </div> <div class="control-group"> <label for="eventMediumImpactMultiplierRange" title="Stacking multiplier for medium impact events.">Medium Impact:</label> <div class="input-pair"> <input type="range" id="eventMediumImpactMultiplierRange" value="1.25" min="1.0" max="2.0" step="0.05"> <input type="number" id="eventMediumImpactMultiplierNumber" value="1.25" min="1.0" max="2.0" step="0.05"> </div> </div> <div class="control-group"> <label for="eventHighImpactMultiplierRange" title="Stacking multiplier for high impact events.">High Impact:</label> <div class="input-pair"> <input type="range" id="eventHighImpactMultiplierRange" value="1.4" min="1.1" max="2.2" step="0.05"> <input type="number" id="eventHighImpactMultiplierNumber" value="1.4" min="1.1" max="2.2" step="0.05"> </div> </div> <div class="control-group"> <label for="eventPeakImpactMultiplierRange" title="Stacking multiplier for peak impact events.">Peak Impact:</label> <div class="input-pair"> <input type="range" id="eventPeakImpactMultiplierRange" value="1.7" min="1.2" max="2.8" step="0.05"> <input type="number" id="eventPeakImpactMultiplierNumber" value="1.7" min="1.2" max="2.8" step="0.05"> </div> </div> <div></div> <div></div> </div> </fieldset>
     </div>
 
      <div id="chart-container">
-          <!-- Chart (HTML same) -->
           <h2>Annual Price Fluctuation</h2> <canvas id="priceChart"></canvas>
       </div>
 
@@ -282,7 +207,116 @@
     function updateStatistics(priceData, inputs) { if (!priceData || priceData.length === 0) return; const prices = priceData.map(d => d.price); const totalPotentialRevenue = prices.reduce((sum, price) => sum + price, 0); const avgRate = totalPotentialRevenue / prices.length; const minRate = Math.min(...prices); const maxRate = Math.max(...prices); const estAnnualRevenue = totalPotentialRevenue * inputs.occupancyRate; const priceOverrideCount = Object.keys(priceOverrides).length; const minStayOverrideCount = Object.keys(minStayOverrides).length; const seasonalPrices = { Low: [], Shoulder: [], High: [], Peak: [] }; const weekdayPrices = []; const weekendPrices = []; priceData.forEach(d => { if (seasonalPrices[d.season]) { seasonalPrices[d.season].push(d.price); } if (d.day === 5 || d.day === 6) { weekendPrices.push(d.price); } else { weekdayPrices.push(d.price); } }); const calculateAverage = (arr) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; document.getElementById('statAvgRate').textContent = formatCurrency(avgRate); document.getElementById('statAvgWeekday').textContent = formatCurrency(calculateAverage(weekdayPrices)); document.getElementById('statAvgWeekend').textContent = formatCurrency(calculateAverage(weekendPrices)); document.getElementById('statMinRate').textContent = formatCurrency(minRate); document.getElementById('statMaxRate').textContent = formatCurrency(maxRate); document.getElementById('statAvgLow').textContent = formatCurrency(calculateAverage(seasonalPrices.Low)); document.getElementById('statAvgShoulder').textContent = formatCurrency(calculateAverage(seasonalPrices.Shoulder)); document.getElementById('statAvgHigh').textContent = formatCurrency(calculateAverage(seasonalPrices.High)); document.getElementById('statAvgPeak').textContent = formatCurrency(calculateAverage(seasonalPrices.Peak)); document.getElementById('statPriceOverrideCount').textContent = priceOverrideCount.toString(); document.getElementById('statMinStayOverrideCount').textContent = minStayOverrideCount.toString(); document.getElementById('statOccupancyRate').textContent = (inputs.occupancyRate * 100).toFixed(0); document.getElementById('statEstRevenue').textContent = formatCurrency(estAnnualRevenue); }
 
     // --- Chart Function ---
-    function renderOrUpdateChart(priceData) { const ctx = document.getElementById('priceChart').getContext('2d'); const labels = priceData.map(d => d.dateStr); const dataPoints = priceData.map(d => Math.round(d.price)); if (priceChart) { priceChart.data.labels = labels; priceChart.data.datasets[0].data = dataPoints; priceChart.update('none'); } else { priceChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: '#007f5f', borderWidth: 1.5, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yyyy' } }, title: { display: true, text: 'Date (2025)' }, ticks: { autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)' }, ticks: { callback: function(value) { return '£' + value; } } } }, plugins: { tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData){ label += `\n  Min Stay: ${dayData.minStay}`; if(dayData.notes){ const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note}`; }); } } return label; } } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false } } }); } }
+    // NEW: Function to generate annotations
+    function generateAnnotations() {
+        const annotations = {};
+        const colors = {
+            Holiday: 'rgba(255, 230, 153, 0.3)', // Light Yellow
+            Low: 'rgba(173, 216, 230, 0.3)',     // Light Blue
+            Medium: 'rgba(255, 160, 122, 0.3)', // Light Salmon
+            High: 'rgba(255, 105, 180, 0.3)',   // Light Pink/HotPink
+            Peak: 'rgba(255, 0, 0, 0.25)'        // Lighter Red
+        };
+
+        // Add School Holidays
+        schoolHolidayData.forEach((holiday, index) => {
+            // Adjust end date for annotation plugin (needs day *after* last day)
+            const endDate = new Date(holiday.end + 'T00:00:00Z');
+            endDate.setUTCDate(endDate.getUTCDate() + 1);
+            const endDateStr = endDate.toISOString().split('T')[0];
+
+            annotations[`holiday-${index}`] = {
+                type: 'box',
+                xScaleID: 'x',
+                yScaleID: 'y',
+                xMin: holiday.start,
+                xMax: endDateStr,
+                backgroundColor: colors.Holiday,
+                borderColor: 'rgba(255, 215, 0, 0.1)',
+                borderWidth: 1,
+                drawTime: 'beforeDatasetsDraw',
+                label: {
+                    // enabled: true, // Optional: uncomment to show labels
+                    // content: holiday.name,
+                    // position: 'start'
+                }
+            };
+        });
+
+        // Add Events (higher impact events draw later, potentially overlapping)
+        ['Low', 'Medium', 'High', 'Peak'].forEach(impactLevel => {
+            eventData.forEach((event, index) => {
+                if (event.impact !== impactLevel) return;
+
+                let startStr, endStr;
+                if (event.date) {
+                    startStr = event.date;
+                    const endDate = new Date(event.date + 'T00:00:00Z');
+                    endDate.setUTCDate(endDate.getUTCDate() + 1);
+                    endStr = endDate.toISOString().split('T')[0];
+                } else if (event.dateRange) {
+                    startStr = event.dateRange[0];
+                     const endDate = new Date(event.dateRange[1] + 'T00:00:00Z');
+                    endDate.setUTCDate(endDate.getUTCDate() + 1);
+                    endStr = endDate.toISOString().split('T')[0];
+                } else {
+                    return; // Skip if no date info
+                }
+
+                annotations[`event-${impactLevel}-${index}`] = {
+                    type: 'box',
+                    xScaleID: 'x',
+                    yScaleID: 'y',
+                    xMin: startStr,
+                    xMax: endStr,
+                    backgroundColor: colors[event.impact],
+                    borderColor: 'rgba(0,0,0,0.05)',
+                    borderWidth: 1,
+                    drawTime: 'beforeDatasetsDraw',
+                     label: {
+                       // enabled: event.impact === 'Peak' || event.impact === 'High', // Only label High/Peak?
+                       // content: event.name.substring(0, 15), // Shorten name
+                       // position: 'start',
+                       // font: { size: 9 }
+                    }
+                };
+            });
+        });
+
+        return annotations;
+    }
+
+    // UPDATED renderOrUpdateChart to include annotations
+    function renderOrUpdateChart(priceData) {
+         const ctx = document.getElementById('priceChart').getContext('2d');
+         const labels = priceData.map(d => d.dateStr);
+         const dataPoints = priceData.map(d => Math.round(d.price));
+         const annotations = generateAnnotations(); // Generate annotations
+
+         if (priceChart) {
+             priceChart.data.labels = labels;
+             priceChart.data.datasets[0].data = dataPoints;
+             // Update annotations - requires replacing the whole options object or specific plugin options
+             priceChart.options.plugins.annotation.annotations = annotations;
+             priceChart.update('none');
+         } else {
+             priceChart = new Chart(ctx, {
+                 type: 'line',
+                 data: { labels: labels, datasets: [{ label: 'Nightly Price (£)', data: dataPoints, borderColor: '#007f5f', borderWidth: 1.5, backgroundColor: 'rgba(0, 127, 95, 0.1)', fill: true, pointRadius: 0, pointHoverRadius: 5, tension: 0.1 }] },
+                 options: {
+                     responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
+                     scales: { x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy', displayFormats: { month: 'MMM yyyy' } }, title: { display: true, text: 'Date (2025)' }, ticks: { autoSkip: true, maxTicksLimit: 12 } }, y: { beginAtZero: false, title: { display: true, text: 'Price (£)' }, ticks: { callback: function(value) { return '£' + value; } } } },
+                     plugins: {
+                         tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += formatCurrency(context.parsed.y); const dataIndex = context.dataIndex; const dayData = priceDataCache[dataIndex]; if(dayData){ label += `\n  Min Stay: ${dayData.minStay}`; if(dayData.notes){ const notesArray = dayData.notes.split(', '); notesArray.forEach(note => { label += `\n  - ${note}`; }); } } return label; } } },
+                         annotation: { // Configure annotation plugin
+                             annotations: annotations
+                         }
+                     },
+                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                 }
+             });
+         }
+     }
 
     // --- Table Function ---
     function populateTable(priceData) { const tableBody = document.getElementById('pricingTableBody'); tableBody.innerHTML = ''; priceData.forEach(data => { const row = tableBody.insertRow(); row.classList.add(`day-${data.day}`); if (data.day === 5 || data.day === 6) row.classList.add('weekend'); if (isSchoolHoliday(data.dateStr)) row.classList.add('holiday'); if (getEventInfoForDate(data.dateStr)) row.classList.add('event'); if (data.isPriceOverridden || data.isMinStayOverridden) row.classList.add('override-row'); row.insertCell().textContent = dateFormatter.format(data.date); row.insertCell().textContent = dayFormatter.format(data.date); const minStayCell = row.insertCell(); minStayCell.textContent = data.minStay; minStayCell.classList.add('min-stay-cell'); minStayCell.dataset.date = data.dateStr; if (data.isMinStayOverridden) minStayCell.classList.add('min-stay-override'); const priceCell = row.insertCell(); priceCell.textContent = Math.round(data.price).toString(); priceCell.classList.add('price-cell'); priceCell.dataset.date = data.dateStr; if (data.isPriceOverridden) priceCell.classList.add('price-override'); row.insertCell().innerHTML = `<span class="notes">${data.notes || ''}</span>`; }); }
